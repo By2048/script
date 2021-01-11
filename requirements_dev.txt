@@ -1,0 +1,7 @@
+VeryPrettyTable
+Requests
+Fire
+
+PyMySQL
+PyMongo
+Redis
