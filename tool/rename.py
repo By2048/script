@@ -1,6 +1,7 @@
 import os
-
 from typing import List
+
+from veryprettytable import VeryPrettyTable
 
 
 class File(object):
@@ -24,12 +25,6 @@ class Rename(object):
         return self.info()
 
     def info(self):
-        try:
-            from veryprettytable import VeryPrettyTable
-        except ImportError:
-            for file in self.files:
-                print(file)
-            return
         table = VeryPrettyTable(['old_name', 'new_name'])
         if self.show_title:
             table.title = self.folder
