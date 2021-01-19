@@ -5,6 +5,8 @@ import shutil
 import subprocess
 from datetime import datetime
 
+from tool.rename import change_name
+
 logging.basicConfig(
     level=logging.INFO,
     format='[%(levelname)1.1s %(lineno)3d] %(message)s',
@@ -33,7 +35,7 @@ bilibili (download_path)
 
 80 64 指不同分辨率
 一般来说只保留一个 越大越好
-处理时如果存在多个删除小的
+处理时如果存在多个 删除小的
 """
 
 logging.info('')
@@ -95,32 +97,6 @@ def init_collections():
     return collections
 
 
-def change_name(name):
-    codes = [
-        # ('?', ''),
-        # ('？', ''),
-        # ('，', '')
-        # ('》', ''),
-        # ('| ', ''),
-        # ('*', ''),
-        # (' ', '_'),
-        # ('\\', '_'),
-        # ('/', '_'),
-        # ('【', '['),
-        # ('】', ']'),
-        # ('《', ''),
-    ]
-    for item in codes:
-        name = name.replace(item[0], item[1])
-    try:
-        # https://pypi.org/project/hanziconv/  简繁体转换
-        from hanziconv import HanziConv
-        name = HanziConv.toSimplified(name)
-    except ImportError:
-        pass
-    return name
-
-
 def init_collection_videos(collection: Collection):
     for video in collection.videos:
         json_file_path = os.path.join(video.folder, 'entry.json')  # 视频信息
@@ -150,7 +126,6 @@ def init_collection_videos(collection: Collection):
             title = change_name(title)
             video.part = part
             video.title = title
-        # logging.info(video)
 
     # if data.get('ep', ''):
     #     index = data['ep']['index']
