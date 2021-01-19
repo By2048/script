@@ -2,6 +2,7 @@ import os
 from typing import List
 
 from veryprettytable import VeryPrettyTable
+from hanziconv import HanziConv
 
 
 class File(object):
@@ -24,22 +25,13 @@ class Rename(object):
     def __str__(self):
         return self.info()
 
-    def info(self):
-        table = VeryPrettyTable(['old_name', 'new_name'])
-        if self.show_title:
-            table.title = self.folder
-        table.align['old_name'] = 'l'
-        table.align['new_name'] = 'l'
-        for file in self.files:
-            table.add_row([file.old_name, file.new_name])
-        return table.get_string()
-
     def init(self):
         for item in os.listdir(self.folder):
             if not self.function_need_rename(item):
                 continue
             file = File(old_name=item)
             file.new_name = self.function_get_name(item)
+            file.new_name = change_name(file.new_name)
             self.files.append(file)
 
     def start(self, check=True):
@@ -52,3 +44,41 @@ class Rename(object):
             old = os.path.join(self.folder, file.old_name)
             new = os.path.join(self.folder, file.new_name)
             os.rename(old, new)
+
+    def info(self):
+        table = VeryPrettyTable(['old_name', 'new_name'])
+        if self.show_title:
+            table.title = self.folder
+        table.align['old_name'] = 'l'
+        table.align['new_name'] = 'l'
+        for file in self.files:
+            table.add_row([file.old_name, file.new_name])
+        return table.get_string()
+
+
+def change_name(name):
+    """ 简繁转换 替换不支持的特殊符号 """
+    codes = [
+        ('?', '？'),
+        (',', '，'),
+
+        (':', '-'),
+
+        ('<', '['),
+        ('>', ']'),
+        ('【', '['),
+        ('】', ']'),
+
+        ('\\', ''),
+        ('/', ''),
+        ('|', ''),
+        ('*', ''),
+    ]
+    for item in codes:
+        name = name.replace(item[0], item[1])
+    try:
+        name = HanziConv.toSimplified(name)
+    except ImportError:
+        pass
+    finally:
+        return name
