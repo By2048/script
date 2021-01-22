@@ -1,3 +1,4 @@
+import re
 import os
 import hashlib
 
@@ -28,6 +29,8 @@ def init():
             icon_file_path = name_icon_path
 
         if not icon_file_path:
+            if not re.match(r"[a-zA-Z1-9_\-]+", folder):
+                print(f"\n{name_icon_path} {hash_icon_path}\n")
             continue
 
         desktop_ini_path = os.path.join(folder_path, 'desktop.ini')
