@@ -166,6 +166,7 @@ def join_video(video: Video):
         "3": f"{video.title} {video.part}",
         "4": f"{video.index} {video.title} {video.part}",
         "5": f"{datetime.now().strftime('%Y-%m-%d')} {video.title}",
+        "0": "[X]"
     }
 
     data = "#选项# \n"
@@ -181,6 +182,8 @@ def join_video(video: Video):
             break
 
     check = "1" if check == "\\" else check
+    if check == "0":
+        return
     if check not in names.keys():
         return
 
