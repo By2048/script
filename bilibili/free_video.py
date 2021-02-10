@@ -4,8 +4,8 @@ import os
 import sys
 
 import requests
+from rich import box
 from rich.live import Live
-from rich import print, box
 from rich.table import Table
 
 path = 'D:\\Temp\\' if sys.platform == 'win32' else '/tmp/'
@@ -51,7 +51,7 @@ def main():
     session = requests.Session()
 
     page = 1
-    with Live(table, refresh_per_second=4) as live:
+    with Live(table, refresh_per_second=4):
         while True:
             response = session.get(url.format(page))
             response = response.json()
@@ -66,7 +66,7 @@ def main():
                     if _id_ in old:
                         table.add_row(video['title'], video['link'])
                     else:
-                        table.add_row(video['title'], "[red]" + video['link'])
+                        table.add_row(video['title'], f"[red]{video['link']}")
             if not data.get('has_next') or page > 99:
                 break
             page += 1
