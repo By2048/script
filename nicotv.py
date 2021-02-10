@@ -3,19 +3,53 @@ import html
 import base64
 from pprint import pprint
 from collections import namedtuple
-from typing import List
+from typing import List, Union
 
 import requests
 from bs4 import BeautifulSoup
 from rich.prompt import Prompt
 
 base_url = "http://www.nicotv.club"
-Video = namedtuple("Video", "title play_url download_url")
 
 
-def get_video_download_url(play_url):
+class Video(object):
+    def __init__(self, title="", play_url="", download_url=""):
+        self.title = title
+        self.play_url = play_url
+        self.download_url = download_url
+
+    def __str__(self):
+        return f"   Title:{self.title}\n" \
+               f"    Play:{self.play_url}\n" \
+               f"Download:{self.download_url}\n"
+
+
+def get_all_link(detail_url) -> List:
+    response = requests.get(detail_url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    ul = soup.find("ul", class_="ff-playurl-tab-1")
+    result = []
+    for li in ul.find_all("li"):
+        a = li.find("a")
+        href = a["href"]
+        href = href.strip("/")
+        play_url = f"{base_url}/{href}"
+        result.append(play_url)
+    return result
+
+
+def get_video(play_url) -> Video:
+    video = Video(play_url=play_url)
+
     response = requests.get(play_url)
     soup = BeautifulSoup(response.text, "html.parser")
+    ul = soup.find("ul", class_="ff-playurl")
+    active_id = ul["data-active"]
+    li = ul.find("li", attrs={"data-id": active_id})
+    a = li.find("a")
+    title = a.get_text()
+    video.title = title
+
     player = soup.find("div", id="cms_player")
     script = player.find("script")
     download_url = script["src"]
@@ -24,23 +58,9 @@ def get_video_download_url(play_url):
     download_url = base64.b64decode(download_url).decode()
     download_url = download_url.split("?url=")[-1]
     download_url = download_url.rstrip("?")
-    return download_url
+    video.download_url = download_url
 
-
-def get_all_video(detail_url) -> List["Video"]:
-    response = requests.get(detail_url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    ul = soup.find("ul", class_="ff-playurl-tab-1")
-    result = []
-    for li in ul.find_all("li"):
-        a = li.find("a")
-        href = a["href"]
-        title = a.get_text()
-        play_url = f"{base_url}/{href}"
-        download_url = get_video_download_url(play_url)
-        result.append(Video(title=title, play_url=play_url, download_url=download_url))
-
-    return result
+    return video
 
 
 def download_video(video: Video, folder):
@@ -57,26 +77,34 @@ def download_video(video: Video, folder):
 
 def main():
     folder = Prompt.ask("保存的文件夹名字")
-    detail_url = Prompt.ask("视频详情页地址")
+    url = Prompt.ask("视频 详情页\\播放页 地址")
 
     folder = f"T:\\{folder}"
 
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    videos = get_all_video(detail_url)
-    for video in videos:
+    if "detail" in url:
+        links = get_all_link(url)
+        for link in links:
+            video = get_video(link)
+            download_video(video, folder)
+
+    if "play" in url:
+        video = get_video(url)
         download_video(video, folder)
 
 
 def test():
-    folder = "七大罪 第四季 愤怒的审判"
     detail_url = "http://www.nicotv.me/video/detail/58086.html"
-    folder = f"T:\\{folder}\\"
+    play_url = "http://www.nicotv.me/video/play/58086-1-5.html"
 
-    videos = get_all_video(detail_url)
-    for video in videos:
-        download_video(video, folder)
+    # links = get_all_link(detail_url)
+    # for link in links:
+    #     print(link)
+
+    video = get_video(play_url)
+    print(video)
 
 
 if __name__ == '__main__':
