@@ -105,7 +105,7 @@ def download_video(video: Video):
     cmd = f" D:\\Aria2\\aria2c.exe " \
           f" '{video.download_url}' " \
           f" --out '{video.title}.mp4' "
-    cmd = cmd.replace("'", '"')
+    cmd = cmd.replace("'", '"').strip()
     print(f"[red]{copy.copy(cmd)}[/red]")
     os.system(cmd)
 
