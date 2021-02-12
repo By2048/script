@@ -45,8 +45,8 @@ def main():
             old = json.load(file)
 
     table = Table(box=box.SIMPLE)
-    table.add_column("Name", justify="right", width=30)
-    table.add_column("Url", justify="left")
+    table.add_column("Name", justify="right", width=40)
+    table.add_column("Url", justify="left", width=60)
 
     session = requests.Session()
 

@@ -63,12 +63,10 @@ def get_video(play_url) -> Video:
     return video
 
 
-def download_video(video: Video, folder):
-    folder = folder.rstrip("\\")
+def download_video(video: Video):
     video_type = video.download_url.split(".")[-1]
     cmd = f"D:\\Aria2\\aria2c.exe " \
           f"{video.download_url} " \
-          f"--dir '{folder}' " \
           f"--out '{video.title}.{video_type}'"
     cmd = cmd.replace("'", '"')
     print(cmd)
@@ -76,23 +74,17 @@ def download_video(video: Video, folder):
 
 
 def main():
-    folder = Prompt.ask("保存的文件夹名字")
-    url = Prompt.ask("视频 详情页\\播放页 地址")
-
-    folder = f"T:\\{folder}"
-
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    url = Prompt.ask("视频 [red][详情页\\播放页][/red] 地址")
 
     if "detail" in url:
         links = get_all_link(url)
         for link in links:
             video = get_video(link)
-            download_video(video, folder)
+            download_video(video)
 
     if "play" in url:
         video = get_video(url)
-        download_video(video, folder)
+        download_video(video)
 
 
 def test():
