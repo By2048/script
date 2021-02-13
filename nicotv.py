@@ -48,7 +48,8 @@ class Video(object):
 def get_all_link(detail_url) -> List:
     response = requests.get(detail_url)
     soup = BeautifulSoup(response.text, "html.parser")
-    ul = soup.find("ul", class_="ff-playurl-tab-1")
+    div = soup.find("div", class_="ff-playurl-tab")
+    ul = div.find("ul", class_="active")
     result = []
     for li in ul.find_all("li"):
         a = li.find("a")
@@ -136,7 +137,7 @@ def test():
     # links = get_all_link(detail_url)
     # for link in links:
     #     print(link)
-
+    #
     # video = get_video(play_url)
     # print(video)
     # download_video(video)
