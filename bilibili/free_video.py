@@ -11,6 +11,8 @@ from rich.table import Table
 path = 'D:\\Temp\\' if sys.platform == 'win32' else '/tmp/'
 path = os.path.join(path, "bilibili.json")
 
+chrome_driver_path = r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe"
+
 # order
 # 0 更新时间
 # 1 无
@@ -73,7 +75,6 @@ def main():
 
     session.close()
 
-    # 存储本次获取的数据
     with open(path, 'w+', encoding='utf-8') as file:
         json.dump(new, file)
 
