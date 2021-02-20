@@ -51,6 +51,7 @@ class Rename(object):
             table.title = self.folder
         table.align['old_name'] = 'l'
         table.align['new_name'] = 'l'
+        table.sortby = "new_name"
         for file in self.files:
             table.add_row([file.old_name, file.new_name])
         return table.get_string()
