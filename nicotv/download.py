@@ -1,3 +1,4 @@
+import sys
 import os
 import html
 import time
@@ -14,23 +15,15 @@ from rich.prompt import Prompt
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+try:
+    from tool.system import get_browser_position
+except ImportError:
+    path = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(path)
+    from tool.system import get_browser_position
+
 base_url = "http://www.nicotv.club"
 chrome_driver_path = r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe"
-
-screen_x, screen_y = 0, 0
-screen_xx, screen_yy = 3840, 2160
-screen_w = screen_xx - screen_x
-screen_h = screen_yy - screen_y
-screen_dpi = 2
-
-w = screen_w * (5 / 6)
-h = screen_h * (8 / 9)
-x = screen_x + (screen_w - w) / 2
-y = screen_y + (screen_h - h) / 2
-
-x, y = x / screen_dpi, y / screen_dpi
-w, h = w / screen_dpi, h / screen_dpi
-x, y, w, h = int(x), int(y), int(w), int(h)
 
 
 class Video(object):
@@ -82,21 +75,24 @@ def get_video(play_url) -> Video:
     download_url = download_url.rstrip("?")
 
     if ".mp4" not in download_url:
-        chrome_options = Options()
-        chrome_options.add_argument(f'--window-size={w},{h}')
-        chrome_options.add_argument(f'--window-position={x},{y}')
+        win_x, win_y, win_w, win_h = get_browser_position(w=0.8, h=0.7)
 
-        chrome = webdriver.Chrome(executable_path=chrome_driver_path, chrome_options=chrome_options)
+        options = Options()
+        options.add_argument(f'--window-size={win_w},{win_h}')
+        options.add_argument(f'--window-position={win_x},{win_y}')
 
-        chrome.get(play_url)
-        chrome.implicitly_wait(10)
+        browser = webdriver.Chrome(executable_path=chrome_driver_path, chrome_options=options)
 
-        chrome.switch_to.frame(0)
-        chrome.switch_to.frame(0)
+        browser.get(play_url)
+        browser.minimize_window()
+        browser.implicitly_wait(10)
 
-        element_video = chrome.find_element_by_tag_name("video")
+        browser.switch_to.frame(0)
+        browser.switch_to.frame(0)
+
+        element_video = browser.find_element_by_tag_name("video")
         download_url = element_video.get_attribute("src")
-        chrome.close()
+        browser.close()
 
     video.download_url = download_url
     return video
@@ -107,7 +103,7 @@ def download_video(video: Video):
           f" '{video.download_url}' " \
           f" --out '{video.title}.mp4' "
     cmd = cmd.replace("'", '"').strip()
-    print(f"[red]{copy.copy(cmd)}[/red]")
+    print(f"\n\n[red]{copy.copy(cmd)}[/red]")
     os.system(cmd)
 
 
