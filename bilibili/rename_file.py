@@ -29,5 +29,5 @@ if __name__ == '__main__':
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
-    print(rename)
+    rename.print()
     rename.start()

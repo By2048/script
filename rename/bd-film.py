@@ -20,7 +20,6 @@ if __name__ == '__main__':
     rename.folder = "T:\\"
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
-    rename.show_title = False
     rename.init()
-    print(rename)
+    rename.print()
     rename.start()
