@@ -75,7 +75,7 @@ def get_video(play_url) -> Video:
     download_url = download_url.rstrip("?")
 
     if ".mp4" not in download_url:
-        win_x, win_y, win_w, win_h = get_browser_position(w=0.8, h=0.7)
+        win_x, win_y, win_w, win_h = get_browser_position(screen="screen_3_main")
 
         options = Options()
         options.add_argument(f'--window-size={win_w},{win_h}')
