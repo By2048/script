@@ -46,7 +46,7 @@ class Rename(object):
         if check:
             check = Prompt.ask('[red]确认重命名[/red]')
             check = check.lower()
-            if check not in ('1', 'true', 'y', 'yes') or not check:
+            if check not in ('1', 'true', 'y', 'yes', '\\') or not check:
                 print("[red]取消重命名[/red]")
                 return
         print("[red]开始重命名[/red]")
