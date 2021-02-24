@@ -11,6 +11,7 @@ from typing import List, Union
 import requests
 from bs4 import BeautifulSoup
 from rich import print
+from rich.console import Console
 from rich.prompt import Prompt
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -38,7 +39,7 @@ class Video(object):
                f"Download:{self.download_url}\n"
 
 
-def get_all_link(detail_url) -> List:
+def get_all_link(detail_url, select: list = None) -> List:
     response = requests.get(detail_url)
     soup = BeautifulSoup(response.text, "html.parser")
     div = soup.find("div", class_="ff-playurl-tab")
@@ -50,6 +51,8 @@ def get_all_link(detail_url) -> List:
         href = href.strip("/")
         play_url = f"{base_url}/{href}"
         result.append(play_url)
+    if select:
+        result = [result[item] for item in select]
     return result
 
 
@@ -108,10 +111,21 @@ def download_video(video: Video):
 
 
 def main():
-    url = Prompt.ask("视频 [red][详情页\\播放页][/red] 地址")
+    text = "[white on red]Arg1[/white on red]"
+    text += "[red][视频详情页\\视频播放页][/red]"
+    text += " "
+    text += "[white on red]Arg2[/white on red]"
+    text += "[red][指定下载序号][/red]"
+
+    url = Prompt.ask(text)
 
     if "detail" in url:
-        links = get_all_link(url)
+        select = None
+        if " " in url:
+            url, select = url.split()
+            select = [int(item) for item in select.split(",")]
+            select = [item - 1 for item in select]
+        links = get_all_link(url, select)
         for link in links:
             video = get_video(link)
             download_video(video)
