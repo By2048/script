@@ -2,7 +2,7 @@ def get_browser_position(w_scale=1, h_scale=1, screen=1):
     """ 获取浏览器位置
     :param w_scale: 宽度比例
     :param h_scale: 高度比例
-    :return: 窗口 x,y,w,h
+    :return: 窗口 win_x, win_y, win_w, win_h
     """
 
     if screen == "screen_3_main":
