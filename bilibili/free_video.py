@@ -43,8 +43,8 @@ def main():
     new = {}  # 本次获取的数据
 
     if os.path.exists(path):
-        with open(path, encoding='utf-8') as file:
-            if file.readlines():
+        if os.path.getsize(path):
+            with open(path, encoding='utf-8') as file:
                 old = json.load(file)
 
     table = Table(box=box.SIMPLE)
