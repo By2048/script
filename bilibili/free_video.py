@@ -2,9 +2,11 @@
 import json
 import os
 import sys
+import time
 
 import requests
-from rich import box
+from rich import print
+from rich import box, get_console
 from rich.live import Live
 from rich.table import Table
 
@@ -47,9 +49,10 @@ def main():
             with open(path, encoding='utf-8') as file:
                 old = json.load(file)
 
+    console = get_console()
     table = Table(box=box.SIMPLE)
-    table.add_column("Name", justify="right", width=40)
-    table.add_column("Url", justify="left", width=60)
+    table.add_column("Name", justify="right", width=int(console.width * 4 / 10))
+    table.add_column("Url", justify="left", width=int(console.width * 6 / 10))
 
     session = requests.Session()
 
@@ -81,4 +84,6 @@ def main():
 
 
 if __name__ == '__main__':
+    time.sleep(3)
     main()
+    os.system("pause")
