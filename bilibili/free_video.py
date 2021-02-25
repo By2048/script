@@ -44,7 +44,8 @@ def main():
 
     if os.path.exists(path):
         with open(path, encoding='utf-8') as file:
-            old = json.load(file)
+            if file.readlines():
+                old = json.load(file)
 
     table = Table(box=box.SIMPLE)
     table.add_column("Name", justify="right", width=40)
@@ -68,7 +69,7 @@ def main():
                     if _id_ in old:
                         table.add_row(video['title'], video['link'])
                     else:
-                        table.add_row(video['title'], f"[red]{video['link']}")
+                        table.add_row(f"[red]{video['title']}", f"[red]{video['link']}")
             if not data.get('has_next') or page > 99:
                 break
             page += 1
@@ -76,7 +77,7 @@ def main():
     session.close()
 
     with open(path, 'w+', encoding='utf-8') as file:
-        json.dump(new, file)
+        json.dump(new, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':
