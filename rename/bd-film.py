@@ -1,4 +1,12 @@
-from tool.rename import Rename
+import os
+import sys
+
+try:
+    from tool.rename import Rename
+except ImportError:
+    path = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(path)
+    from tool.rename import Rename
 
 
 def need_rename(item):

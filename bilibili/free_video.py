@@ -84,6 +84,6 @@ def main():
 
 
 if __name__ == '__main__':
-    time.sleep(3)
+    time.sleep(1)
     main()
     os.system("pause")

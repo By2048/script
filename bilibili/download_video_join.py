@@ -1,11 +1,18 @@
-import logging
 import os
+import sys
 import json
+import time
 import shutil
 import subprocess
+import logging
 from datetime import datetime
 
-from tool.rename import change_name
+try:
+    from tool.rename import change_name
+except ImportError:
+    path = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(path)
+    from tool.rename import change_name
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,13 +45,6 @@ bilibili (download_path)
 处理时如果存在多个 删除小的
 """
 
-logging.info('')
-logging.info('-' * 66)
-logging.info(f'ffmpeg_path      {ffmpeg_path}')
-logging.info(f'download_path    {download_path}')
-logging.info(f'keep_path        {keep_path}')
-logging.info('-' * 66)
-
 
 class Video(object):
     def __init__(self, folder="", index=0, part="", title=""):
@@ -73,6 +73,15 @@ class Collection(object):
     def __str__(self):
         result = f"{'collection_path'.rjust(20)} {self.folder}"
         return result
+
+
+def logging_config():
+    logging.info('')
+    logging.info('-' * 66)
+    logging.info(f'ffmpeg_path      {ffmpeg_path}')
+    logging.info(f'download_path    {download_path}')
+    logging.info(f'keep_path        {keep_path}')
+    logging.info('-' * 66)
 
 
 def init_collections():
@@ -218,6 +227,8 @@ def test():
 
 
 def setup():
+    logging_config()
+
     if not os.path.exists(base_folder):
         logging.error(f"不存在路径 {base_folder}")
         return
@@ -232,5 +243,7 @@ def setup():
 
 
 if __name__ == '__main__':
+    time.sleep(1)
     setup()
+    os.system("pause")
     # test()
