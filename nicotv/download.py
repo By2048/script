@@ -124,7 +124,7 @@ def main():
         if " " in url:
             url, select = url.split()
             select = [int(item) for item in select.split(",")]
-            select = [item - 1 for item in select]
+            select = [item - 1 if item > 0 else item for item in select]
         links = get_all_link(url, select)
         for link in links:
             video = get_video(link)
