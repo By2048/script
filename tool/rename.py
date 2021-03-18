@@ -24,6 +24,9 @@ class Rename(object):
         self.function_need_rename = None  # 筛选需要重命名的文件
         self.function_get_name = None  # 重命名函数
 
+    def __bool__(self):
+        return bool(len(self.files))
+
     def init(self):
         for item in os.listdir(self.folder):
             if not self.function_need_rename(item):
@@ -44,6 +47,8 @@ class Rename(object):
         self.files = sorted(self.files, key=key)
 
     def start(self, check=True):
+        if not self:
+            return
         if check:
             check = Prompt.ask('[red]确认重命名[/red]')
             check = check.lower()
@@ -57,6 +62,11 @@ class Rename(object):
             os.rename(old, new)
 
     def print(self):
+        if not self:
+            print()
+            print("[red][No Rename][/red]")
+            print()
+            return
         print()
         table = Table(box=box.ROUNDED)
         table.add_column("old_name", justify="right")
