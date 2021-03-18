@@ -40,6 +40,11 @@ config = [
     # Everything-1.4.1.1005.x64-Setup.exe
     [r"(Everything)(-)([\d.]+)(.x64-Setup)(.exe)", r"\1_\3\5"],
 
+    # ScreenToGif.2.27.3.Setup.msi
+    [r"(ScreenToGif)(\.)([\d.]+)(.Setup)(.msi)", r"\1_\3\5"],
+    # ScreenToGif.2.27.3.Portable.zip
+    [r"(ScreenToGif)(\.)([\d.]+)(.Portable)(.zip)", r"\1_\3\5"],
+
 ]
 
 
