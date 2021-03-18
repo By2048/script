@@ -14,6 +14,7 @@ except ImportError:
     sys.path.append(path)
     from tool.rename import Rename
 
+# 替换规则
 config = [
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)(\d.\d.\d+)(\w)(.exe)", r"\1_\3\5"],
@@ -23,6 +24,9 @@ config = [
 
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)(\d.\d.\d+)(\w+)(-)(\w+)(.zip)", r"\1_\3\7", lambda x: x.title()],
+
+    # Screenshot_20210318215042.png
+    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"[\2-\3-\4][\5-\6-\7]\8"]
 ]
 
 
