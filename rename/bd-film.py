@@ -10,12 +10,13 @@ except ImportError:
 
 
 def need_rename(item):
-    result = 'bd-film.cc' in item
+    result = "bd-film.cc" in item or "bd2020" in item
     return result
 
 
 def get_name(item):
-    name = item.lstrip('[BD影视分享bd-film.cc]')
+    name = item.replace("[BD影视分享bd-film.cc]", "")
+    name = item.replace("[BD影视分享bd2020.com]", "")
     name = name.strip()
     name = name.replace(':', ' ')
     name = name.replace('：', ' ')
