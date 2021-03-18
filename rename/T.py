@@ -2,11 +2,6 @@ import re
 import os
 import sys
 
-path = "T:\\"
-
-import os
-import sys
-
 try:
     from tool.rename import Rename
 except ImportError:
@@ -33,7 +28,6 @@ config = [
 def need_rename(item):
     for cfg in config:
         rule_match = cfg[0]
-        rule_name = cfg[1]
         if re.match(rule_match, item):
             return True
     return False
@@ -53,7 +47,7 @@ def get_name(item):
 
 if __name__ == '__main__':
     rename = Rename()
-    rename.folder = "T:\\"
+    rename.folder = os.getcwd()
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
