@@ -37,7 +37,8 @@ class Rename(object):
     def sort(self):
 
         def key(item: File):
-            _name_, _type_ = item.new_name.split(".")
+            # _name_, _type_ = item.new_name.split(".")
+            _name_, _type_ = os.path.splitext(item.new_name)
             return int(_name_) if _name_.isdigit() else _name_
 
         self.files = sorted(self.files, key=key)
