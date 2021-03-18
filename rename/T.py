@@ -11,6 +11,7 @@ except ImportError:
 
 # 替换规则
 config = [
+
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)(\d.\d.\d+)(\w)(.exe)", r"\1_\3\5"],
 
@@ -18,13 +19,27 @@ config = [
     [r"(Xshell)(-)(\d.\d.\d+)(\w)(.exe)", r"\1_\3\5"],
 
     # ventoy-1.0.38-windows.zip
-    [r"(ventoy)(-)(\d.\d.\d+)(\w+)(-)(\w+)(.zip)", r"\1_\3\7", lambda x: x.title()],
+    [r"(ventoy)(-)(\d.\d.\d+)(\w+)(-)(\w+)(.zip)", r"\1_\3\7", lambda x: x.capitalize()],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"[\2-\3-\4][\5-\6-\7]\8"],
 
     # FreeFileSync_11.8_Windows_Setup.exe
-    [r"(FreeFileSync_)(\d+\.\d+)(_Windows_Setup)(.exe)", r"\1\2\4"]
+    [r"(FreeFileSync_)(\d+\.\d+)(_Windows_Setup)(.exe)", r"\1\2\4"],
+
+    # python-3.8.5.exe
+    [r"(python)(-)(\d+.\d+.\d+)(.exe)", r"\1_\3\4", lambda x: x.capitalize()],
+    # python-3.9.2-amd64.exe
+    [r"(python)(-)(\d+.\d+.\d+)(-amd64)(.exe)", r"\1_\3\5", lambda x: x.capitalize()],
+
+    # DG5411178_x64.zip
+    [r"(DG)(\d+)(_x64)(.zip)", r"DiskGenius_\2\4"],
+
+    # Everything-1.4.1.1005.x64.zip
+    [r"(Everything)(-)([\d.]+)(.x64)(.zip)", r"\1_\3\5"],
+    # Everything-1.4.1.1005.x64-Setup.exe
+    [r"(Everything)(-)([\d.]+)(.x64-Setup)(.exe)", r"\1_\3\5"],
+
 ]
 
 
