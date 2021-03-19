@@ -50,6 +50,11 @@ config = [
     # PortableGit-2.31.0-64-bit.7z.exe
     [r"(Portable)(Git)(-)(\d+.\d+.\d+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
 
+    # Q-Dir_Portable_x64.zip
+    [r"(Q-Dir)(_)(Portable_x64)(.zip)", r"\1\4"],
+    # Q-Dir_x64.exe
+    [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
+
 ]
 
 
