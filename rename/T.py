@@ -45,6 +45,11 @@ config = [
     # ScreenToGif.2.27.3.Portable.zip
     [r"(ScreenToGif)(\.)([\d.]+)(.Portable)(.zip)", r"\1_\3\5"],
 
+    # Git-2.31.0-64-bit.exe
+    [r"(Git)(-)(\d+.\d+.\d+)(-64-bit)(.exe)", r"\1_\3\5"],
+    # PortableGit-2.31.0-64-bit.7z.exe
+    [r"(Portable)(Git)(-)(\d+.\d+.\d+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
+
 ]
 
 
