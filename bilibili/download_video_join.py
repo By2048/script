@@ -93,6 +93,7 @@ def init_collections():
         videos = []
         for video_folder in os.listdir(collection_folder_path):
             video_folder_path = os.path.join(collection_folder_path, video_folder)
+            video_folder = video_folder.replace("c_", "")
             video = Video(folder=video_folder_path, index=int(video_folder))
             videos.append(video)
         collection.videos = videos

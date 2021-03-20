@@ -22,7 +22,7 @@ config = [
     [r"(ventoy)(-)(\d.\d.\d+)(\w+)(-)(\w+)(.zip)", r"\1_\3\7", lambda x: x.capitalize()],
 
     # Screenshot_20210318215042.png
-    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"[\2-\3-\4][\5-\6-\7]\8"],
+    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # FreeFileSync_11.8_Windows_Setup.exe
     [r"(FreeFileSync_)(\d+\.\d+)(_Windows_Setup)(.exe)", r"\1\2\4"],
