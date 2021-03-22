@@ -55,6 +55,9 @@ config = [
     # Q-Dir_x64.exe
     [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
 
+    # VMware-workstation-full-16.1.0-17198959.exe
+    [r"(VMware)(-workstation-full-)(\d+.\d+.\d+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
+
 ]
 
 
@@ -80,7 +83,7 @@ def get_name(item):
 
 if __name__ == '__main__':
     rename = Rename()
-    rename.folder = os.getcwd()
+    rename.folder = "T:\\"
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
