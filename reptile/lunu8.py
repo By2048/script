@@ -11,6 +11,8 @@ from rich.prompt import Prompt
 from bs4 import BeautifulSoup
 
 
+# https://www.lunu8.com/
+
 def download(url, name):
     cmd = f" D:\\Aria2\\aria2c.exe " \
           f" '{url}' " \
