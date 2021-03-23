@@ -58,6 +58,9 @@ config = [
     # VMware-workstation-full-16.1.0-17198959.exe
     [r"(VMware)(-workstation-full-)(\d+.\d+.\d+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
 
+    # FoxmailSetup_7.2.20.273.exe
+    [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
+
 ]
 
 

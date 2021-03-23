@@ -1,5 +1,6 @@
+
 .idea
 .vacode
 __pycache__
 
-test
+/test/*
