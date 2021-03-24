@@ -13,42 +13,42 @@ except ImportError:
 config = [
 
     # Xftp-7.0.0063p.exe
-    [r"(Xftp)(-)(\d.\d.\d+)(\w)(.exe)", r"\1_\3\5"],
+    [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
     # Xshell-7.0.0063p.exe
-    [r"(Xshell)(-)(\d.\d.\d+)(\w)(.exe)", r"\1_\3\5"],
+    [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
     # ventoy-1.0.38-windows.zip
-    [r"(ventoy)(-)(\d.\d.\d+)(\w+)(-)(\w+)(.zip)", r"\1_\3\7", lambda x: x.capitalize()],
+    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", r"\1_\3\5", lambda x: x.capitalize()],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # FreeFileSync_11.8_Windows_Setup.exe
-    [r"(FreeFileSync_)(\d+\.\d+)(_Windows_Setup)(.exe)", r"\1\2\4"],
+    [r"(FreeFileSync_)([\d+\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
 
     # python-3.8.5.exe
-    [r"(python)(-)(\d+.\d+.\d+)(.exe)", r"\1_\3\4", lambda x: x.capitalize()],
+    [r"(python)(-)([\d\.]+)(.exe)", r"\1_\3\4", lambda x: x.capitalize()],
     # python-3.9.2-amd64.exe
-    [r"(python)(-)(\d+.\d+.\d+)(-amd64)(.exe)", r"\1_\3\5", lambda x: x.capitalize()],
+    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", r"\1_\3\5", lambda x: x.capitalize()],
 
     # DG5411178_x64.zip
     [r"(DG)(\d+)(_x64)(.zip)", r"DiskGenius_\2\4"],
 
     # Everything-1.4.1.1005.x64.zip
-    [r"(Everything)(-)([\d.]+)(.x64)(.zip)", r"\1_\3\5"],
+    [r"(Everything)(-)([\d\.]+)(.x64)(.zip)", r"\1_\3\5"],
     # Everything-1.4.1.1005.x64-Setup.exe
-    [r"(Everything)(-)([\d.]+)(.x64-Setup)(.exe)", r"\1_\3\5"],
+    [r"(Everything)(-)([\d\.]+)(.x64-Setup)(.exe)", r"\1_\3\5"],
 
     # ScreenToGif.2.27.3.Setup.msi
-    [r"(ScreenToGif)(\.)([\d.]+)(.Setup)(.msi)", r"\1_\3\5"],
+    [r"(ScreenToGif)(\.)([\d\.]+)(.Setup)(.msi)", r"\1_\3\5"],
     # ScreenToGif.2.27.3.Portable.zip
-    [r"(ScreenToGif)(\.)([\d.]+)(.Portable)(.zip)", r"\1_\3\5"],
+    [r"(ScreenToGif)(\.)([\d\.]+)(.Portable)(.zip)", r"\1_\3\5"],
 
     # Git-2.31.0-64-bit.exe
-    [r"(Git)(-)(\d+.\d+.\d+)(-64-bit)(.exe)", r"\1_\3\5"],
+    [r"(Git)(-)([\d\.]+)(-64-bit)(.exe)", r"\1_\3\5"],
     # PortableGit-2.31.0-64-bit.7z.exe
-    [r"(Portable)(Git)(-)(\d+.\d+.\d+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
+    [r"(Portable)(Git)(-)([\d\.]+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
 
     # Q-Dir_Portable_x64.zip
     [r"(Q-Dir)(_)(Portable_x64)(.zip)", r"\1\4"],
@@ -56,7 +56,7 @@ config = [
     [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
 
     # VMware-workstation-full-16.1.0-17198959.exe
-    [r"(VMware)(-workstation-full-)(\d+.\d+.\d+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
+    [r"(VMware)(-workstation-full-)([\d+\.]+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
 
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
