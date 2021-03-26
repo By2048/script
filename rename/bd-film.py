@@ -16,17 +16,18 @@ def need_rename(item):
 
 def get_name(item):
     name = item.replace("[BD影视分享bd-film.cc]", "")
-    name = item.replace("[BD影视分享bd2020.com]", "")
+    name = name.replace("[BD影视分享bd2020.com]", "")
     name = name.strip()
     name = name.replace(':', ' ')
     name = name.replace('：', ' ')
     _name_, *_, _type_ = name.split('.')
+    _type_ = _type_.replace("mp41", "mp4")
     return f"{_name_}.{_type_}"
 
 
 if __name__ == '__main__':
     rename = Rename()
-    rename.folder = "T:\\"
+    rename.folder = os.getcwd()
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()

@@ -1,6 +1,13 @@
+import os
+import sys
 from datetime import datetime
 
-from tool.rename import Rename
+try:
+    from tool.rename import Rename
+except ImportError:
+    path = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(path)
+    from tool.rename import Rename
 
 
 def need_rename(item):
@@ -9,11 +16,11 @@ def need_rename(item):
 
 
 def get_name(item):
-    _old_ = item
-    _name_, _type_ = item.split("Screenshot_")[-1].split('.')
+    item = item.replace("Screenshot_", "")
+    _name_, _type_ = item.split('.')
     _name_ = datetime.strptime(_name_, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H-%M-%S")
-    _new_ = f"{_name_}.{_type_}"
-    return _new_
+    item = f"{_name_}.{_type_}"
+    return item
 
 
 def main():

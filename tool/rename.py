@@ -53,13 +53,15 @@ class Rename(object):
             check = Prompt.ask('[red]确认重命名[/red]')
             check = check.lower()
             if check not in ('1', 'true', 'y', 'yes', '\\') or not check:
-                print("[red]取消重命名[/red]")
+                print("\n[red]取消重命名[/red]\n")
                 return
-        print("[red]开始重命名[/red]")
+
+        print("\n[red]开始重命名[/red]", end="///")
         for file in self.files:
             old = os.path.join(self.folder, file.old_name)
             new = os.path.join(self.folder, file.new_name)
             os.rename(old, new)
+        print("[red]结束重命名[/red]\n")
 
     def print(self):
         if not self:
