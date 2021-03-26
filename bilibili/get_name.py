@@ -2,9 +2,7 @@ import re
 import json
 
 import requests
-
-# 番剧地址
-url = "https://www.bilibili.com/bangumi/play/ss26281"
+from rich.prompt import Prompt
 
 
 class Video(object):
@@ -38,6 +36,11 @@ class Collection(object):
 
 
 def main():
+    # 番剧地址
+    # url = "https://www.bilibili.com/bangumi/play/ss26281"
+
+    url = Prompt.ask("[red]URL地址[/red]")
+
     response = requests.get(url)
     tags = re.search("(window.__INITIAL_STATE__=)(.*?)(;)", response.text)
     data = tags.groups()[1]
@@ -51,7 +54,7 @@ def main():
         video.index = item['title']
         video.name = item['longTitle']
         collection.append(video)
-        
+    print()
     print(collection.info())
 
 

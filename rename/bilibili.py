@@ -1,14 +1,22 @@
+import os
 import re
+import sys
 
-from tool.rename import Rename
+try:
+    from tool.rename import Rename
+except ImportError:
+    path = os.path.dirname(os.path.dirname(__file__))
+    sys.path.append(path)
+    from tool.rename import Rename
 
 
 def need_rename(item):
-    return bool(item)
+    return ".mp4" in item and "Av" in item
 
 
 def get_name(item):
     item = item.split('.')
+    print(item)
     try:
         index, name, file_type = item[0].zfill(2), item[1], item[2]
     except Exception as e:
@@ -20,12 +28,8 @@ def get_name(item):
 
 
 if __name__ == '__main__':
-    print("\n粘贴文件夹路径\n")
-    path = input()
-    path = path.strip('"')
-
     rename = Rename()
-    rename.folder = path
+    rename.folder = os.getcwd()
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
