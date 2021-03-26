@@ -16,7 +16,6 @@ def need_rename(item):
 
 def get_name(item):
     item = item.split('.')
-    print(item)
     try:
         index, name, file_type = item[0].zfill(2), item[1], item[2]
     except Exception as e:
