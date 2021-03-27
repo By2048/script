@@ -20,12 +20,21 @@ class File(object):
 
 class Rename(object):
     def __init__(self):
-        self.folder: str = ""  # 重命名文件夹目录
+        self._folder_: str = ""  # 重命名文件夹目录
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
         self.function_need_rename = None  # 筛选需要重命名的文件
         self.function_get_name = None  # 重命名函数
+
+    @property
+    def folder(self):
+        return self._folder_
+
+    @folder.setter
+    def folder(self, value):
         if sys.argv[-1] == ".":
-            self.folder = os.getcwd()
+            self._folder_ = os.getcwd()
+        else:
+            self._folder_ = value
 
     def __bool__(self):
         return bool(len(self.files))
@@ -43,7 +52,6 @@ class Rename(object):
     def sort(self):
 
         def key(item: File):
-            # _name_, _type_ = item.new_name.split(".")
             _name_, _type_ = os.path.splitext(item.new_name)
             return int(_name_) if _name_.isdigit() else _name_
 
