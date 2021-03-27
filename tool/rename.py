@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import List
 
 from rich import print
@@ -23,6 +24,8 @@ class Rename(object):
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
         self.function_need_rename = None  # 筛选需要重命名的文件
         self.function_get_name = None  # 重命名函数
+        if sys.argv[-1] == ".":
+            self.folder = os.getcwd()
 
     def __bool__(self):
         return bool(len(self.files))
@@ -49,6 +52,9 @@ class Rename(object):
     def start(self, check=True):
         if not self:
             return
+        if sys.argv[-1] == "test":
+            return
+
         if check:
             check = Prompt.ask('[red]确认重命名[/red]')
             check = check.lower()

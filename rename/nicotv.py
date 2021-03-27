@@ -24,9 +24,8 @@ def get_name(item):
 
 
 def main():
-    folder = os.getcwd()
     rename = Rename()
-    rename.folder = folder
+    rename.folder = os.getcwd()
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()

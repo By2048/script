@@ -85,13 +85,8 @@ def get_name(item):
 
 
 if __name__ == '__main__':
-    args = sys.argv
-    folder = "t:\\"
-    if len(args) > 1:
-        folder = args[-1]
-        folder = os.getcwd() if folder == "." else folder
     rename = Rename()
-    rename.folder = folder
+    rename.folder = "t:\\"
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
