@@ -22,21 +22,10 @@ class File(object):
 
 class Rename(object):
     def __init__(self):
-        self._folder_: str = ""  # 重命名文件夹目录
+        self.folder: str = ""  # 重命名文件夹目录
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
         self.function_need_rename = None  # 筛选需要重命名的文件
         self.function_get_name = None  # 重命名函数
-
-    @property
-    def folder(self):
-        return self._folder_
-
-    @folder.setter
-    def folder(self, value):
-        if sys.argv[-1] == ".":
-            self._folder_ = os.getcwd()
-        else:
-            self._folder_ = value
 
     def __bool__(self):
         return bool(len(self.files))
@@ -64,9 +53,26 @@ class Rename(object):
         if len(sys.argv) == 1:
             return
 
-        if arg == "test":
-            self.print()
+        if arg == "help":
+            print()
+            print(".")
+            print("local")
+            print("debug")
+            print("rule")
+            print()
             exit()
+
+        if arg == "debug":
+            print()
+            print("path", self.folder)
+            for item in self.files:
+                print(f"file {item}")
+            print()
+            exit()
+
+        if arg == "local" or arg == ".":
+            self.folder = os.getcwd()
+            self.init()
 
         if arg == "rule":
             need_rename = inspect.getsource(self.function_need_rename)
