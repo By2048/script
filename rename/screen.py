@@ -37,6 +37,7 @@ def main():
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
+    rename.command()
     rename.print()
     rename.start()
 

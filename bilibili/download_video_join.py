@@ -244,7 +244,4 @@ def setup():
 
 
 if __name__ == '__main__':
-    time.sleep(1)
     setup()
-    os.system("pause")
-    # test()

@@ -1,3 +1,4 @@
+import inspect
 import os
 import sys
 from typing import List
@@ -5,6 +6,7 @@ from typing import List
 from rich import print
 from rich import box
 from rich.prompt import Prompt
+from rich.syntax import Syntax
 from rich.table import Table
 from hanziconv import HanziConv
 
@@ -57,10 +59,27 @@ class Rename(object):
 
         self.files = sorted(self.files, key=key)
 
+    def command(self):
+        arg = sys.argv[-1]
+        if len(sys.argv) == 1:
+            return
+
+        if arg == "test":
+            self.print()
+            exit()
+
+        if arg == "rule":
+            need_rename = inspect.getsource(self.function_need_rename)
+            get_name = inspect.getsource(self.function_get_name)
+            print()
+            print(Syntax(need_rename, "python3", line_numbers=True, indent_guides=True))
+            print()
+            print(Syntax(get_name, "python3", line_numbers=True, indent_guides=True))
+            print()
+            exit()
+
     def start(self, check=True):
         if not self:
-            return
-        if sys.argv[-1] == "test":
             return
 
         if check:
