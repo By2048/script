@@ -12,9 +12,9 @@ from hanziconv import HanziConv
 
 
 class File(object):
-    def __init__(self, old_name='', new_name=''):
-        self.old_name = old_name
-        self.new_name = new_name
+    def __init__(self):
+        self.old_name = ""
+        self.new_name = ""
 
     def __str__(self):
         return f"{self.old_name} -> {self.new_name}"
@@ -34,7 +34,8 @@ class Rename(object):
         for item in os.listdir(self.folder):
             if not self.function_need_rename(item):
                 continue
-            file = File(old_name=item)
+            file = File()
+            file.old_name = item
             file.new_name = self.function_get_name(item)
             file.new_name = change_name(file.new_name)
             self.files.append(file)
@@ -48,11 +49,28 @@ class Rename(object):
 
         self.files = sorted(self.files, key=key)
 
+    def debug(self):
+        print()
+        print("path", self.folder)
+        for item in self.files:
+            print(f"file {item}")
+        print()
+        exit()
+
+    def rule(self):
+        need_rename = inspect.getsource(self.function_need_rename)
+        get_name = inspect.getsource(self.function_get_name)
+        print()
+        print(Syntax(need_rename, "python3", line_numbers=True, indent_guides=True))
+        print()
+        print(Syntax(get_name, "python3", line_numbers=True, indent_guides=True))
+        print()
+        exit()
+
     def command(self):
         arg = sys.argv[-1]
         if len(sys.argv) == 1:
             return
-
         if arg == "help":
             print()
             print(".")
@@ -61,28 +79,10 @@ class Rename(object):
             print("rule")
             print()
             exit()
-
         if arg == "debug":
-            print()
-            print("path", self.folder)
-            for item in self.files:
-                print(f"file {item}")
-            print()
-            exit()
-
-        if arg == "local" or arg == ".":
-            self.folder = os.getcwd()
-            self.init()
-
+            self.debug()
         if arg == "rule":
-            need_rename = inspect.getsource(self.function_need_rename)
-            get_name = inspect.getsource(self.function_get_name)
-            print()
-            print(Syntax(need_rename, "python3", line_numbers=True, indent_guides=True))
-            print()
-            print(Syntax(get_name, "python3", line_numbers=True, indent_guides=True))
-            print()
-            exit()
+            self.rule()
 
     def start(self, check=True):
         if not self:

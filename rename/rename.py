@@ -9,6 +9,8 @@ except ImportError:
     sys.path.append(path)
     from tool.rename import Rename
 
+import fire
+
 # 替换规则
 config = [
 
@@ -61,6 +63,9 @@ config = [
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
 
+    # IMG_20200926_214521.jpg
+    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+
 ]
 
 
@@ -77,19 +82,26 @@ def get_name(item):
         rule_match = cfg[0]
         rule_name = cfg[1]
         rule_py = cfg[2] if len(cfg) == 3 else lambda x: x
-        if re.match(rule_match, item):
-            name = re.sub(rule_match, rule_name, item)
-            name = rule_py(name)
-            return name
+        name = re.sub(rule_match, rule_name, item)
+        name = rule_py(name)
+        return name
     return item
 
 
-if __name__ == '__main__':
+def main(folder="", debug=False, rule=False):
     rename = Rename()
-    rename.folder = "t:\\"
+    rename.folder = folder or os.getcwd()
     rename.function_need_rename = need_rename
     rename.function_get_name = get_name
     rename.init()
+    if debug:
+        rename.debug()
+    if rule:
+        rename.rule()
     rename.command()
     rename.print()
     rename.start()
+
+
+if __name__ == '__main__':
+    fire.Fire(main)
