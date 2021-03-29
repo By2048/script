@@ -17,7 +17,7 @@ class File(object):
         self.new_name = new_name
 
     def __str__(self):
-        return f"{self.old_name} \t {self.new_name}"
+        return f"{self.old_name} -> {self.new_name}"
 
 
 class Rename(object):
