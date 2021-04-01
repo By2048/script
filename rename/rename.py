@@ -82,9 +82,10 @@ def get_name(item):
         rule_match = cfg[0]
         rule_name = cfg[1]
         rule_py = cfg[2] if len(cfg) == 3 else lambda x: x
-        name = re.sub(rule_match, rule_name, item)
-        name = rule_py(name)
-        return name
+        if re.match(rule_match, item):
+            name = re.sub(rule_match, rule_name, item)
+            name = rule_py(name)
+            return name
     return item
 
 
