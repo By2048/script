@@ -11,6 +11,19 @@ except ImportError:
 
 import fire
 
+
+def _capitalize_(item: str):
+    item = item.split("_")
+    item[0] = item[0].capitalize()
+    return "_".join(item)
+
+
+def _upper_(item: str):
+    item = item.split("_")
+    item[0] = item[0].upper()
+    return "_".join(item)
+
+
 # 替换规则
 config = [
 
@@ -21,7 +34,10 @@ config = [
     [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
     # ventoy-1.0.38-windows.zip
-    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", r"\1_\3\5", lambda x: x.capitalize()],
+    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", r"\1_\3\5", _capitalize_],
+
+    # rdm-2021.3.0.0.exe
+    [r"(rdm)(-)([\d\.]+)(.exe)", r"\1_\3\4", _upper_],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
@@ -30,9 +46,9 @@ config = [
     [r"(FreeFileSync_)([\d+\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
 
     # python-3.8.5.exe
-    [r"(python)(-)([\d\.]+)(.exe)", r"\1_\3\4", lambda x: x.capitalize()],
+    [r"(python)(-)([\d\.]+)(.exe)", r"\1_\3\4", _capitalize_],
     # python-3.9.2-amd64.exe
-    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", r"\1_\3\5", lambda x: x.capitalize()],
+    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", r"\1_\3\5", _capitalize_],
 
     # DG5411178_x64.zip
     [r"(DG)(\d+)(_x64)(.zip)", r"DiskGenius_\2\4"],
