@@ -7,3 +7,5 @@ PyMongo
 Redis
 
 Rich
+
+hanziconv
