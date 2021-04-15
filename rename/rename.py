@@ -73,6 +73,9 @@ config = [
     # Q-Dir_x64.exe
     [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
 
+    # go1.16.3.windows-amd64.zip
+    [r"(go)([\d+\.]+)(.windows-amd64)(.zip)", r"\1_\2\4", _capitalize_],
+
     # VMware-workstation-full-16.1.0-17198959.exe
     [r"(VMware)(-workstation-full-)([\d+\.]+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
 
