@@ -3,10 +3,13 @@ import os
 import sys
 from typing import List
 
+_print_ = print
+
 from rich import print
 from rich import box
 from rich.prompt import Prompt
 from rich.syntax import Syntax
+from rich.markup import escape
 from rich.table import Table
 from hanziconv import HanziConv
 
@@ -50,11 +53,11 @@ class Rename(object):
         self.files = sorted(self.files, key=key)
 
     def debug(self):
-        print()
-        print("path", self.folder)
+        _print_()
+        _print_("path", self.folder)
         for item in self.files:
-            print(f"file {item}")
-        print()
+            _print_(f"file {item}")
+        _print_()
         exit()
 
     def rule(self):
@@ -74,7 +77,6 @@ class Rename(object):
         if arg == "help":
             print()
             print(".")
-            print("local")
             print("debug")
             print("rule")
             print()
@@ -113,7 +115,9 @@ class Rename(object):
         table.add_column("old_name", justify="right")
         table.add_column("new_name", justify="left")
         for file in self.files:
-            table.add_row(file.old_name, file.new_name)
+            _old_ = escape(file.old_name)
+            _new_ = escape(file.new_name)
+            table.add_row(_old_, _new_)
         print(table)
         print()
 
