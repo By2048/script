@@ -10,11 +10,10 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    return ".mp4" in item and "Av" in item
+def rule(item):
+    if not (".mp4" in item and "Av" in item):
+        return
 
-
-def get_name(item):
     item = item.split('.')
     try:
         index = item[0].zfill(2)
@@ -35,8 +34,7 @@ def get_name(item):
 if __name__ == '__main__':
     rename = Rename()
     rename.folder = os.getcwd()
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()

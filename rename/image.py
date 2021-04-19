@@ -6,13 +6,11 @@ from tool.rename import Rename
 folder = "T:\\收藏\\"
 
 
-def need_rename(item):
-    # 已经重命名为文件的MD5
-    # xx_md5_xxx.jpg 长度(36)
-    return len(item) != 36
+def rule(item):
+    # 已经重命名为文件的MD5  xx_md5_xxx.jpg 长度(36)
+    if len(item) == 36:
+        return
 
-
-def get_name(item):
     item_type = item.split('.')[-1]
     item_full_path = os.path.join(folder, item)
     hash_md5 = hashlib.md5()
@@ -26,8 +24,7 @@ def get_name(item):
 if __name__ == '__main__':
     rename = Rename()
     rename.folder = folder
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()

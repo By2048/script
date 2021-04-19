@@ -10,26 +10,14 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    if "screenshot_" in item:
-        return True
+def rule(item):
+    # screenshot_1616779141888.png
+    # Chrome_1618427487075.png
 
-    if "_" in item and "-" not in item:
-        app, date = os.path.splitext(item)[0].split("_")
-        if len(app) > 0 and len(date) == 13:
-            return True
+    # 1616779141888 为时间戳
+    # 1616779141 -> 2021-03-27 01:19:01
+    #        888 -> 毫秒
 
-    return False
-
-
-# screenshot_1616779141888.png
-# Chrome_1618427487075.png
-
-# 1616779141888 为时间戳
-# 1616779141 -> 2021-03-27 01:19:01
-#        888 -> 毫秒
-
-def get_name(item):
     if "screenshot_" in item:
         item = item.replace("screenshot_", "")
         _name_, _type_ = item.split('.')
@@ -51,16 +39,11 @@ def get_name(item):
         return item
 
 
-def main():
+if __name__ == "__main__":
     rename = Rename()
     rename.folder = "P:\\Screens\\"
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()
     rename.start()
-
-
-if __name__ == "__main__":
-    main()

@@ -10,11 +10,9 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    return re.match(r"第([\d\\.]+)集", item)
-
-
-def get_name(item):
+def rule(item):
+    if not re.match(r"第([\d\\.]+)集", item):
+        return
     item = item.replace("(无修)", "")
     data = re.match(r"(第)([\d\\.]+)(集)", item)
     item_name = data.group(2)
@@ -23,21 +21,11 @@ def get_name(item):
     return f"{item_name}.{item_type}"
 
 
-def main():
+if __name__ == '__main__':
     rename = Rename()
     rename.folder = os.getcwd()
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()
     rename.start()
-
-
-def test():
-    pass
-
-
-if __name__ == '__main__':
-    main()
-    # test()

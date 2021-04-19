@@ -10,12 +10,9 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    result = "Screenshot_" in item
-    return result
-
-
-def get_name(item):
+def rule(item):
+    if "Screenshot_" not in item:
+        return
     item = item.replace("Screenshot_", "")
     _name_, _type_ = item.split('.')
     _name_ = datetime.strptime(_name_, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H-%M-%S")
@@ -23,16 +20,11 @@ def get_name(item):
     return item
 
 
-def main():
+if __name__ == "__main__":
     rename = Rename()
-    rename.folder = "R:\\History\\"
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.folder = "P:\\History\\"
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()
     rename.start()
-
-
-if __name__ == "__main__":
-    main()

@@ -10,13 +10,10 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    result = "wx_camera_" in item
-    return result
-
-
-# wx_camera_1616986022655.jpg
-def get_name(item):
+def rule(item):
+    # wx_camera_1616986022655.jpg
+    if "wx_camera_" not in item:
+        return
     item = item.replace("wx_camera_", "")
     _name_, _type_ = item.split('.')
     _name_ = _name_[:-3]
@@ -27,16 +24,11 @@ def get_name(item):
     return item
 
 
-def main():
+if __name__ == "__main__":
     rename = Rename()
     rename.folder = os.getcwd()
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()
     rename.start()
-
-
-if __name__ == "__main__":
-    main()

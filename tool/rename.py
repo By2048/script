@@ -1,6 +1,6 @@
-import inspect
 import os
 import sys
+import inspect
 from typing import List
 
 _print_ = print
@@ -27,47 +27,47 @@ class Rename(object):
     def __init__(self):
         self.folder: str = ""  # 重命名文件夹目录
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
-        self.function_need_rename = None  # 筛选需要重命名的文件
-        self.function_get_name = None  # 重命名函数
+        self.rule = None  # 匹配 重命名 规则
 
     def __bool__(self):
         return bool(len(self.files))
 
     def init(self):
         for item in os.listdir(self.folder):
-            if not self.function_need_rename(item):
+            result = self.rule(item)
+            if not result:
                 continue
             file = File()
             file.old_name = item
-            file.new_name = self.function_get_name(item)
+            file.new_name = result
             file.new_name = change_name(file.new_name)
             self.files.append(file)
-        self.sort()
+        try:
+            self.sort()
+        except Exception as e:
+            print(e)
 
     def sort(self):
 
         def key(item: File):
             _name_, _type_ = os.path.splitext(item.new_name)
-            return int(_name_) if _name_.isdigit() else _name_
+            _name_ = int(_name_) if _name_.isdigit() else _name_
+            return _name_
 
         self.files = sorted(self.files, key=key)
 
     def debug(self):
+        rule = inspect.getsource(self.rule)
+        print()
+        print(Syntax(rule, "python3", line_numbers=True, indent_guides=True))
+        print()
+
         _print_()
         _print_("path", self.folder)
         for item in self.files:
             _print_(f"file {item}")
         _print_()
-        exit()
 
-    def rule(self):
-        need_rename = inspect.getsource(self.function_need_rename)
-        get_name = inspect.getsource(self.function_get_name)
-        print()
-        print(Syntax(need_rename, "python3", line_numbers=True, indent_guides=True))
-        print()
-        print(Syntax(get_name, "python3", line_numbers=True, indent_guides=True))
-        print()
         exit()
 
     def command(self):

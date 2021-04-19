@@ -9,12 +9,9 @@ except ImportError:
     from tool.rename import Rename
 
 
-def need_rename(item):
-    result = "bd-film.cc" in item or "bd2020" in item
-    return result
-
-
-def get_name(item):
+def rule(item):
+    if not ("bd-film.cc" in item or "bd2020" in item):
+        return
     name = item.replace("[BD影视分享bd-film.cc]", "")
     name = name.replace("[BD影视分享bd2020.com]", "")
     name = name.strip()
@@ -28,8 +25,7 @@ def get_name(item):
 if __name__ == '__main__':
     rename = Rename()
     rename.folder = os.getcwd()
-    rename.function_need_rename = need_rename
-    rename.function_get_name = get_name
+    rename.rule = rule
     rename.init()
     rename.command()
     rename.print()
