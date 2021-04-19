@@ -96,6 +96,9 @@ config = [
     # IMG_20200926_214521.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
 
+    # PowerToysSetup-0.36.0-x64.exe
+    [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
+
     # 第xxx集
     [r"(第)(\d+)(集)(\.\w+)", (r"\2\4", _zfill_)],
 
@@ -127,12 +130,14 @@ def rule(item: str):
         if isfunction(_all_get_):
             item = _all_get_(item)
             return item
-
-        for _get_ in list(_all_get_):
-            if isinstance(_get_, str):
-                item = re.sub(_match_, _get_, item)
-            elif isfunction(_get_):
-                item = _get_(item)
+        elif isinstance(_all_get_, str):
+            item = re.sub(_match_, _all_get_, item)
+        elif isinstance(_all_get_, (list, tuple)):
+            for _get_ in list(_all_get_):
+                if isinstance(_get_, str):
+                    item = re.sub(_match_, _get_, item)
+                elif isfunction(_get_):
+                    item = _get_(item)
 
         return item
 
