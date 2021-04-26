@@ -18,9 +18,10 @@ class File(object):
     def __init__(self):
         self.old_name = ""
         self.new_name = ""
+        self.rename_rule = ""
 
     def __str__(self):
-        return f"{self.old_name} -> {self.new_name}"
+        return f"{self.old_name:<35} | {self.new_name:<35} | {self.rename_rule}"
 
 
 class Rename(object):
@@ -39,7 +40,8 @@ class Rename(object):
                 continue
             file = File()
             file.old_name = item
-            file.new_name = result
+            file.new_name = result[0]
+            file.rename_rule = result[1]
             file.new_name = change_name(file.new_name)
             self.files.append(file)
         try:
@@ -63,9 +65,9 @@ class Rename(object):
         print()
 
         _print_()
-        _print_("path", self.folder)
+        _print_(self.folder)
         for item in self.files:
-            _print_(f"file {item}")
+            _print_(f"    {item}")
         _print_()
 
         exit()

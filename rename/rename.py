@@ -3,6 +3,7 @@ import os
 import sys
 import typing
 import copy
+from datetime import datetime
 from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
@@ -30,12 +31,133 @@ def _upper_(item: str):
 
 
 def _zfill_(item: str):
-    _name_, _type_ = item.split(".")
+    _name_, _type_ = os.path.splitext(item)
     _name_ = _name_.zfill(2)
+    return f"{_name_}{_type_}"
+
+
+def screen(item):
+    # Chrome_1618427487075.png
+    # 1616779141888 为时间戳
+    # 1616779141 -> 2021-03-27 01:19:01
+    #        888 -> 毫秒
+    if "_" in item and "-" not in item:
+        _name_, _type_ = os.path.splitext(item)
+        _app_, _date_ = _name_.split("_")
+        _date_ = _date_[:-3]
+        _date_ = int(_date_)
+        _date_ = datetime.fromtimestamp(_date_)
+        _date_ = _date_.strftime("[%Y-%m-%d][%H-%M-%S]")
+        item = f"{_date_}[{_app_}]{_type_}"
+        return item
+    else:
+        return False
+
+
+def screenshot(item):
+    # screenshot_1616779141888.png
+    # 1616779141888 为时间戳
+    # 1616779141 -> 2021-03-27 01:19:01
+    #        888 -> 毫秒
+    if "screenshot_" in item:
+        item = item.replace("screenshot_", "")
+        _name_, _type_ = os.path.splitext(item)
+        _name_ = _name_[:-3]
+        _name_ = int(_name_)
+        _name_ = datetime.fromtimestamp(_name_)
+        _name_ = _name_.strftime("[%Y-%m-%d][%H-%M-%S]")
+        item = f"{_name_}{_type_}"
+        return item
+    else:
+        return False
+
+
+def timestamp(item: str):
+    # 1616986022655.jpg
+    _name_, _type_ = os.path.splitext(item)
+    if _type_ in ".png .jpg .gif".split() and _name_.isdigit() and len(_name_) in [13, 10]:
+        if len(_name_) == 13:
+            _name_ = _name_[:-3]
+        _name_ = int(_name_)
+        _name_ = datetime.fromtimestamp(_name_)
+        _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
+        result = f"{_name_}{_type_}"
+        return result
+    else:
+        return False
+
+
+def wx_camera(item: str):
+    # wx_camera_1616986022655.jpg
+    if "wx_camera_" not in item:
+        return False
+    item = item.replace("wx_camera_", "")
+    _name_, _type_ = os.path.splitext(item)
+    _name_ = _name_[:-3]
+    _name_ = int(_name_)
+    _name_ = datetime.fromtimestamp(_name_)
+    _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
+    item = f"{_name_}{_type_}"
+    return item
+
+
+def nicotv(item: str):
+    if not re.match(r"第([\d\\.]+)集", item):
+        return False
+    item = item.replace("(无修)", "")
+    data = re.match(r"(第)([\d\\.]+)(集)", item)
+    item_name = data.group(2)
+    item_name = item_name.zfill(2)
+    item_type = item.split('.')[-1]
+    return f"{item_name}.{item_type}"
+
+
+def history(item: str):
+    if "Screenshot_" not in item:
+        return False
+    item = item.replace("Screenshot_", "")
+    _name_, _type_ = item.split('.')
+    _name_ = datetime.strptime(_name_, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H-%M-%S")
+    item = f"{_name_}.{_type_}"
+    return item
+
+
+def bilibili(item: str):
+    if not (".mp4" in item and "Av" in item):
+        return False
+
+    item = item.split('.')
+    try:
+        index = item[0].zfill(2)
+        name = item[1]
+        file_type = item[2]
+    except Exception as e:
+        print(f'\n文件名解析错误 {item}\n')
+        return False
+
+    name = re.split(r'\([avAVpP,\d]+\)', name)  # 去除(Avxxxxxx,Px)
+    name = [item for item in name if bool(item)]
+    name = ''.join(name)
+    name = name.rstrip("_ ")
+    new_name = f"{index} {name}.{file_type}"
+    return new_name
+
+
+def bdfilm(item: str):
+    if not ("bd-film.cc" in item or "bd2020" in item):
+        return False
+    name = item.replace("[BD影视分享bd-film.cc]", "")
+    name = name.replace("[BD影视分享bd2020.com]", "")
+    name = name.strip()
+    name = name.replace(':', ' ')
+    name = name.replace('：', ' ')
+    _name_, *_, _type_ = name.split('.')
+    _type_ = _type_.replace("mp41", "mp4")
     return f"{_name_}.{_type_}"
 
 
 # 替换规则
+# 函数 \ 正则表达式
 config = [
 
     # Xftp-7.0.0063p.exe
@@ -105,41 +227,58 @@ config = [
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
 
-    # Test
-    [lambda x: "v2" in x, lambda x: x.replace("v2-", "")]
+    # 手机屏幕截图
+    screen,
+    screenshot,
+
+    # 以时间戳格式保存的图片
+    timestamp,
+
+    # 微信保存的图片
+    wx_camera,
+
+    # 下载的动漫
+    nicotv,
+
+    # 记录的历史图片
+    history,
+
+    bilibili,
+
+    bdfilm,
 
 ]
 
 
 def rule(item: str):
     for cfg in config:
-        _match_ = cfg[0]
-        _all_get_ = cfg[1]
 
-        check = False
-        if isinstance(_match_, str):
-            if re.match(_match_, item):
-                check = True
-        elif isfunction(_match_):
-            if _match_(item):
-                check = True
-
-        if not check:
+        if isfunction(cfg):
+            result = cfg(item)
+            if result:
+                return result, cfg
             continue
 
-        if isfunction(_all_get_):
-            item = _all_get_(item)
-            return item
-        elif isinstance(_all_get_, str):
-            item = re.sub(_match_, _all_get_, item)
-        elif isinstance(_all_get_, (list, tuple)):
-            for _get_ in list(_all_get_):
-                if isinstance(_get_, str):
-                    item = re.sub(_match_, _get_, item)
-                elif isfunction(_get_):
-                    item = _get_(item)
+        _match_, _get_ = cfg[0], cfg[1]
 
-        return item
+        if not isinstance(_match_, str):
+            continue
+
+        if not re.match(_match_, item):
+            continue
+
+        if isinstance(_get_, str):
+            result = re.sub(_match_, _get_, item)
+            return result, cfg
+
+        if isinstance(_get_, (list, tuple)):
+            result = None
+            for _g_ in list(_get_):
+                if isinstance(_g_, str):
+                    result = re.sub(_match_, _g_, item)
+                elif isfunction(_g_):
+                    result = _g_(item)
+            return result, cfg
 
 
 def main(folder="", debug=False):
