@@ -59,34 +59,30 @@ class Rename(object):
         self.files = sorted(self.files, key=key)
 
     def debug(self):
-        rule = inspect.getsource(self.rule)
-        print()
-        print(Syntax(rule, "python3", line_numbers=True, indent_guides=True))
-        print()
-
         _print_()
         _print_(self.folder)
         for item in self.files:
             _print_(f"    {item}")
         _print_()
 
-        exit()
+    def config(self):
+        rule = inspect.getsource(self.rule)
+        print()
+        print(Syntax(rule, "python3", line_numbers=True, indent_guides=True))
+        print()
 
-    def command(self):
-        arg = sys.argv[-1]
-        if len(sys.argv) == 1:
-            return
+    def command(self, arg):
         if arg == "help":
             print()
-            print(".")
+            print("help")
             print("debug")
-            print("rule")
+            print("config")
             print()
-            exit()
         if arg == "debug":
             self.debug()
-        if arg == "rule":
-            self.rule()
+        if arg == "config":
+            self.config()
+        exit()
 
     def start(self, check=True):
         if not self:

@@ -281,14 +281,14 @@ def rule(item: str):
             return result, cfg
 
 
-def main(folder="", debug=False):
+def main(command="", folder="", debug=False):
     rename = Rename()
     rename.folder = folder or os.getcwd()
     rename.rule = rule
     rename.init()
     if debug:
         rename.debug()
-    rename.command()
+    rename.command(command)
     rename.print()
     rename.start()
 
