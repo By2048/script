@@ -78,11 +78,14 @@ class Rename(object):
             print("debug")
             print("config")
             print()
+            exit()
         if arg == "debug":
             self.debug()
+            exit()
         if arg == "config":
             self.config()
-        exit()
+            exit()
+
 
     def start(self, check=True):
         if not self:
