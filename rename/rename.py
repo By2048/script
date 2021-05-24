@@ -170,6 +170,9 @@ config = [
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", _capitalize_)],
 
+    # navicat150_premium_cs_x64.exe
+    [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", _capitalize_)],
+
     # rdm-2021.3.0.0.exe
     [r"(rdm)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
 
@@ -218,6 +221,9 @@ config = [
 
     # IMG_20200926_214521.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+
+    # MuMu20210129215157.png
+    [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # PowerToysSetup-0.36.0-x64.exe
     [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
@@ -281,7 +287,7 @@ def rule(item: str):
                 if isinstance(_g_, str):
                     result = re.sub(_match_, _g_, item)
                 elif isfunction(_g_):
-                    result = _g_(item)
+                    result = _g_(result)
             return result, cfg
 
 
