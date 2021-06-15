@@ -186,6 +186,8 @@ config = [
     [r"(python)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _capitalize_)],
     # python-3.9.2-amd64.exe
     [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1_\3\5", _capitalize_)],
+    # python-3.9.5-embed-amd64.zip
+    [r"(python)(-)([\d\.]+)(-embed-amd64)(.zip)", (r"\1_\3\5", _capitalize_)],
 
     # node-v14.17.0-win-x64.zip
     [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", _capitalize_)],
