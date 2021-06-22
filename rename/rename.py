@@ -161,6 +161,9 @@ def bdfilm(item: str):
 # 函数 \ 正则表达式
 config = [
 
+    # pattern.cpython-37.pyc
+    [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
+
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
