@@ -9,14 +9,21 @@ from collections import namedtuple
 # .pdf 文件将会被 pdf2svg 转换为 svg 然后被引用。
 
 types_image = ['png', 'jpg', 'gif', 'jpeg', 'svg']
-
 types_code = ['txt', 'py', 'md', 'json', 'html', 'css', 'less', 'js']
+
+re_image_str = '|'.join(types_image)
+re_image_len = " " * len(re_image_str)
+
+# test
+re_code_str = '|'.join(types_code)
+re_code_len = " " * len(re_code_str)
 
 # key=width value=xxx
 Command = namedtuple('Command', ['key', 'value'])
 
 # index=1 name=file value=([\w\d\.]+)
 Arg = namedtuple('Arg', ['index', 'name', 'value'])
+# test
 
 # 编码转化
 chars_encode = {chr(i): f'\\{chr(i)}' for i in b'()[]{}?*+-|^$\\.&~# \t\n\r\v\f'}

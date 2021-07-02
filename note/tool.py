@@ -1,3 +1,4 @@
+import inspect
 import os
 import re
 from pathlib import Path
@@ -60,11 +61,7 @@ def change(arg: str):
     if not arg:
         return result
 
-    # 代码块\原始数据
-    if arg == 'origin':
-        result['origin'] = True
-        return result
-
+    # {start:1 end:3}
     # k:v命令
     if '{' in arg and '}' in arg:
         arg = arg.lstrip("{").rstrip("}").strip()
@@ -76,43 +73,16 @@ def change(arg: str):
             result[k] = v
         return result
 
-    # 图片长宽 width x height
-    if 'x' in arg:
-        w, h = arg.split('x')
-        w = try_str_to_num(w)
-        h = try_str_to_num(h)
-        result['width'] = w
-        result['height'] = h
-        return result
-
     # 快速命令
     if ':' in arg:
 
-        if re.match(r'function:\w+', arg):
-            arg = arg.split(":")
-            result['function'] = arg[-1]
-            return result
-
+        # label:test
         if re.match(r'label:\w+', arg):
             arg = arg.split(":")
             result['function'] = arg[-1]
             return result
 
-        if re.match(r'-?\d+:-?\d+', arg) or re.match(r'origin:-?\d+:-?\d+', arg):
-            if 'origin' in arg:
-                result['origin'] = True
-                arg = arg.replace('origin', '')
-                arg = arg.strip(':')
-            arg = arg.split(":")
-            _start_ = arg[0]
-            _end_ = arg[1]
-            _start_ = try_str_to_num(_start_)
-            _end_ = try_str_to_num(_end_)
-            result['start'] = _start_
-            result['end'] = _end_
-            return result
-
-        return {}
+        return result
 
 
 def get_file_path(file):
@@ -147,19 +117,46 @@ def get_new_file_path(file_path):
 
 
 def open_file(file_full_path: str, command: dict = None):
+    # 打开文件 优先预览文件
     file_preview = get_new_file_path(file_full_path)
     if os.path.isfile(file_preview):
         file_full_path = file_preview
+
     with open(file_full_path, 'r', encoding='utf-8') as file:
-        code = file.readlines()
+        data = file.readlines()
+
     command = command or {}
-    start = command.get('start') or None
-    end = command.get('end') or None
-    code = code[start:end]
-    code = ''.join(code)
-    code = code.strip("\n")
-    # code = file_encode(code)
-    return code
+
+    if 'label' in command:
+        label_name = command['label']
+        rule = rf"""(?<=\n)(?:{label_name})([\s\S]+?)(?:{label_name})(?=\n)"""
+
+        data = ''.join(data)
+        data = '\n\n' + data + '\n\n'
+
+        result = re.findall(rule, data)
+        data = result[0] if len(result) == 1 else ""
+
+    if 'function' in command:
+        function_name = command['function']
+        rule = rf"""(?<=\n\n)(def )({function_name})(\()([\s\S]+?)(:)([\S\s]+?)(?=\n\n)"""
+
+        data = ''.join(data)
+        data = '\n\n' + data + '\n\n'
+
+        result = re.findall(rule, data)
+        data = result[0] if len(result) == 1 else ""
+
+    if 'start' in command and 'end' in command:
+        start = command['start'] - 1
+        end = command['end']
+        data = data[start:end]
+
+    data = ''.join(data)
+    data = data.strip("\n")
+    # data = file_encode(data)
+
+    return data
 
 
 if __name__ == '__main__':
