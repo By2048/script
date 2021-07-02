@@ -85,10 +85,11 @@ class MarkdownPattern(object):
         index = index - 1
         return index
 
-    def init_replace(self, match: re.Match):
+    def get_match_replace(self, match: re.Match):
         if not self.replace_backup:
             self.replace_backup = self.replace
         self.replace = copy.copy(self.replace_backup)
+
         self.replace = self.replace.replace('\\n', '\n')
         for index in range(30, 0, -1):
             item = f'\\{index}'
@@ -96,8 +97,6 @@ class MarkdownPattern(object):
                 continue
             self.replace = self.replace.replace(item, match.groups()[index - 1])
 
-    def get_match_replace(self, match: re.Match):
-        self.init_replace(match)
         if self.function:
             result = self.function(self, match)
             self.replace = self.replace.format(**result)
@@ -216,11 +215,11 @@ pattern_code_run.origin = rf"""
        1     2   3 file                 {re_code_len}  4   5     6 cmd     7   8          9                10   
 (?<=\n)(<!--)(\s)((?:[\w\d\/]+)(?:\.)(?:{re_code_str}))(\s)(cmd:)([\s\S]+?)(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)
 """
-pattern_code_run.replace = r'\1\2\3\4\5\n' \
+pattern_code_run.replace = r'\1\2\3\4\5\6\7\8\n' \
                            r'```\n' \
                            r'{result}\n' \
                            r'```\n' \
-                           r'\7'
+                           r'\10'
 
 
 def get_code_run_result(self: MarkdownPattern, match: re.Match):
