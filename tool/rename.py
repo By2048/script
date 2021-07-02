@@ -86,7 +86,6 @@ class Rename(object):
             self.config()
             exit()
 
-
     def start(self, check=True):
         if not self:
             return

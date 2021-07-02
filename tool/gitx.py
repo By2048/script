@@ -17,6 +17,7 @@ def remote():
 
 def update(path):
     cmd = rf'cd /d {path} & git pull'
+    print('\n\n\n')
     print(cmd)
     os.system(cmd)
 
