@@ -22,9 +22,10 @@ def update(path):
 
 
 def main():
-    for item in paths:
-        t = threading.Thread(target=update, args=(item,))
-        t.start()
+    for path in paths:
+        update(path)
+        # t = threading.Thread(target=update, args=(path,))
+        # t.start()
 
 
 if __name__ == '__main__':
