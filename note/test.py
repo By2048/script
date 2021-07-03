@@ -9,6 +9,7 @@ from collections import namedtuple
 from enum import Enum
 import subprocess
 from pathlib import Path
+from urllib.parse import quote, unquote, urlencode
 
 # from .markdown import *
 from markdown import *
@@ -316,8 +317,22 @@ def test_run_code():
     print(markdown)
 
 
-def test():
-    pass
+def test_carbon():
+    markdown = r"""
+
+    <!-- py.py carbon -->
+    <!--  -->
+
+    """
+
+    markdown = markdown.replace('    ', '')
+
+    from pattern import pattern_carbon as mdp
+
+    mdp.debug()
+    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
+
+    print(markdown)
 
 
 if __name__ == '__main__':
@@ -335,5 +350,7 @@ if __name__ == '__main__':
     # test_code_function()
     # test_code_origin_slice()
     # test_label_origin()
-    test_run_code()
-    test()
+    # test_run_code()
+    # test()
+    # test_carbon()
+    test_carbon()

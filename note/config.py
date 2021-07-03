@@ -1,3 +1,4 @@
+import json
 from collections import namedtuple
 
 # carbon
@@ -28,3 +29,40 @@ Arg = namedtuple('Arg', ['index', 'name', 'value'])
 # 编码转化
 chars_encode = {chr(i): f'\\{chr(i)}' for i in b'()[]{}?*+-|^$\\.&~# \t\n\r\v\f'}
 chars_decode = {v: k for k, v in chars_encode.items()}
+
+carbon_args: dict = {}
+
+# *\carbon\lib\routing.js
+routing = [
+    'bg:backgroundColor',
+    't:theme',
+    'wt:windowTheme',
+    'l:language',
+    'ds:dropShadow',
+    'dsyoff:dropShadowOffsetY',
+    'dsblur:dropShadowBlurRadius',
+    'wc:windowControls',
+    'wa:widthAdjustment',
+    'pv:paddingVertical',
+    'ph:paddingHorizontal',
+    'ln:lineNumbers',
+    'fl:firstLineNumber',
+    'fm:fontFamily',
+    'fs:fontSize',
+    'lh:lineHeight',
+    'si:squaredImage',
+    'es:exportSize',
+    'wm:watermark',
+    'sl:selectedLines',
+]
+
+for item in routing:
+    item = item.split(':')
+    carbon_args[item[0]] = item[1]
+    carbon_args[item[1]] = item[0]
+
+with open('carbon-config.json', 'r', encoding='utf-8') as file:
+    _carbon_ = file.readlines()
+    _carbon_ = ''.join(_carbon_)
+    carbon: dict = json.loads(_carbon_)
+    del file, _carbon_

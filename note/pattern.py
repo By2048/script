@@ -2,8 +2,10 @@ import os
 import re
 import copy
 import string
+import math
 import subprocess
 import inspect
+from urllib.parse import quote
 
 from config import *
 from tool import *
@@ -204,6 +206,77 @@ def get_type_code(self: MarkdownPattern, match: re.Match):
 
 
 pattern_code.function = get_type_code
+
+# --------------------------------------------------------------------------------
+
+# 插入全部 代码块 carbon
+# <!-- xxx.py carbon -->
+pattern_carbon = MarkdownPattern('carbon')
+patterns.append(pattern_carbon)
+pattern_carbon.origin = rf"""
+       1     2   3 file                 {re_code_len}  4   5       6   7          8                9     
+(?<=\n)(<!--)(\s)((?:[\w\d\/]+)(?:\.)(?:{re_code_str}))(\s)(carbon)(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)
+"""
+pattern_carbon.replace = r'\1\2\3\4\5\6\7\n' \
+                         r'<iframe\n' \
+                         r'    src="{src}"\n' \
+                         r'    width="100%" height="100%"\n' \
+                         r'    style="width:{width}px; height:{height}px; border:0; overflow:hidden;"\n' \
+                         r'    sandbox="allow-scripts allow-same-origin">\n' \
+                         r'</iframe>\n' \
+                         r'\9'
+
+
+def get_carbon_arg(self: MarkdownPattern, match: re.Match):
+    index_file = self.get_arg_index('file')
+    file = match.groups()[index_file] if index_file >= 0 else ''
+    file_full_path = get_file_path(file)
+
+    with open(file_full_path, 'r', encoding='utf-8') as file:
+        code = file.readlines()
+
+    width = 0
+    height = 0
+
+    for item in code:
+        width = len(item) if len(item) > width else width
+        height += 1
+
+    font_size = carbon.get('fontSize')
+    font_size = font_size.replace('px', '')
+    font_size = int(font_size)
+
+    line_height = carbon.get('lineHeight')
+    line_height = line_height.replace('%', '')
+    line_height = int(line_height) / 100
+
+    height = height * font_size * line_height * 1.25
+    height = math.ceil(height)
+
+    width = width * 10 + 10
+
+    code = ''.join(code)
+    code = quote(quote(code))
+
+    config = {}
+    for key, value in carbon.items():
+        # 125%
+        if key == 'lineHeight':
+            value = line_height
+        key = carbon_args.get(key)
+        if not key:
+            continue
+        config[key] = value
+
+    args = [f"{key}={value}".lower() for key, value in config.items()]
+    args = '&'.join(args)
+
+    src = f"https://carbon.now.sh/embed/?{args}&code={code}"
+
+    return {'src': src, 'width': width, 'height': height}
+
+
+pattern_carbon.function = get_carbon_arg
 
 # --------------------------------------------------------------------------------
 
@@ -522,7 +595,6 @@ def get_w_h(self: MarkdownPattern, match: re.Match):
 pattern_image_html.function = get_w_h
 
 # --------------------------------------------------------------------------------
-
 
 # <!-- py.py {start:1 end:3} -->
 # <!-- py.py {cmd:D:\Python\_python_\Scripts\python.exe type:txt} -->
