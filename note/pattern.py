@@ -250,14 +250,28 @@ def get_carbon_arg(self: MarkdownPattern, match: re.Match):
     line_height = line_height.replace('%', '')
     line_height = int(line_height) / 100
 
+    # 边框
+    padding_vertical = carbon.get('paddingVertical')
+    padding_vertical = padding_vertical.replace('px', '')
+    padding_vertical = int(padding_vertical)
+    padding_horizontal = carbon.get('paddingHorizontal')
+    padding_horizontal = padding_horizontal.replace('px', '')
+    padding_horizontal = int(padding_horizontal)
+
+    # 行高
     height = height * font_size * line_height * 1.25
     height = math.ceil(height)
+    height = height + padding_vertical + padding_vertical
 
+    # 行宽
     width = width * 10 + 10
+    width = width + padding_horizontal + padding_horizontal
 
+    # 代码
     code = ''.join(code)
     code = quote(quote(code))
 
+    # url编码
     config = {}
     for key, value in carbon.items():
         # 125%
@@ -267,10 +281,8 @@ def get_carbon_arg(self: MarkdownPattern, match: re.Match):
         if not key:
             continue
         config[key] = value
-
     args = [f"{key}={value}".lower() for key, value in config.items()]
     args = '&'.join(args)
-
     src = f"https://carbon.now.sh/embed/?{args}&code={code}"
 
     return {'src': src, 'width': width, 'height': height}
