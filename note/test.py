@@ -11,188 +11,176 @@ import subprocess
 from pathlib import Path
 from urllib.parse import quote, unquote, urlencode
 
-# from .markdown import *
 from markdown import *
+
+
+def test_pattern_change(pattern, markdown):
+    if not markdown.startswith('\n'):
+        markdown = '\n' + markdown
+    if not markdown.endswith('\n'):
+        markdown = markdown + '\n'
+
+    result = []
+    for line in markdown.split('\n'):
+        if line.startswith('    '):
+            line = line.lstrip('    ')
+        result.append(line)
+    markdown = '\n'.join(result)
+
+    pattern.debug()
+    markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
+    print(markdown)
 
 
 def test_code():
     markdown = r"""
-
     <!-- py.py -->
     <!--  -->
-
     """
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
-
-    print(markdown)
+    from pattern import pattern_code as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_code_origin():
+def test_code_slice():
     markdown = r"""
+    <!-- py.py 2:7 -->
+    <!--  -->
+    """
+    from pattern import pattern_code_slice as mdp
+    test_pattern_change(mdp, markdown)
 
+
+def test_code_function():
+    markdown = r"""
+    <!-- py.py function:test_set -->
+    <!--  -->
+    """
+    from pattern import pattern_code_function as mdp
+    test_pattern_change(mdp, markdown)
+
+
+def test_code_run():
+    markdown = r"""
+    <!-- py.py cmd:D:\Python\_python_\Scripts\python.exe -->
+    <!--  -->
+    """
+    from pattern import pattern_code_run as mdp
+    test_pattern_change(mdp, markdown)
+
+
+def test_carbon():
+    markdown = r"""
+    <!-- py.py carbon -->
+    <!--  -->
+    """
+    from pattern import pattern_carbon as mdp
+    test_pattern_change(mdp, markdown)
+
+
+def test_origin():
+    markdown = r"""
     <!-- config.py origin -->
     <!--  -->
-
     """
-
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
-
-    print(markdown)
+    from pattern import pattern_origin as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_code_origin_slice():
+def test_origin_slice():
     markdown = r"""
-
     <!-- config.py origin:3:9 -->
     <!--  -->
-
     """
-
-    markdown = markdown.replace('    ', '')
-
     from pattern import pattern_origin_slice as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
+    test_pattern_change(mdp, markdown)
 
 
 def test_image_md():
     markdown = r"""
-
     <!-- png.png -->
     <!--  -->
-
     """
-
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
-
-    print(markdown)
+    from pattern import pattern_image_md as mdp
+    test_pattern_change(mdp, markdown)
 
 
 def test_image_html():
     markdown = r"""
-
     <!-- png.png 0.2x0.2 -->
     <!--  -->
-
     """
-
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
-
-    print(markdown)
+    from pattern import pattern_image_html as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_markdown_args():
+def test_label():
     markdown = r"""
-
-    <!-- md1.md origin -->
+    <!-- config.py label:# test -->
     <!--  -->
-
-    <!-- xxx.py 1:2 -->
-    <!--  -->
-
-    <!-- xxx.py 1:-2 -->
-    <!--  -->
-
-    <!-- xxx.py function:test -->
-    <!--  -->
-
-    <!-- xxx.py label:test -->
-    <!--  -->
-
-    <!-- xxx.py origin -->
-    <!--  -->
-
-    <!-- xxx.py origin:1:2 -->
-    <!--  -->
-
-    <!-- xxx.png 0.2x0.5 -->
-    <!--  -->
-
-    <!-- xxx.png 20x50 -->
-    <!--  -->
-
     """
-
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        result = re.findall(pattern.match, markdown)
-        if not result:
-            continue
-        for item in result:
-            index_file = pattern.get_arg_index('file')
-            index_arg = pattern.get_arg_index('arg')
-            file = item[index_file] if index_file >= 0 else ''
-            arg = item[index_arg] if index_arg >= 0 else ''
-            cmd = change(arg)
-            print()
-            print(file, arg)
-            print(cmd)
-            # pattern_replace = pattern.get_replace_pattern(file, cmd)
-            # markdown = re.sub(pattern.match, pattern_replace, markdown)
+    from pattern import pattern_label as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_change():
+def test_label_origin():
     markdown = r"""
-    
-    <!-- md1.md origin -->
+    <!-- config.py origin:label:# test -->
     <!--  -->
-    
     """
-    # markdown = markdown.replace('    ', '')
-    # markdown = change_markdown(markdown)
-    # print(markdown)
+    from pattern import pattern_label_origin as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_float():
+def test_left_right_clear():
     markdown = r"""
-
     <!-- [left] -->
     <!-- png.png -->
     <!--  -->
-    
+
     <!-- [right] -->
     <!-- png.png -->
     <!--  -->
-    
+
     <!-- [clear] -->
     <!--  -->
+    """
+    from pattern import pattern_left as mdp
+    test_pattern_change(mdp, markdown)
 
-    """.replace('    ', '')
-    # markdown = change_markdown(markdown)
-    # print(markdown)
+    from pattern import pattern_right as mdp
+    test_pattern_change(mdp, markdown)
+
+    from pattern import pattern_clear as mdp
+    test_pattern_change(mdp, markdown)
 
 
-def test_code_result():
+def test_center():
+    markdown = r"""
+    <!-- [center] -->
+    <!-- png.png -->
+    <!--  -->
+    """
+    from pattern import pattern_center as mdp
+    test_pattern_change(mdp, markdown)
+    from pattern import pattern_image_md as mdp
+    test_pattern_change(mdp, markdown)
+
+
+def test_re():
     markdown = r"""
 
-    <!-- py.py {cmd:D:\Python\_python_\Scripts\python.exe type:txt} -->
+    <!-- [center] -->
     <!--  -->
 
     """
     markdown = markdown.replace('    ', '')
-    # markdown = change_markdown(markdown)
-    print(markdown)
+
+    rule = r"(?<=\n)(<!--)(\s)(\[center\])(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)"
+
+    result = re.findall(rule, markdown)
+
+    for item in result:
+        print(item)
 
 
 def test_main():
@@ -213,130 +201,9 @@ def test_main():
     #     print(f'create {file_preview}')
 
 
-def test_code_slice():
-    markdown = r"""
-
-    <!-- py.py 2:7 -->
-    <!--  -->
-
-    """
-    markdown = markdown.replace('    ', '')
-
-    pattern: MarkdownPattern
-    for pattern in patterns:
-        markdown = re.sub(pattern.match, pattern.get_match_replace, markdown)
-
-    print(markdown)
-
-
-def test_code_function():
-    markdown = r"""
-
-    <!-- py.py function:test_set -->
-    <!--  -->
-
-    """
-    markdown = markdown.replace('    ', '')
-
-    from pattern import pattern_code_function as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
-
-
-def test_label():
-    markdown = r"""
-
-    <!-- config.py label:# test -->
-    <!--  -->
-
-    """
-
-    markdown = markdown.replace('    ', '')
-
-    from pattern import pattern_label as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
-
-
-def test_label_origin():
-    markdown = r"""
-
-    <!-- config.py origin:label:# test -->
-    <!--  -->
-
-    """
-
-    markdown = markdown.replace('    ', '')
-
-    from pattern import pattern_label_origin as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
-
-
-def test_re():
-    markdown = r"""
-
-    <!-- [center] -->
-    <!--  -->
-
-    """
-    markdown = markdown.replace('    ', '')
-
-    rule = r"(?<=\n)(<!--)(\s)(\[center\])(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)"
-
-    result = re.findall(rule, markdown)
-
-    for item in result:
-        print(item)
-
-
-def test_run_code():
-    markdown = r"""
-
-    <!-- py.py cmd:D:\Python\_python_\Scripts\python.exe -->
-    <!--  -->
-
-    """
-
-    markdown = markdown.replace('    ', '')
-
-    from pattern import pattern_code_run as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
-
-
-def test_carbon():
-    markdown = r"""
-
-    <!-- py.py carbon -->
-    <!--  -->
-
-    """
-
-    markdown = markdown.replace('    ', '')
-
-    from pattern import pattern_carbon as mdp
-
-    mdp.debug()
-    markdown = re.sub(mdp.match, mdp.get_match_replace, markdown)
-
-    print(markdown)
-
-
 if __name__ == '__main__':
-    # print()
+    print()
+    # test_center()
     # test_markdown_args()
     # test_change()
     # test_float()
@@ -353,4 +220,3 @@ if __name__ == '__main__':
     # test_run_code()
     # test()
     # test_carbon()
-    test_carbon()
