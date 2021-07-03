@@ -54,37 +54,6 @@ def try_str_to_num(value):
     return value
 
 
-def change(arg: str):
-    # 命令
-    result = {}
-
-    if not arg:
-        return result
-
-    # {start:1 end:3}
-    # k:v命令
-    if '{' in arg and '}' in arg:
-        arg = arg.lstrip("{").rstrip("}").strip()
-        arg = arg.split(" ")
-        for o in arg:
-            k, v = o.split(':', 1)
-            v = str_to_bool(v)
-            v = try_str_to_num(v) if not isinstance(v, bool) else v
-            result[k] = v
-        return result
-
-    # 快速命令
-    if ':' in arg:
-
-        # label:test
-        if re.match(r'label:\w+', arg):
-            arg = arg.split(":")
-            result['function'] = arg[-1]
-            return result
-
-        return result
-
-
 def get_file_path(file):
     work_folder = os.environ.get('work_folder')
     if work_folder:

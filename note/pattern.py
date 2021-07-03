@@ -612,18 +612,38 @@ pattern_image_html.function = get_w_h
 # <!-- py.py {cmd:D:\Python\_python_\Scripts\python.exe type:txt} -->
 # <!-- xxx.png {width:0.1 height:0.3 alt:xxx} -->
 # <!-- xxx.png {width:200 height:300 alt:xxx} -->
-# pattern_command = MarkdownPattern('cmd')
-# pattern_command.origin = r"""
-#        1     2   3 file      4   5 arg         6   7          8 code           9
-# (?<=\n)(<!--)(\s)([\w\d\./]+)(\s)(\{[\s\S]+?\})(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)
-# """
-# pattern_command.replace_base = r'\1\2\3\4\5\6\7\8\9'
-# pattern_command.replace_file = r"\1\2\3\4\5\6\7\n{file}\n\9"
-# pattern_command.replace_code = r'\1\2\3\4\5\6\7\n' \
-#                                r'```{type}\n' \
-#                                r'{code}\n' \
-#                                r'```\n' \
-#                                r'\9'
+pattern_command = MarkdownPattern('cmd')
+patterns.append(pattern_command)
+pattern_command.origin = r"""
+       1     2   3 file      4   5 arg         6   7          8 code           9
+(?<=\n)(<!--)(\s)([\w\d\./]+)(\s)(\{[\s\S]+?\})(\s)(-->)(?=\n)([\s\S]+?)(?<=\n)(<!--\s+-->)(?=\n)
+"""
+pattern_command.replace = r'\1\2\3\4\5\6\7\8\9'
+
+
+def get_command(self: MarkdownPattern, match: re.Match):
+    index_file = self.get_arg_index('file')
+    index_arg = self.get_arg_index('arg')
+    file = match.groups()[index_file] if index_file >= 0 else ''
+    arg = match.groups()[index_arg] if index_arg >= 0 else ''
+
+    file_full_path = get_file_path(file)
+
+    # {start:1 end:3}
+    # k:v命令
+    command = {}
+    arg = arg.lstrip("{").rstrip("}").strip()
+    arg = arg.split(" ")
+    for o in arg:
+        k, v = o.split(':', 1)
+        v = str_to_bool(v)
+        v = try_str_to_num(v) if not isinstance(v, bool) else v
+        command[k] = v
+
+    data = open_file(file_full_path, command)
+
+    return {'data': data, 'command': command}
+
 
 ################################################################################
 
