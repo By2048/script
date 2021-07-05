@@ -24,7 +24,7 @@ except ImportError:
     from tool.system import get_browser_position
 
 base_url = "http://www.nicotv.club"
-chrome_driver_path = r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe"
+chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
 
 
 class Video(object):
@@ -53,6 +53,7 @@ def get_all_link(detail_url, select: list = None) -> List:
         result.append(play_url)
     if select:
         result = [result[item] for item in select]
+
     return result
 
 
@@ -98,10 +99,15 @@ def get_video(play_url) -> Video:
         browser.close()
 
     video.download_url = download_url
+
     return video
 
 
 def download_video(video: Video):
+    folder = os.getcwd()
+    for file in os.listdir(folder):
+        if video.title in file:
+            return
     cmd = f" D:\\Aria2\\aria2c.exe " \
           f" '{video.download_url}' " \
           f" --out '{video.title}.mp4' "
