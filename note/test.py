@@ -55,7 +55,7 @@ def test_code_function():
     <!-- py.py function:test_set -->
     <!--  -->
     """
-    from pattern import pattern_code_function as mdp
+    from pattern import pattern_function as mdp
     test_pattern_change(mdp, markdown)
 
 
