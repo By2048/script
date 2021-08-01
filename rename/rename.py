@@ -44,6 +44,8 @@ def screen(item):
     if "_" in item and "-" not in item:
         _name_, _type_ = os.path.splitext(item)
         _app_, _date_ = _name_.split("_")
+        if len(_date_) != 13 or len(_app_) <= 0:
+            return False
         _date_ = _date_[:-3]
         _date_ = int(_date_)
         _date_ = datetime.fromtimestamp(_date_)
