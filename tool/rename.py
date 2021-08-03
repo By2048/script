@@ -90,18 +90,47 @@ class Rename(object):
         if not self:
             return
 
+        rename_index = []
+
+        check = Prompt.ask('[red]确认重命名[/red]')
+
+        if not check:
+            print("\n[red]取消重命名[/red]\n")
+            return
+
+        if check and check.isdigit():
+            rename_index = [check]
+            check = '\\'
+
+        if ',' in check or '`' in check or ' ' in check:
+            check = check.replace(',', ' ')
+            check = check.replace('`', ' ')
+            rename_index = check.split()
+            check = '\\'
+
+        rename_index = [int(obj) for obj in rename_index]
+
         if check:
-            check = Prompt.ask('[red]确认重命名[/red]')
-            check = check.lower()
-            if check not in ('1', 'true', 'y', 'yes', '\\') or not check:
+            if check in ['\\\\']:
+                print("\n[red]取消重命名[/red]\n")
+                return
+
+            if check not in ('y', 'yes', '\\'):
                 print("\n[red]取消重命名[/red]\n")
                 return
 
         print("\n[red]开始重命名[/red]", end="///")
-        for file in self.files:
+
+        for index, file in enumerate(self.files, 1):
             old = os.path.join(self.folder, file.old_name)
             new = os.path.join(self.folder, file.new_name)
-            os.rename(old, new)
+            if not rename_index:
+                os.rename(old, new)
+                continue
+            if index in rename_index:
+                os.rename(old, new)
+                continue
+
         print("[red]结束重命名[/red]\n")
 
     def print(self):
@@ -113,11 +142,12 @@ class Rename(object):
         print()
         table = Table(box=box.ROUNDED)
         table.add_column("old_name", justify="right")
+        table.add_column("I", justify="center")
         table.add_column("new_name", justify="left")
-        for file in self.files:
+        for index, file in enumerate(self.files, 1):
             _old_ = escape(file.old_name)
             _new_ = escape(file.new_name)
-            table.add_row(_old_, _new_)
+            table.add_row(_old_, str(index), _new_)
         print(table)
         print()
 
