@@ -1,3 +1,4 @@
+import json
 import sys
 import os
 import html
@@ -26,6 +27,13 @@ except ImportError:
 base_url = "http://www.nicotv.club"
 chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
 
+download_folder = os.getcwd()
+config_file = os.path.join(os.getcwd(), 'config.json')
+
+
+# download_folder = "T:\Anime\平稳世代的韦驮天们"
+# config_file = "T:\Anime\平稳世代的韦驮天们\config.json"
+
 
 class Video(object):
     def __init__(self, title="", play_url="", download_url=""):
@@ -39,20 +47,30 @@ class Video(object):
                f"Download:{self.download_url}\n"
 
 
-def get_all_link(detail_url, select: list = None) -> List:
+def get_all_link(detail_url, select: list = None, ignore: list = None) -> List:
     response = requests.get(detail_url)
     soup = BeautifulSoup(response.text, "html.parser")
     div = soup.find("div", class_="ff-playurl-tab")
     ul = div.find("ul", class_="active")
+
     result = []
+
     for li in ul.find_all("li"):
         a = li.find("a")
         href = a["href"]
         href = href.strip("/")
         play_url = f"{base_url}/{href}"
         result.append(play_url)
+
     if select:
         result = [result[item] for item in select]
+
+    if ignore:
+        obj = []
+        for index, item in enumerate(result):
+            if index not in ignore:
+                obj.append(item)
+        result = obj
 
     return result
 
@@ -104,8 +122,7 @@ def get_video(play_url) -> Video:
 
 
 def download_video(video: Video):
-    folder = os.getcwd()
-    for file in os.listdir(folder):
+    for file in os.listdir(download_folder):
         if video.title in file:
             return
     cmd = f" D:\\Aria2\\aria2c.exe " \
@@ -123,15 +140,44 @@ def main():
     text += "[white on red]Arg2[/white on red]"
     text += "[red][指定下载序号][/red]"
 
-    url = Prompt.ask(text)
+    url = None
+    select = []
+    ignore = []
 
-    if "detail" in url:
-        select = None
-        if " " in url:
+    if os.path.isfile(config_file):
+        with open(config_file, 'r', encoding='utf-8') as file:
+            file = json.loads(file.read())
+            url = file.get('url')
+
+        for index in range(len(os.listdir(download_folder)) - 1):
+            ignore.append(index)
+        ignore.reverse()
+
+    if not url:
+        arg = Prompt.ask(text)
+        if " " in arg:
             url, select = url.split()
             select = [int(item) for item in select.split(",")]
             select = [item - 1 if item > 0 else item for item in select]
-        links = get_all_link(url, select)
+        else:
+            url = arg
+
+    if "detail" in url:
+        if not os.path.isfile(config_file):
+            with open(config_file, 'w+', encoding='utf-8') as file:
+                data = {"url": url}
+                json.dump(data, file)
+
+        links = get_all_link(url, select, ignore)
+
+        print()
+        print(f"[red]url[/red]  : {url}")
+        if not links:
+            print(f"[red]link[/red] : None")
+        for link in links:
+            print(f"[red]link[/red] : {link}")
+        print()
+
         for link in links:
             video = get_video(link)
             download_video(video)
