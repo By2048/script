@@ -31,9 +31,14 @@ def _upper_(item: str):
 
 
 def _zfill_(item: str):
-    _name_, _type_ = os.path.splitext(item)
-    _name_ = _name_.zfill(2)
-    return f"{_name_}{_type_}"
+    if " " in item:
+        index, name = item.split(" ", 1)
+        index = index.zfill(2)
+        return f"{index} {name}"
+    else:
+        _name_, _type_ = os.path.splitext(item)
+        _name_ = _name_.zfill(2)
+        return f"{_name_}{_type_}"
 
 
 def screen(item):
@@ -259,7 +264,7 @@ config_software = [
 config_other = [
 
     # 下载的动漫
-    nicotv,
+    # nicotv,
 
     bilibili,
 
@@ -274,8 +279,14 @@ config_other = [
     # PowerToysSetup-0.36.0-x64.exe
     [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
 
+    # 第1集 三重奏.mp4
+
+    # 第1集
     # 第xxx集
-    [r"(第)(\d+)(集)(\.\w+)", (r"\2\4", _zfill_)],
+
+    [r"(第)(\d+)(集)(\s)(\S+)", (r"\2 \5", _zfill_)],
+
+    [r"(第)(\d+)(集)([\.\w\d]+)", (r"\2\4", _zfill_)],
 
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
