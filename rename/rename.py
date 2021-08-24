@@ -115,16 +115,6 @@ def nicotv(item: str):
     return f"{item_name}.{item_type}"
 
 
-def history(item: str):
-    if "Screenshot_" not in item:
-        return False
-    item = item.replace("Screenshot_", "")
-    _name_, _type_ = item.split('.')
-    _name_ = datetime.strptime(_name_, "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H-%M-%S")
-    item = f"{_name_}.{_type_}"
-    return item
-
-
 def bilibili(item: str):
     if not (".mp4" in item and "Av" in item):
         return False
@@ -159,12 +149,48 @@ def bdfilm(item: str):
     return f"{_name_}.{_type_}"
 
 
-# 替换规则
-# 函数 \ 正则表达式
-config = [
+config_image = [
 
-    # pattern.cpython-37.pyc
-    [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
+    # 手机屏幕截图
+    screen,
+    screenshot,
+
+    # 以时间戳格式保存的图片
+    timestamp,
+
+    # 微信保存的图片
+    wx_camera,
+
+    # 20210622183532.jpg
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\1-\2-\3 \4-\5-\6\7"],
+
+    # Screenshot_20210318215042.png
+    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
+
+    # Screenshot_2014-08-31-13-59-51.png
+    [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(.png)", r"\2 \4\5"],
+
+    # Screenshot_2013-11-29-13-01-53-1.png
+    [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(\-1)(.png)", r"\2 \4\6"],
+
+    # IMG20200712095720.jpg
+    [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \5-\6-\7\8"],
+
+    # IMG_20200926_214521.jpg
+    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+
+    # IMG_20040622_141354_HDR.jpg
+    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)", r"\2-\3-\4 \6-\7-\8\10"],
+
+    # PANO_20140629_080915.jpg
+    [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+
+    # VID_20210731_144747.mp4
+    [r"(VID_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.mp4|.3gp)", r"\2-\3-\4 \6-\7-\8\9"],
+
+]
+
+config_software = [
 
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
@@ -180,9 +206,6 @@ config = [
 
     # rdm-2021.3.0.0.exe
     [r"(rdm)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
-
-    # Screenshot_20210318215042.png
-    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # FreeFileSync_11.8_Windows_Setup.exe
     [r"(FreeFileSync_)([\d+\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
@@ -229,8 +252,21 @@ config = [
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
 
-    # IMG_20200926_214521.jpg
-    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+]
+
+# 替换规则
+# 函数 \ 正则表达式
+config_other = [
+
+    # 下载的动漫
+    nicotv,
+
+    bilibili,
+
+    bdfilm,
+
+    # pattern.cpython-37.pyc
+    [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
 
     # MuMu20210129215157.png
     [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
@@ -244,27 +280,9 @@ config = [
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
 
-    # 手机屏幕截图
-    screen,
-    screenshot,
-
-    # 以时间戳格式保存的图片
-    timestamp,
-
-    # 微信保存的图片
-    wx_camera,
-
-    # 下载的动漫
-    nicotv,
-
-    # 记录的历史图片
-    history,
-
-    bilibili,
-
-    bdfilm,
-
 ]
+
+config = config_software + config_image + config_other
 
 
 def rule(item: str):
