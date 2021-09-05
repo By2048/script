@@ -149,8 +149,11 @@ def main():
             file = json.loads(file.read())
             url = file.get('url')
 
-        for index in range(len(os.listdir(download_folder)) - 1):
-            ignore.append(index)
+        index = 0
+        for file in os.listdir(download_folder):
+            if file.endswith(('.mp4',)):
+                ignore.append(index)
+                index += 1
         ignore.reverse()
 
     if not url:
