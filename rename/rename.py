@@ -17,6 +17,8 @@ except ImportError:
 
 import fire
 
+rename = Rename()
+
 
 def _capitalize_(item: str):
     item = item.split("_")
@@ -39,6 +41,18 @@ def _zfill_(item: str):
         _name_, _type_ = os.path.splitext(item)
         _name_ = _name_.zfill(2)
         return f"{_name_}{_type_}"
+
+
+def lol(item: str):
+    # 11-18_HN16_NEW-1449121099_05.webm
+    if '_HN' in item and '_NEW' in item and item.endswith('.webm'):
+        _name_, _type_ = os.path.splitext(item)
+        file = os.path.join(rename.folder, item)
+        print(file)
+        date = os.path.getctime(file)
+        date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
+        return f"LOL {date}{_type_}"
+    return False
 
 
 def screen(item):
@@ -83,7 +97,8 @@ def screenshot(item):
 def timestamp(item: str):
     # 1616986022655.jpg
     _name_, _type_ = os.path.splitext(item)
-    if _type_ in ".png .jpg .gif".split() and _name_.isdigit() and len(_name_) in [13, 10]:
+    _types_ = ".png .jpg .jpeg .gif .webm"
+    if _type_ in _types_.split() and _name_.isdigit() and len(_name_) in [13, 10]:
         if len(_name_) == 13:
             _name_ = _name_[:-3]
         _name_ = int(_name_)
@@ -154,7 +169,7 @@ def bdfilm(item: str):
     return f"{_name_}.{_type_}"
 
 
-config_image = [
+config_image_video = [
 
     # 手机屏幕截图
     screen,
@@ -165,6 +180,8 @@ config_image = [
 
     # 微信保存的图片
     wx_camera,
+
+    lol,
 
     # 20210622183532.jpg
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\1-\2-\3 \4-\5-\6\7"],
@@ -296,7 +313,7 @@ config_other = [
 
 ]
 
-config = config_software + config_image + config_other
+config = config_software + config_image_video + config_other
 
 
 def rule(item: str):
@@ -329,12 +346,11 @@ def rule(item: str):
                 if isinstance(_g_, str):
                     result = re.sub(_match_, _g_, item)
                 elif isfunction(_g_):
-                    result = _g_(result)
+                    result = _g_(result, nane=123)
             return result, cfg
 
 
 def main(command="", folder="", debug=False):
-    rename = Rename()
     rename.folder = folder or os.getcwd()
     rename.rule = rule
     rename.init()
@@ -345,5 +361,24 @@ def main(command="", folder="", debug=False):
     rename.start()
 
 
+def debug():
+    folder = 'T:\\'
+    rename.folder = folder
+    rename.rule = rule
+    rename.init()
+    rename.print()
+
+
+def test():
+    # 1616779141888 为时间戳
+    # 1616779141 -> 2021-03-27 01:19:01
+    #        888 -> 毫秒
+    # date = "1616779141888"
+    # print(_timestamp_(date))
+    pass
+
+
 if __name__ == '__main__':
+    # test()
+    # debug()
     fire.Fire(main)

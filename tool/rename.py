@@ -35,6 +35,8 @@ class Rename(object):
 
     def init(self):
         for item in os.listdir(self.folder):
+            if os.path.isdir(os.path.join(self.folder, item)):
+                continue
             result = self.rule(item)
             if not result:
                 continue
@@ -154,6 +156,8 @@ class Rename(object):
 
 def change_name(name: str):
     """ 简繁转换 替换不支持的特殊符号 """
+    if not name:
+        return name
     codes = [
         ('?', '？'),
         (',', '，'),
