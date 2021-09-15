@@ -7,6 +7,7 @@ import time
 import requests
 from rich import print
 from rich import box, get_console
+from rich.align import Align
 from rich.live import Live
 from rich.table import Table
 
@@ -51,13 +52,20 @@ def main():
 
     console = get_console()
     table = Table(box=box.SIMPLE)
-    table.add_column("Name", justify="right", width=int(console.width * 4 / 10))
-    table.add_column("Url", justify="left", width=int(console.width * 6 / 10))
+    # table.add_column("Name", justify="right", width=int(console.width * 4 / 10))
+    # table.add_column("Url", justify="left", width=int(console.width * 6 / 10))
+    table.add_column("Name", justify="right", width=55)
+    table.add_column("Url", justify="left", width=55)
 
     session = requests.Session()
 
+    table_center = Align.center(table)
+    console.clear()
+    print()
+    print()
+
     page = 1
-    with Live(table, refresh_per_second=4):
+    with Live(table_center, console=console, screen=False, refresh_per_second=4):
         while True:
             response = session.get(url.format(page))
             response = response.json()
@@ -78,6 +86,9 @@ def main():
             page += 1
 
     session.close()
+
+    print()
+    print()
 
     with open(path, 'w+', encoding='utf-8') as file:
         json.dump(new, file, ensure_ascii=False, indent=4)
