@@ -48,7 +48,6 @@ def lol(item: str):
     if '_HN' in item and '_NEW' in item and item.endswith('.webm'):
         _name_, _type_ = os.path.splitext(item)
         file = os.path.join(rename.folder, item)
-        print(file)
         date = os.path.getctime(file)
         date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
         return f"LOL {date}{_type_}"
