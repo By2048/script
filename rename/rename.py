@@ -345,7 +345,7 @@ def rule(item: str):
                 if isinstance(_g_, str):
                     result = re.sub(_match_, _g_, item)
                 elif isfunction(_g_):
-                    result = _g_(result, nane=123)
+                    result = _g_(result)
             return result, cfg
 
 
