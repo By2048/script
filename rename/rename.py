@@ -79,14 +79,14 @@ def screenshot(item):
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
     #        888 -> 毫秒
-    if "screenshot_" in item or "Screenshot_" in item:
+    if "screenshot_1" in item or "Screenshot_1" in item:
         item = item.replace("screenshot_", "")
         item = item.replace("Screenshot_", "")
         _name_, _type_ = os.path.splitext(item)
         _name_ = _name_[:-3]
         _name_ = int(_name_)
         _name_ = datetime.fromtimestamp(_name_)
-        _name_ = _name_.strftime("[%Y-%m-%d][%H-%M-%S]")
+        _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
         item = f"{_name_}{_type_}"
         return item
     else:

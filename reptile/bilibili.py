@@ -54,8 +54,8 @@ def main():
     table = Table(box=box.SIMPLE)
     # table.add_column("Name", justify="right", width=int(console.width * 4 / 10))
     # table.add_column("Url", justify="left", width=int(console.width * 6 / 10))
-    table.add_column("Name", justify="right", width=55)
-    table.add_column("Url", justify="left", width=55)
+    table.add_column("Name", justify="right", width=45)
+    table.add_column("Url", justify="left", width=65)
 
     session = requests.Session()
 
