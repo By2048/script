@@ -26,13 +26,13 @@ except ImportError:
 
 base_url = "http://www.nicotv.club"
 chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
+aria2c = r"D:\\Bin\\Aria2\\aria2c.exe"
+
+# 0 | -1
+play_source_index = 0
 
 download_folder = os.getcwd()
 config_file = os.path.join(os.getcwd(), 'config.json')
-
-
-# download_folder = "T:\Anime\平稳世代的韦驮天们"
-# config_file = "T:\Anime\平稳世代的韦驮天们\config.json"
 
 
 class Video(object):
@@ -51,7 +51,7 @@ def get_all_link(detail_url, select: list = None, ignore: list = None) -> List:
     response = requests.get(detail_url)
     soup = BeautifulSoup(response.text, "html.parser")
     div = soup.find("div", class_="ff-playurl-tab")
-    ul = div.find("ul", class_="active")
+    ul = div.find_all("ul")[play_source_index]
 
     result = []
 
@@ -80,7 +80,7 @@ def get_video(play_url) -> Video:
 
     response = requests.get(play_url)
     soup = BeautifulSoup(response.text, "html.parser")
-    ul = soup.find("ul", class_="ff-playurl")
+    ul = soup.find_all("ul", class_="ff-playurl")[play_source_index]
     active_id = ul["data-active"]
     li = ul.find("li", attrs={"data-id": active_id})
     a = li.find("a")
@@ -125,7 +125,7 @@ def download_video(video: Video):
     for file in os.listdir(download_folder):
         if video.title in file:
             return
-    cmd = f" D:\\Aria2\\aria2c.exe " \
+    cmd = f" {aria2c} " \
           f" '{video.download_url}' " \
           f" --out '{video.title}.mp4' "
     cmd = cmd.replace("'", '"').strip()
@@ -134,66 +134,84 @@ def download_video(video: Video):
 
 
 def main():
-    text = "[white on red]Arg1[/white on red]"
-    text += "[red][视频详情页\\视频播放页][/red]"
-    text += " "
-    text += "[white on red]Arg2[/white on red]"
-    text += "[red][指定下载序号][/red]"
+    # command args
 
-    url = None
-    select = []
-    ignore = []
+    source_index = 0
+    detail_or_play_url = None
+    select_index = []
+    clear_config = False
 
+    config = {}
     if os.path.isfile(config_file):
         with open(config_file, 'r', encoding='utf-8') as file:
-            file = json.loads(file.read())
-            url = file.get('url')
+            config = json.loads(file.read())
 
-        index = 0
-        for file in os.listdir(download_folder):
-            if file.endswith(('.mp4',)):
-                ignore.append(index)
-                index += 1
-        ignore.reverse()
+    source_index = config.get('source_index')
+    detail_url = config.get('detail_url')
 
-    if not url:
-        arg = Prompt.ask(text)
-        if " " in arg:
-            url, select = url.split()
-            select = [int(item) for item in select.split(",")]
-            select = [item - 1 if item > 0 else item for item in select]
-        else:
-            url = arg
+    index = 0
+    ignore_index = []
+    for file in os.listdir(download_folder):
+        if file.endswith(('.mp4',)):
+            ignore_index.append(index)
+            index += 1
+    ignore_index.reverse()
 
-    if "detail" in url:
-        if not os.path.isfile(config_file):
-            with open(config_file, 'w+', encoding='utf-8') as file:
-                data = {"url": url}
-                json.dump(data, file)
+    if not source_index:
+        source_index = Prompt.ask("[white on red]Arg1[/white on red][red][视频源序号 0,-1][/red]")
+        if not source_index:
+            source_index = 0
+        source_index = int(source_index)
+        global play_source_index
+        play_source_index = source_index
+        config['source_index'] = source_index
 
-        links = get_all_link(url, select, ignore)
+    if not detail_or_play_url:
+        detail_or_play_url = Prompt.ask(
+            "[white on red]Arg2[/white on red][red][视频详情页\\视频播放页][/red]")
+        detail_or_play_url = detail_or_play_url.strip()
+        if 'detail' in detail_or_play_url:
+            config['detail_url'] = detail_url
+
+    select_index = Prompt.ask("[white on red]Arg3[/white on red][red][指定下载序号][/red]")
+    select_index = select_index.strip()
+    if not select_index:
+        select_index = []
+    else:
+        select_index = [int(item) for item in select_index.split(",")]
+        select_index = [item - 1 if item > 0 else item for item in select_index]
+
+    print(f"[red]index[/red] : {select_index}")
+    print(f"[red]url[/red]   : {detail_or_play_url}")
+
+    if not os.path.isfile(config_file):
+        with open(config_file, 'w+', encoding='utf-8') as file:
+            json.dump(config, file)
+
+    if "detail" in detail_or_play_url:
+        links = get_all_link(detail_or_play_url, select_index, ignore_index)
 
         print()
-        print(f"[red]url[/red]  : {url}")
+        print(f"[red]url[/red]  : {detail_or_play_url}")
         if not links:
             print(f"[red]link[/red] : None")
-        for link in links:
-            print(f"[red]link[/red] : {link}")
+        for index, link in enumerate(links):
+            print(f"[red]index[/red]:{str(index).zfill(2)} [blue]link[/blue]:{link}")
         print()
 
         for link in links:
             video = get_video(link)
             download_video(video)
 
-    if "play" in url:
-        video = get_video(url)
+    if "play" in detail_or_play_url:
+        video = get_video(detail_or_play_url)
         download_video(video)
 
 
 def test():
     # chrome
-    detail_url = "http://www.nicotv.me/video/detail/56828.html"
-    play_url = "http://www.nicotv.me/video/play/56828-1-1.html"
+    detail_url = "http://www.nicotv.me/video/detail/58216.html"
+    play_url = "http://www.nicotv.club/video/play/58216-2-1.html"
 
     # requests
     # detail_url = "http://www.nicotv.me/video/detail/58100.html"
