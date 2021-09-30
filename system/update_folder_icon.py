@@ -1,3 +1,4 @@
+#
 import re
 import os
 import hashlib
@@ -41,10 +42,10 @@ def create(folder):
     name_icon_path = f"{path_icons}\\{folder}.ico"
 
     icon_file_path = ""
-    if os.path.exists(hash_icon_path):
-        icon_file_path = hash_icon_path
     if os.path.exists(name_icon_path):
         icon_file_path = name_icon_path
+    if os.path.exists(hash_icon_path):
+        icon_file_path = hash_icon_path
 
     if not icon_file_path:
         if not re.match(r"[a-zA-Z1-9_\-]+", folder):
@@ -91,5 +92,14 @@ def main():
     print()
 
 
+def test():
+    folder = "QQ音乐"
+    hash_icon = hashlib.md5(folder.encode("utf-8")).hexdigest()[:6]
+    hash_icon_path = f"#hash-{hash_icon}.ico"
+    print()
+    print(hash_icon_path)
+
+
 if __name__ == '__main__':
+    # test()
     main()
