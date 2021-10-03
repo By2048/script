@@ -298,7 +298,8 @@ config_other = [
     # PowerToysSetup-0.36.0-x64.exe
     [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
 
-    # 第1集 三重奏.mp4
+    # xxx(无修).mp4
+    [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
 
     # 第1集
     # 第xxx集
