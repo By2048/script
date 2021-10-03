@@ -171,7 +171,7 @@ def main():
             "[white on red]Arg2[/white on red][red][视频详情页\\视频播放页][/red]")
         detail_or_play_url = detail_or_play_url.strip()
         if 'detail' in detail_or_play_url:
-            config['detail_url'] = detail_url
+            config['detail_url'] = detail_or_play_url
 
     select_index = Prompt.ask("[white on red]Arg3[/white on red][red][指定下载序号][/red]")
     select_index = select_index.strip()
@@ -184,9 +184,8 @@ def main():
     print(f"[red]index[/red] : {select_index}")
     print(f"[red]url[/red]   : {detail_or_play_url}")
 
-    if not os.path.isfile(config_file):
-        with open(config_file, 'w+', encoding='utf-8') as file:
-            json.dump(config, file)
+    with open(config_file, 'w+', encoding='utf-8') as file:
+        json.dump(config, file)
 
     if "detail" in detail_or_play_url:
         links = get_all_link(detail_or_play_url, select_index, ignore_index)
