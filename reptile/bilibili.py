@@ -57,6 +57,9 @@ def main():
     table.add_column("Name", justify="right", width=45)
     table.add_column("Url", justify="left", width=65)
 
+    # os.environ.setdefault("HTTP_PROXY", "http://127.0.0.1:20202")
+    os.environ.setdefault("no_proxy", "bilibili.com")
+
     session = requests.Session()
 
     table_center = Align.center(table)
