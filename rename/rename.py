@@ -267,15 +267,25 @@ config_software = [
     # Q-Dir_x64.exe
     [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
 
+    # Maye.1.2.6-20211001.zip
+    [r"(Maye)(.)(\d.\d.\d)(-)(\d+)(.zip)", r"\1_\3\6"],
+
+    # VeraCrypt_1.24-Update7.zip
+    [r"(VeraCrypt)(_)([\d+\.]+)(-Update)(\d)(.zip)", r"\1\2\3.\5\6"],
+    # VeraCrypt Setup 1.24-Update7
+    [r"(VeraCrypt)( Setup )([\d+\.]+)(-Update)(\d)(.exe)", r"\1_\3.\5\6"],
+
     # go1.16.3.windows-amd64.zip
     [r"(go)([\d+\.]+)(.windows-amd64)(.zip)", (r"\1_\2\4", _capitalize_)],
 
     # VMware-workstation-full-16.1.0-17198959.exe
     [r"(VMware)(-workstation-full-)([\d+\.]+)(-)(\d+)(.exe)", r"\1_\3.\5\6"],
 
+    # Sandboxie-Plus-x64-v0.9.6.exe
+    [r"(Sandboxie)(-Plus)(-x64)(-v)([\d+\.]+)(.exe)", r"\1_\5\6"],
+
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
-
 ]
 
 # 替换规则
