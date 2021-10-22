@@ -4,63 +4,78 @@ import sys
 import typing
 import copy
 from datetime import datetime
+from pathlib import Path
 from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
 
 try:
-    from tool.rename import Rename
+    from tool.rename import Rename, version
 except ImportError:
     path = os.path.dirname(os.path.dirname(__file__))
     sys.path.append(path)
-    from tool.rename import Rename
+    from tool.rename import Rename, version
 
 import fire
 
 rename = Rename()
 
 
-def _capitalize_(item: str):
-    item = item.split("_")
-    item[0] = item[0].capitalize()
-    return "_".join(item)
+# name : 文件正则处理后的名字
+# file : 文件原始完整路径
+
+def _capitalize_(name: str):
+    name = name.split("_")
+    name[0] = name[0].capitalize()
+    return "_".join(name)
 
 
-def _upper_(item: str):
-    item = item.split("_")
-    item[0] = item[0].upper()
-    return "_".join(item)
+def _upper_(name: str):
+    name = name.split("_")
+    name[0] = name[0].upper()
+    return "_".join(name)
 
 
-def _zfill_(item: str):
-    if " " in item:
-        index, name = item.split(" ", 1)
+def _zfill_(name: str):
+    if " " in name:
+        index, name = name.split(" ", 1)
         index = index.zfill(2)
         return f"{index} {name}"
     else:
-        _name_, _type_ = os.path.splitext(item)
+        _name_, _type_ = os.path.splitext(name)
         _name_ = _name_.zfill(2)
         return f"{_name_}{_type_}"
 
 
-def lol(item: str):
+def github(name: str, file: str = ""):
+    if "GitHubDesktop" in name:
+        _version_ = version(file)
+        path_name = Path(name)
+        path_file = Path(file)
+        path_name = path_name.with_stem(f"{path_name.stem}_{_version_}")
+        path_file.with_name(path_name.as_posix())
+        return path_name.as_posix()
+    return False
+
+
+def lol(name: str, file: str = ""):
     # 11-18_HN16_NEW-1449121099_05.webm
-    if '_HN' in item and '_NEW' in item and item.endswith('.webm'):
-        _name_, _type_ = os.path.splitext(item)
-        file = os.path.join(rename.folder, item)
+    if '_HN' in name and '_NEW' in name and name.endswith('.webm'):
+        _name_, _type_ = os.path.splitext(name)
+        file = os.path.join(rename.folder, name)
         date = os.path.getctime(file)
         date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
         return f"LOL {date}{_type_}"
     return False
 
 
-def screen(item):
+def screen(name: str, file: str = ""):
     # Chrome_1618427487075.png
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
     #        888 -> 毫秒
-    if "_" in item and "-" not in item:
-        _name_, _type_ = os.path.splitext(item)
+    if "_" in name and "-" not in name:
+        _name_, _type_ = os.path.splitext(name)
         _app_, _date_ = _name_.split("_")
         if len(_date_) != 13 or len(_app_) <= 0:
             return False
@@ -68,34 +83,32 @@ def screen(item):
         _date_ = int(_date_)
         _date_ = datetime.fromtimestamp(_date_)
         _date_ = _date_.strftime("[%Y-%m-%d][%H-%M-%S]")
-        item = f"{_date_}[{_app_}]{_type_}"
-        return item
-    else:
-        return False
+        name = f"{_date_}[{_app_}]{_type_}"
+        return name
+    return False
 
 
-def screenshot(item):
+def screenshot(name: str, file: str = ""):
     # screenshot_1616779141888.png
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
     #        888 -> 毫秒
-    if "screenshot_1" in item or "Screenshot_1" in item:
-        item = item.replace("screenshot_", "")
-        item = item.replace("Screenshot_", "")
-        _name_, _type_ = os.path.splitext(item)
+    if "screenshot_1" in name or "Screenshot_1" in name:
+        name = name.replace("screenshot_", "")
+        name = name.replace("Screenshot_", "")
+        _name_, _type_ = os.path.splitext(name)
         _name_ = _name_[:-3]
         _name_ = int(_name_)
         _name_ = datetime.fromtimestamp(_name_)
         _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
-        item = f"{_name_}{_type_}"
-        return item
-    else:
-        return False
+        name = f"{_name_}{_type_}"
+        return name
+    return False
 
 
-def timestamp(item: str):
+def timestamp(name: str, file: str = ""):
     # 1616986022655.jpg
-    _name_, _type_ = os.path.splitext(item)
+    _name_, _type_ = os.path.splitext(name)
     _types_ = ".png .jpg .jpeg .gif .webm"
     if _type_ in _types_.split() and _name_.isdigit() and len(_name_) in [13, 10]:
         if len(_name_) == 13:
@@ -105,46 +118,45 @@ def timestamp(item: str):
         _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
         result = f"{_name_}{_type_}"
         return result
-    else:
-        return False
+    return False
 
 
-def wx_camera(item: str):
+def wx_camera(name: str, file: str = ""):
     # wx_camera_1616986022655.jpg
-    if "wx_camera_" not in item:
+    if "wx_camera_" not in name:
         return False
-    item = item.replace("wx_camera_", "")
-    _name_, _type_ = os.path.splitext(item)
+    name = name.replace("wx_camera_", "")
+    _name_, _type_ = os.path.splitext(name)
     _name_ = _name_[:-3]
     _name_ = int(_name_)
     _name_ = datetime.fromtimestamp(_name_)
     _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
-    item = f"{_name_}{_type_}"
-    return item
+    name = f"{_name_}{_type_}"
+    return name
 
 
-def nicotv(item: str):
-    if not re.match(r"第([\d\\.]+)集", item):
+def nicotv(name: str, file: str = ""):
+    if not re.match(r"第([\d\\.]+)集", name):
         return False
-    item = item.replace("(无修)", "")
-    data = re.match(r"(第)([\d\\.]+)(集)", item)
+    name = name.replace("(无修)", "")
+    data = re.match(r"(第)([\d\\.]+)(集)", name)
     item_name = data.group(2)
     item_name = item_name.zfill(2)
-    item_type = item.split('.')[-1]
+    item_type = name.split('.')[-1]
     return f"{item_name}.{item_type}"
 
 
-def bilibili(item: str):
-    if not (".mp4" in item and "Av" in item):
+def bilibili(name: str, file: str = ""):
+    if not (".mp4" in name and "Av" in name):
         return False
 
-    item = item.split('.')
+    name = name.split('.')
     try:
-        index = item[0].zfill(2)
-        name = item[1]
-        file_type = item[2]
+        index = name[0].zfill(2)
+        name = name[1]
+        file_type = name[2]
     except Exception as e:
-        print(f'\n文件名解析错误 {item}\n')
+        print(f'\n文件名解析错误 {name}\n')
         return False
 
     name = re.split(r'\([avAVpP,\d]+\)', name)  # 去除(Avxxxxxx,Px)
@@ -155,10 +167,10 @@ def bilibili(item: str):
     return new_name
 
 
-def bdfilm(item: str):
-    if not ("bd-film.cc" in item or "bd2020" in item):
+def bdfilm(name: str, file: str = ""):
+    if not ("bd-film.cc" in name or "bd2020" in name):
         return False
-    name = item.replace("[BD影视分享bd-film.cc]", "")
+    name = name.replace("[BD影视分享bd-film.cc]", "")
     name = name.replace("[BD影视分享bd2020.com]", "")
     name = name.strip()
     name = name.replace(':', ' ')
@@ -215,6 +227,8 @@ config_image_video = [
 ]
 
 config_software = [
+
+    github,
 
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
@@ -284,6 +298,9 @@ config_software = [
     # Sandboxie-Plus-x64-v0.9.6.exe
     [r"(Sandboxie)(-Plus)(-x64)(-v)([\d+\.]+)(.exe)", r"\1_\5\6"],
 
+    # XMind-for-Windows-64bit-11.1.1-202110191919.exe
+    [r"(XMind)(-for)(-Windows)(-64bit)(-)([\d+\.]+)(-\d+)(.exe)", r"\1_\6\8"],
+
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
 ]
@@ -316,6 +333,9 @@ config_other = [
     [r"(第)(\d+)(集|话)(\s)(\S+)", (r"\2 \5", _zfill_)],
     [r"(第)(\d+)(集|话)([\.\w\d]+)", (r"\2\4", _zfill_)],
 
+    #  [Keep] XMind.lnk
+    [r"(\[)(Keep)(\])(\s)([\d\w]+)(.lnk)", r"\1#\3\5\6"],
+
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
 
@@ -328,12 +348,21 @@ config_other = [
 config = config_software + config_image_video + config_other
 
 
-def rule(item: str):
+def rule(file: Path):
+    """ 重命名函数
+    @param file: 需要重命名文件的完整路径
+    @return: 重命名文件名 命名规则
+    """
+
+    file_name = file.name
+    file_path = file.as_posix()
+
     for cfg in config:
 
         if isfunction(cfg):
+            fun = cfg
             try:
-                result = cfg(item)
+                result = fun(file_name, file_path)
             except Exception as e:
                 continue
             if result:
@@ -345,18 +374,18 @@ def rule(item: str):
         if not isinstance(_match_, str):
             continue
 
-        if not re.match(_match_, item):
+        if not re.match(_match_, file_name):
             continue
 
         if isinstance(_get_, str):
-            result = re.sub(_match_, _get_, item)
+            result = re.sub(_match_, _get_, file_name)
             return result, cfg
 
         if isinstance(_get_, (list, tuple)):
             result = None
             for _g_ in list(_get_):
                 if isinstance(_g_, str):
-                    result = re.sub(_match_, _g_, item)
+                    result = re.sub(_match_, _g_, file_name)
                 elif isfunction(_g_):
                     result = _g_(result)
             return result, cfg

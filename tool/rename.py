@@ -1,7 +1,9 @@
 import os
 import sys
+import win32api
 import inspect
 from typing import List
+from pathlib import Path
 
 _print_ = print
 
@@ -34,16 +36,18 @@ class Rename(object):
         return bool(len(self.files))
 
     def init(self):
-        for item in os.listdir(self.folder):
-            if os.path.isdir(os.path.join(self.folder, item)):
+        path_folder = Path(self.folder)
+        for path_file in path_folder.iterdir():
+            if path_file.is_dir():
                 continue
-            result = self.rule(item)
+            result = self.rule(path_file)
             if not result:
                 continue
+            new_name, rename_rule = result
             file = File()
-            file.old_name = item
-            file.new_name = result[0]
-            file.rename_rule = result[1]
+            file.old_name = path_file.name
+            file.new_name = new_name
+            file.rename_rule = rename_rule
             file.new_name = change_name(file.new_name)
             self.files.append(file)
         try:
@@ -152,6 +156,20 @@ class Rename(object):
             table.add_row(_old_, str(index), _new_)
         print(table)
         print()
+
+
+def version(file: str):
+    try:
+        info = win32api.GetFileVersionInfo(file, os.sep)
+        ms = info['FileVersionMS']
+        ls = info['FileVersionLS']
+        high = win32api.HIWORD
+        low = win32api.LOWORD
+        result = f"{high(ms)}.{low(ms)}.{high(ls)}.{low(ls)}"
+        return result
+    except Exception as e:
+        print(e)
+        return None
 
 
 def change_name(name: str):
