@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
 import requests
 from rich import print
@@ -11,8 +12,12 @@ from rich.align import Align
 from rich.live import Live
 from rich.table import Table
 
-path = 'D:\\Temp\\' if sys.platform == 'win32' else '/tmp/'
-path = os.path.join(path, "bilibili.json")
+if sys.platform == 'win32':
+    path = Path("D:\\#\\")
+else:
+    path = Path("/tmp/")
+
+path = path / "bilibili.json"
 
 chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
 
@@ -45,8 +50,8 @@ def main():
     old = {}  # 上一次获取的数据
     new = {}  # 本次获取的数据
 
-    if os.path.exists(path):
-        if os.path.getsize(path):
+    if path.is_file():
+        if path.stat().st_size:
             with open(path, encoding='utf-8') as file:
                 old = json.load(file)
 
