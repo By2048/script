@@ -158,7 +158,7 @@ class Rename(object):
         print()
 
 
-def version(file: str):
+def get_version(file: str):
     try:
         info = win32api.GetFileVersionInfo(file, os.sep)
         ms = info['FileVersionMS']
