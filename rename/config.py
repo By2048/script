@@ -262,6 +262,9 @@ config_software = [
     # Xshell-7.0.0063p.exe
     [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
+    # aria2-1.36.0-win-64bit-build1.zip
+    [r"(aria2)(-)([\d\.]+)(-win-64bit-build1)(.zip)", (r"\1_\3\5", _capitalize_)],
+
     # dexpot_1614_portable_r2439.zip
     [r"(dexpot)(_)([\d\.]+)(_portable)(\_\w+)(.zip)", (r"\1_\3\6", _capitalize_)],
     # dexpot_1614_r2439.exe
@@ -293,13 +296,6 @@ config_software = [
 
     # WiresharkPortable_3.4.9.paf.exe
     [r"(Wireshark)(Portable)(_)([\d\.]+)(.paf)(.exe)", r"\1_\4\6"],
-
-    # python-3.8.5.exe
-    [r"(python)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _capitalize_)],
-    # python-3.9.2-amd64.exe
-    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1_\3\5", _capitalize_)],
-    # python-3.9.5-embed-amd64.zip
-    [r"(python)(-)([\d\.]+)(-embed-amd64)(.zip)", (r"\1_\3\5", _capitalize_)],
 
     # node-v14.17.0-win-x64.zip
     [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", _capitalize_)],
@@ -395,6 +391,20 @@ config_software = [
 
     # zeal-portable-0.6.1-windows-x64.zip
     [r"(zeal)(-portable)(-)([\d\.]+)(-windows-x64)(.zip)", (r"\1_\4\6", _capitalize_)],
+
+]
+
+config_python = [
+    # pattern.cpython-37.pyc
+    [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
+    # python-x.x.x.exe
+    [r"(python)(-)([\d\.]+)(.exe)", (r"\1\2\3-win32\4", _capitalize_)],
+    # python-x.x.x-amd64.exe
+    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1\2\3\4\5", _capitalize_)],
+    # python-x.x.x-embed-amd64.zip
+    [r"(python)(-)([\d\.]+)(-embed)(-amd64)(.zip)", (r"\1\2\3\5\4\6", _capitalize_)],
+    # python-3.9.9-embed-win32.zip
+    [r"(python)(-)([\d\.]+)(-embed)(-win32)(.zip)", (r"\1\2\3\5\4\6", _capitalize_)],
 ]
 
 # 替换规则
@@ -407,9 +417,6 @@ config_other = [
     bilibili,
 
     bdfilm,
-
-    # pattern.cpython-37.pyc
-    [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
 
     # MuMu20210129215157.png
     [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
@@ -437,4 +444,4 @@ config_other = [
 
 ]
 
-config = config_software + config_image_video + config_other
+config = config_software + config_python + config_image_video + config_other
