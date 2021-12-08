@@ -1,9 +1,12 @@
 import os
 import sys
+from collections.abc import Callable
+
 import win32api
 import inspect
+import copy
 from typing import List
-from pathlib import Path
+from pathlib import Path, WindowsPath
 
 _print_ = print
 
@@ -18,37 +21,39 @@ from hanziconv import HanziConv
 
 class File(object):
     def __init__(self):
-        self.old_name = ""
-        self.new_name = ""
-        self.rename_rule = ""
+        self.old: WindowsPath = WindowsPath()
+        self.new: WindowsPath = WindowsPath()
 
     def __str__(self):
-        return f"{self.old_name:<35} | {self.new_name:<35} | {self.rename_rule}"
+        return f"{self.old.name:<35} | {self.new.name:<35}"
 
 
 class Rename(object):
     def __init__(self):
-        self.folder: str = ""  # 重命名文件夹目录
+        self.folder: WindowsPath = WindowsPath()  # 重命名文件夹目录
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
-        self.rule = None  # 匹配 重命名 规则
+        self.rule: Callable([WindowsPath], WindowsPath) = lambda x: x  # 匹配 重命名 规则
 
     def __bool__(self):
         return bool(len(self.files))
 
     def init(self):
-        path_folder = Path(self.folder)
-        for path_file in path_folder.iterdir():
+        for path_file in self.folder.iterdir():
             if path_file.is_dir():
                 continue
             result = self.rule(path_file)
             if not result:
                 continue
-            new_name, rename_rule = result
+
+            path_file_old = path_file
+            path_file_new = result
+
             file = File()
-            file.old_name = path_file.name
-            file.new_name = new_name
-            file.rename_rule = rename_rule
-            file.new_name = change_name(file.new_name)
+            file.old = path_file_old
+            file.new = path_file_new
+            file.new = change_name(file.new)
+            if file.old == file.new:
+                continue
             self.files.append(file)
         try:
             self.sort()
@@ -58,9 +63,10 @@ class Rename(object):
     def sort(self):
 
         def key(item: File):
-            _name_, _type_ = os.path.splitext(item.new_name)
-            _name_ = int(_name_) if _name_.isdigit() else _name_
-            return _name_
+            # _name_, _type_ = os.path.splitext(item.new)
+            # _name_ = int(_name_) if _name_.isdigit() else _name_
+            # return _name_
+            return item.new.name
 
         self.files = sorted(self.files, key=key)
 
@@ -92,19 +98,22 @@ class Rename(object):
             self.config()
             exit()
 
-    def start(self, check=True):
+    def start(self, silent=False):
         if not self:
             return
 
         rename_index = []
 
-        check = Prompt.ask('[red]确认重命名[/red]')
+        if silent:
+            check = "\\"
+        else:
+            check = Prompt.ask('[red]确认重命名[/red]')
 
         if not check:
             print("\n[red]取消重命名[/red]\n")
             return
 
-        if check and check.isdigit():
+        if check.isdigit():
             rename_index = [check]
             check = '\\'
 
@@ -117,27 +126,32 @@ class Rename(object):
         rename_index = [int(obj) for obj in rename_index]
 
         if check:
+            if check not in ['\\']:
+                print("\n[red]取消重命名[/red]\n")
+                return
+
             if check in ['\\\\']:
                 print("\n[red]取消重命名[/red]\n")
                 return
 
-            if check not in ('y', 'yes', '\\'):
-                print("\n[red]取消重命名[/red]\n")
-                return
-
-        print("\n[red]开始重命名[/red]", end="///")
+        if not silent:
+            print("\n[red]开始重命名[/red]", end="///")
 
         for index, file in enumerate(self.files, 1):
-            old = os.path.join(self.folder, file.old_name)
-            new = os.path.join(self.folder, file.new_name)
+
+            # old = os.path.join(self.folder, file.old)
+            # new = os.path.join(self.folder, file.new)
+
             if not rename_index:
-                os.rename(old, new)
+                file.old.rename(file.new)
+                # os.rename(old, new)
                 continue
             if index in rename_index:
-                os.rename(old, new)
+                file.old.rename(file.new)
+                # os.rename(old, new)
                 continue
-
-        print("[red]结束重命名[/red]\n")
+        if not silent:
+            print("[red]结束重命名[/red]\n")
 
     def print(self):
         if not self:
@@ -151,14 +165,14 @@ class Rename(object):
         table.add_column("I", justify="center")
         table.add_column("new_name", justify="left")
         for index, file in enumerate(self.files, 1):
-            _old_ = escape(file.old_name)
-            _new_ = escape(file.new_name)
+            _old_ = escape(file.old.name)
+            _new_ = escape(file.new.name)
             table.add_row(_old_, str(index), _new_)
         print(table)
         print()
 
 
-def get_version(file: str):
+def get_version(file: WindowsPath):
     try:
         info = win32api.GetFileVersionInfo(file, os.sep)
         ms = info['FileVersionMS']
@@ -172,10 +186,13 @@ def get_version(file: str):
         return None
 
 
-def change_name(name: str):
+def change_name(file: WindowsPath) -> WindowsPath:
     """ 简繁转换 替换不支持的特殊符号 """
-    if not name:
-        return name
+    if not file:
+        return file
+
+    new_name = file.name
+
     codes = [
         ('?', '？'),
         (',', '，'),
@@ -193,10 +210,11 @@ def change_name(name: str):
         ('*', ''),
     ]
     for item in codes:
-        name = name.replace(item[0], item[1])
+        new_name = new_name.replace(item[0], item[1])
     try:
-        name = HanziConv.toSimplified(name)
+        new_name = HanziConv.toSimplified(new_name)
     except ImportError:
         pass
     finally:
-        return name
+        file = file.with_name(new_name)
+        return file
