@@ -4,7 +4,7 @@ import sys
 import typing
 import copy
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, WindowsPath
 from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
@@ -12,194 +12,203 @@ from inspect import isfunction
 try:
     from tool.rename import Rename, get_version
 except ImportError:
-    path = os.path.dirname(os.path.dirname(__file__))
-    sys.path.append(path)
+    sys.path.append(WindowsPath(__file__).parents[1].as_posix())
     from tool.rename import Rename, get_version
 
 
 # name : 文件正则处理后的名字
 # file : 文件原始完整路径
 
-def _capitalize_(name: str):
-    name = name.split("_")
-    name[0] = name[0].capitalize()
-    return "_".join(name)
+def _capitalize_(file: WindowsPath):
+    new_name = file.name.split("_")
+    new_name[0] = new_name[0].capitalize()
+    new_name = "_".join(new_name)
+    file = file.with_name(new_name)
+    return file
 
 
-def _upper_(name: str):
-    name = name.split("_")
-    name[0] = name[0].upper()
-    return "_".join(name)
+def _upper_(file: WindowsPath):
+    new_name = file.name.split("_")
+    new_name[0] = new_name[0].upper()
+    new_name = "_".join(new_name)
+    file = file.with_name(new_name)
+    return file
 
 
-def _zfill_(name: str):
-    if " " in name:
-        index, name = name.split(" ", 1)
+def _zfill_(file: WindowsPath):
+    if " " in file.stem:
+        index, name = file.stem.split(" ", 1)
         index = index.zfill(2)
-        return f"{index} {name}"
+        new_stem = f"{index} {name}"
+        file = file.with_stem(new_stem)
+        return file
     else:
-        _name_, _type_ = os.path.splitext(name)
-        _name_ = _name_.zfill(2)
-        return f"{_name_}{_type_}"
+        new_stem = file.stem.zfill(2)
+        file = file.with_stem(new_stem)
+        return file
 
 
-def github(name: str, file: str = ""):
+def github(file: WindowsPath):
     key = 'GitHubDesktop'
-    result = ""
-    if key in name:
+    new_name = ""
+    if key in file.name:
         version = get_version(file)
         # path_name = Path(name)
         # path_file = Path(file)
         # path_name = path_name.with_stem(f"{path_name.stem}_{_version_}")
         # path_file.with_name(path_name.as_posix())
         # return path_name.as_posix()
-        result = f"{key}_{version}.exe"
-    if name == result:
-        return
-    return result
+        new_name = f"{key}_{version}.exe"
+    if file.name == new_name:
+        return file
+    file = file.with_name(new_name)
+    return file
 
 
-def potplayer(name: str, file: str = ""):
+def potplayer(file: WindowsPath):
     key = 'PotPlayer'
-    result = ""
-    if key in name:
+    new_name = ""
+    if key in file.name:
         version = get_version(file)
-        result = f"{key}_{version}.exe"
-    if name == result:
-        return
-    return result
+        new_name = f"{key}_{version}.exe"
+    if file.name == new_name:
+        return file
+    file = file.with_name(new_name)
+    return file
 
 
-def fdm(name: str, file: str = ""):
+def fdm(file: WindowsPath):
     key = 'fdm'
-    result = ""
-    if key in name:
+    new_name = ""
+    if key in file.name:
         version = get_version(file)
-        result = f"{key.upper()}_{version}.exe"
-    if name == result:
-        return
-    return result
+        new_name = f"{key.upper()}_{version}.exe"
+    if file.name == new_name:
+        return file
+    file = file.with_name(new_name)
+    return file
 
 
-def lol(name: str, file: str = ""):
+def lol(file: WindowsPath):
     # 11-18_HN16_NEW-1449121099_05.webm
-    if '_HN' in name and '_NEW' in name and name.endswith('.webm'):
-        _name_, _type_ = os.path.splitext(name)
-        date = os.path.getctime(file)
+    if '_HN' in file.name and '_NEW' in file.name and file.name.endswith('.webm'):
+        date = file.stat().st_ctime
         date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
-        return f"LOL {date}{_type_}"
-    return False
+        file = file.with_stem(f"LOL {date}")
+        return file
+    return file
 
 
-def screen(name: str, file: str = ""):
+def screen(file: WindowsPath):
     # Chrome_1618427487075.png
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
     #        888 -> 毫秒
-    if "_" in name and "-" not in name:
-        _name_, _type_ = os.path.splitext(name)
-        _app_, _date_ = _name_.split("_")
+    if "_" in file.name and "-" not in file.name:
+        _app_, _date_ = file.stem.split("_")
         if len(_date_) != 13 or len(_app_) <= 0:
-            return False
+            return file
         _date_ = _date_[:-3]
         _date_ = int(_date_)
         _date_ = datetime.fromtimestamp(_date_)
         _date_ = _date_.strftime("[%Y-%m-%d][%H-%M-%S]")
-        name = f"{_date_}[{_app_}]{_type_}"
-        return name
-    return False
+        file = file.with_stem(f"{_date_}[{_app_}]")
+        return file
+    return file
 
 
-def screenshot(name: str, file: str = ""):
+def screenshot(file: WindowsPath):
     # screenshot_1616779141888.png
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
     #        888 -> 毫秒
-    if "screenshot_1" in name or "Screenshot_1" in name:
-        name = name.replace("screenshot_", "")
-        name = name.replace("Screenshot_", "")
-        _name_, _type_ = os.path.splitext(name)
-        _name_ = _name_[:-3]
-        _name_ = int(_name_)
-        _name_ = datetime.fromtimestamp(_name_)
-        _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
-        name = f"{_name_}{_type_}"
-        return name
-    return False
+    if "screenshot_1" in file.name or "Screenshot_1" in file.name:
+        file.stem = file.stem.replace("screenshot_", "")
+        file.stem = file.stem.replace("Screenshot_", "")
+        new_stem = int(file.stem)
+        new_stem = datetime.fromtimestamp(new_stem)
+        new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
+        file = file.with_stem(new_stem)
+        return file
+    return file
 
 
-def timestamp(name: str, file: str = ""):
+def timestamp(file: WindowsPath):
     # 1616986022655.jpg
-    _name_, _type_ = os.path.splitext(name)
+    _type_ = file.suffix
     _types_ = ".png .jpg .jpeg .gif .webm"
-    if _type_ in _types_.split() and _name_.isdigit() and len(_name_) in [13, 10]:
-        if len(_name_) == 13:
-            _name_ = _name_[:-3]
-        _name_ = int(_name_)
-        _name_ = datetime.fromtimestamp(_name_)
-        _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
-        result = f"{_name_}{_type_}"
-        return result
-    return False
+    if _type_ in _types_.split() and file.stem.isdigit() and len(file.stem) in [13, 10]:
+        if len(file.stem) == 13:
+            file.stem = file.stem[:-3]
+        new_stem = int(file.stem)
+        new_stem = datetime.fromtimestamp(new_stem)
+        new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
+        file = file.with_stem(new_stem)
+        return file
+    return file
 
 
-def wx_camera(name: str, file: str = ""):
+def wx_camera(file: WindowsPath):
     # wx_camera_1616986022655.jpg
-    if "wx_camera_" not in name:
+    if "wx_camera_" not in file.name:
         return False
-    name = name.replace("wx_camera_", "")
-    _name_, _type_ = os.path.splitext(name)
-    _name_ = _name_[:-3]
-    _name_ = int(_name_)
-    _name_ = datetime.fromtimestamp(_name_)
-    _name_ = _name_.strftime("%Y-%m-%d %H-%M-%S")
-    name = f"{_name_}{_type_}"
-    return name
+    file.stem = file.stem.replace("wx_camera_", "")
+
+    new_stem = file.stem[:-3]
+    new_stem = int(new_stem)
+    new_stem = datetime.fromtimestamp(new_stem)
+    new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
+    file = file.with_stem(new_stem)
+    return file
 
 
-def nicotv(name: str, file: str = ""):
-    if not re.match(r"第([\d\\.]+)集", name):
-        return False
-    name = name.replace("(无修)", "")
-    data = re.match(r"(第)([\d\\.]+)(集)", name)
-    item_name = data.group(2)
-    item_name = item_name.zfill(2)
-    item_type = name.split('.')[-1]
-    return f"{item_name}.{item_type}"
+def nicotv(file: WindowsPath):
+    if not re.match(r"第([\d\\.]+)集", file.stem):
+        return file
+    file.stem = file.stem.replace("(无修)", "")
+    data = re.match(r"(第)([\d\\.]+)(集)", file.stem)
+    item_stem = data.group(2)
+    item_stem = item_stem.zfill(2)
+    file = file.with_stem(item_stem)
+    return file
 
 
-def bilibili(name: str, file: str = ""):
-    if not (".mp4" in name and "Av" in name):
-        return False
+def bilibili(file: WindowsPath):
+    if ".mp4" not in file.name or "Av" not in file.name:
+        return file
 
-    name = name.split('.')
+    info = file.name.split('.')
     try:
-        index = name[0].zfill(2)
-        name = name[1]
-        file_type = name[2]
+        index = info[0].zfill(2)
+        name = info[1]
+        file_type = info[2]
     except Exception as e:
-        print(f'\n文件名解析错误 {name}\n')
+        print(f'\n文件名解析错误 {file.name}\n')
         return False
 
     name = re.split(r'\([avAVpP,\d]+\)', name)  # 去除(Avxxxxxx,Px)
     name = [item for item in name if bool(item)]
     name = ''.join(name)
     name = name.rstrip("_ ")
-    new_name = f"{index} {name}.{file_type}"
-    return new_name
+    new_stem = f"{index} {name}"
+    file = file.with_stem(new_stem)
+    return file
 
 
-def bdfilm(name: str, file: str = ""):
-    if not ("bd-film.cc" in name or "bd2020" in name):
-        return False
+def bdfilm(file: WindowsPath):
+    if "bd-film.cc" not in file.name or "bd2020" not in file.name:
+        return file
+
+    name = file.name
     name = name.replace("[BD影视分享bd-film.cc]", "")
     name = name.replace("[BD影视分享bd2020.com]", "")
+    name = name.replace("mp41", "mp4")
     name = name.strip()
     name = name.replace(':', ' ')
     name = name.replace('：', ' ')
-    _name_, *_, _type_ = name.split('.')
-    _type_ = _type_.replace("mp41", "mp4")
-    return f"{_name_}.{_type_}"
+
+    file = file.with_name(name)
+    return file
 
 
 config_image_video = [
@@ -273,6 +282,9 @@ config_software = [
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", _capitalize_)],
 
+    # ffmpeg-2021-11-18-git-85a6b7f7b7-full_build.7z
+    [r"(ffmpeg)(-)([\d\-]+)(-git)(\-\w+)(-full_build)(.7z)", r"\1_\3\7"],
+
     # navicat150_premium_cs_x64.exe
     [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", _capitalize_)],
 
@@ -288,8 +300,10 @@ config_software = [
     # FreeFileSync_11.8_Windows_Setup.exe
     [r"(FreeFileSync_)([\d\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
 
-    # SumatraPDF-3.3.3-64.zip
-    [r"(SumatraPDF)(\-)([\d\.]+)(-64)(\.zip|\.exe)", r"\1_\3\5"],
+    # SumatraPDF-3.3.3-64.zip  portable (zip) v
+    [r"(SumatraPDF)(\-)([\d\.]+)(-64)(\.zip)", r"\1_\3_Portable\5"],
+    # SumatraPDF-3.3.3-64-install.exe
+    [r"(SumatraPDF)(\-)([\d\.]+)(-64)(-install)(\.exe)", r"\1_\3_Install\6"],
 
     # sysdiag-all-5.0.64.2-2021.11.3.1.exe
     [r"(sysdiag)(\-all\-)([\d\.]+)(\-)([\d\.]+)(.exe)", r"HuoRong_\3\6"],
@@ -426,6 +440,9 @@ config_other = [
 
     # xxx(无修).mp4
     [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
+
+    # stylish-2021_12_3.json,.bin,.dms
+    [r"(stylish)(-)(\d+)(_)(\d+)(_)(\d+)(.json)(,.bin,.dms)", (r"\1_\3-\5-\7\8", _capitalize_)],
 
     # 第1集
     # 第xxx集
