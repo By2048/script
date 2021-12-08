@@ -1,3 +1,4 @@
+import functools
 import re
 import os
 import sys
@@ -10,11 +11,10 @@ from functools import partial
 from inspect import isfunction
 
 try:
-    from config import config
+    from config import config_rename
     from tool.rename import Rename
 except ImportError:
-    path = os.path.dirname(os.path.dirname(__file__))
-    sys.path.append(path)
+    sys.path.append(WindowsPath(__file__).parents[1].as_posix())
     from tool.rename import Rename
 
 import fire
@@ -31,9 +31,8 @@ def rule(file: WindowsPath):
     # file_name = file.name
     # file_path = file.as_posix()
 
-    for cfg in config:
-
-        if isfunction(cfg):
+    for cfg in config_rename:
+        if isfunction(cfg) or isinstance(cfg, functools.partial):
             fun = cfg
             try:
                 result = fun(file)
@@ -80,7 +79,7 @@ def main(command="", folder="", debug=False):
 
 
 def debug():
-    folder = WindowsPath('T:\\')
+    folder = WindowsPath('T:\\Test\\')
     rename.folder = folder
     rename.rule = rule
     rename.init()

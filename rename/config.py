@@ -48,45 +48,18 @@ def _zfill_(file: WindowsPath):
         return file
 
 
-def github(file: WindowsPath):
-    key = 'GitHubDesktop'
-    new_name = ""
-    if key in file.name:
-        version = get_version(file)
-        # path_name = Path(name)
-        # path_file = Path(file)
-        # path_name = path_name.with_stem(f"{path_name.stem}_{_version_}")
-        # path_file.with_name(path_name.as_posix())
-        # return path_name.as_posix()
-        new_name = f"{key}_{version}.exe"
-    if file.name == new_name:
-        return file
+def version(file: WindowsPath, key: str):
+    if key.lower() not in file.name.lower():
+        return
+    version_data = get_version(file)
+    new_name = f"{key}_{version_data}.exe"
     file = file.with_name(new_name)
     return file
 
 
-def potplayer(file: WindowsPath):
-    key = 'PotPlayer'
-    new_name = ""
-    if key in file.name:
-        version = get_version(file)
-        new_name = f"{key}_{version}.exe"
-    if file.name == new_name:
-        return file
-    file = file.with_name(new_name)
-    return file
-
-
-def fdm(file: WindowsPath):
-    key = 'fdm'
-    new_name = ""
-    if key in file.name:
-        version = get_version(file)
-        new_name = f"{key.upper()}_{version}.exe"
-    if file.name == new_name:
-        return file
-    file = file.with_name(new_name)
-    return file
+github = partial(version, key="GitHubDesktop")
+potplayer = partial(version, key="PotPlayer")
+fdm = partial(version, key="FDM")
 
 
 def lol(file: WindowsPath):
@@ -96,7 +69,6 @@ def lol(file: WindowsPath):
         date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
         file = file.with_stem(f"LOL {date}")
         return file
-    return file
 
 
 def screen(file: WindowsPath):
@@ -107,14 +79,13 @@ def screen(file: WindowsPath):
     if "_" in file.name and "-" not in file.name:
         _app_, _date_ = file.stem.split("_")
         if len(_date_) != 13 or len(_app_) <= 0:
-            return file
+            return
         _date_ = _date_[:-3]
         _date_ = int(_date_)
         _date_ = datetime.fromtimestamp(_date_)
         _date_ = _date_.strftime("[%Y-%m-%d][%H-%M-%S]")
         file = file.with_stem(f"{_date_}[{_app_}]")
         return file
-    return file
 
 
 def screenshot(file: WindowsPath):
@@ -130,7 +101,6 @@ def screenshot(file: WindowsPath):
         new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
         file = file.with_stem(new_stem)
         return file
-    return file
 
 
 def timestamp(file: WindowsPath):
@@ -145,15 +115,13 @@ def timestamp(file: WindowsPath):
         new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
         file = file.with_stem(new_stem)
         return file
-    return file
 
 
 def wx_camera(file: WindowsPath):
     # wx_camera_1616986022655.jpg
     if "wx_camera_" not in file.name:
-        return False
+        return
     file.stem = file.stem.replace("wx_camera_", "")
-
     new_stem = file.stem[:-3]
     new_stem = int(new_stem)
     new_stem = datetime.fromtimestamp(new_stem)
@@ -164,7 +132,7 @@ def wx_camera(file: WindowsPath):
 
 def nicotv(file: WindowsPath):
     if not re.match(r"第([\d\\.]+)集", file.stem):
-        return file
+        return
     file.stem = file.stem.replace("(无修)", "")
     data = re.match(r"(第)([\d\\.]+)(集)", file.stem)
     item_stem = data.group(2)
@@ -175,7 +143,7 @@ def nicotv(file: WindowsPath):
 
 def bilibili(file: WindowsPath):
     if ".mp4" not in file.name or "Av" not in file.name:
-        return file
+        return
 
     info = file.name.split('.')
     try:
@@ -184,7 +152,7 @@ def bilibili(file: WindowsPath):
         file_type = info[2]
     except Exception as e:
         print(f'\n文件名解析错误 {file.name}\n')
-        return False
+        return
 
     name = re.split(r'\([avAVpP,\d]+\)', name)  # 去除(Avxxxxxx,Px)
     name = [item for item in name if bool(item)]
@@ -197,7 +165,7 @@ def bilibili(file: WindowsPath):
 
 def bdfilm(file: WindowsPath):
     if "bd-film.cc" not in file.name or "bd2020" not in file.name:
-        return file
+        return
 
     name = file.name
     name = name.replace("[BD影视分享bd-film.cc]", "")
@@ -461,4 +429,4 @@ config_other = [
 
 ]
 
-config = config_software + config_python + config_image_video + config_other
+config_rename = config_image_video + config_software + config_python + config_other
