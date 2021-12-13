@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import win32api
 import win32com
 import win32com.client
+from win32comext.shell import shell, shellcon
 
 from rich import print
 from rich import box, get_console
@@ -34,12 +35,13 @@ ignore_folder = ["System Volume Information", "$RECYCLE.BIN"]
 
 @dataclass
 class FolderDesktop(object):
-    path: str = ""
+    path: WindowsPath = WindowsPath()
     icon: str = ""
     info: str = ""
+    name: str = ""
 
     def to_list(self):
-        return [self.path, self.icon, self.info]
+        return [str(self.path), self.icon, self.info, self.name]
 
     def __repr__(self):
         return " | ".join(self.to_list())
@@ -64,7 +66,6 @@ def init():
             result = f"{high(ms)}.{low(ms)}.{high(ls)}.{low(ls)}"
             return result
         except Exception as e:
-            logger.exception(e)
             return None
 
     def get_icon(folder: WindowsPath):
@@ -86,7 +87,7 @@ def init():
             icon = path_hash_icon
 
         if icon:
-            return icon.as_posix()
+            return icon
 
         return icon
 
@@ -110,6 +111,13 @@ def init():
 
         return result
 
+    def get_name(folder: WindowsPath):
+        # #Name#xxx#
+        name = ""
+        if (name_file := list(folder.glob("#Name#*"))):
+            name = name_file[0].name.split("#")[-2]
+        return name
+
     result = []
 
     for folder in path_folders.iterdir():
@@ -122,10 +130,12 @@ def init():
 
         icon = get_icon(folder)
         info = get_info(folder)
+        name = get_name(folder)
 
-        fd.path = folder.as_posix()
-        fd.icon = icon
-        fd.info = info
+        fd.path = folder
+        fd.icon = str(icon)
+        fd.info = str(info)
+        fd.name = str(name)
 
         result.append(fd)
 
@@ -141,39 +151,48 @@ def clear(fd: FolderDesktop):
 
     if not desktop_ini_path.exists():
         return
-    os.system(f" attrib -s -h \"{desktop_ini_path.as_posix()}\" ")
+    os.system(f" attrib -s -h \"{desktop_ini_path}\" ")
     desktop_ini_path.unlink()
 
 
 def create(fd: FolderDesktop):
     def get_desktop_ini(fd: FolderDesktop):
-        desktop_ini_data = """
-        [.ShellClassInfo]
-        """.strip()
+        desktop_ini_data = "[.ShellClassInfo]"
 
         if fd.icon:
-            desktop_ini_data = desktop_ini_data + "\n" + f"IconResource = {fd.icon}, 0"
+            desktop_ini_data = f"{desktop_ini_data}\n" \
+                               f"IconResource = {fd.icon} , 0"
 
         if fd.info:
-            desktop_ini_data = desktop_ini_data + "\n" + f"InfoTip = {fd.info}"
+            desktop_ini_data = f"{desktop_ini_data}\n" \
+                               f"InfoTip = {fd.info}"
+
+        if fd.name:
+            desktop_ini_data = f"{desktop_ini_data}\n" \
+                               f"LocalizedResourceName = {fd.path.name} | {fd.name}"
 
         desktop_ini_data = desktop_ini_data.strip()
         return desktop_ini_data
 
     desktop_ini_path = WindowsPath(fd.path) / 'desktop.ini'
 
-    if desktop_ini_path.exists():
-        os.system(f" attrib -s -h \"{desktop_ini_path.as_posix()}\" ")
-
     try:
-        with open(desktop_ini_path, 'w', encoding="utf-8") as file:
+        with open(desktop_ini_path, 'w', encoding="gbk") as file:
             desktop_ini = get_desktop_ini(fd)
             file.write(desktop_ini)
     except Exception as e:
         logger.exception(e)
-        print(e)
 
-    os.system(f" attrib +s +h \"{desktop_ini_path.as_posix()}\" ")
+    os.system(f" attrib +s +h \"{desktop_ini_path}\" ")
+
+
+def flush(fd: FolderDesktop):
+    shell.SHChangeNotify(
+        shellcon.SHCNE_UPDATEITEM,
+        shellcon.SHCNF_PATH,
+        bytes(fd.path.as_posix(), 'gbk'),
+        None
+    )
 
 
 def main():
@@ -182,16 +201,19 @@ def main():
     table.add_column("Folder", justify="left", width=30)
     table.add_column("Icon", justify="left", width=35)
     table.add_column("Info", justify="center", width=20)
+    table.add_column("Name", justify="center", width=20)
     table_center = Align.center(table)
     console.clear()
     print()
     print()
+
+    result = init()
     with Live(table_center, console=console, refresh_per_second=30):
-        result = init()
         item: FolderDesktop
         for item in result:
             clear(item)
             create(item)
+            flush(item)
             table.add_row(*item.to_list())
     print()
     print()
