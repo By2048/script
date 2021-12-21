@@ -26,7 +26,7 @@ except ImportError:
 
 base_url = "http://www.nicotv.club"
 chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
-aria2c = r"D:\\Bin\\Aria2\\aria2c.exe"
+aria2c = r"D:\\Aria2\\aria2c.exe"
 
 # 0 | -1
 play_source_index = 0
