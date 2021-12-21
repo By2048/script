@@ -43,7 +43,10 @@ rename.rule = rule
 rename.init()
 rename.start(silent=True)
 print(f"[red]Folder[/red] : {path_from}")
-print(f"[red]File[/red]   : {len(rename.files)}")
+
+print(f"[red]Rename[/red] : ", end="")
+for index, file in enumerate(rename.files, 1):
+    print(f"{'         ' if index != 1 else ''}{index} {file.old.name} -> {file.new.name}")
 
 for file in path_from.iterdir():
     files_from.append(file)

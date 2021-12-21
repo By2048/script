@@ -25,7 +25,7 @@ class File(object):
         self.new: WindowsPath = WindowsPath()
 
     def __str__(self):
-        return f"{self.old.name:<35} | {self.new.name:<35}"
+        return f"{self.old.name} -> {self.new.name}"
 
 
 class Rename(object):
