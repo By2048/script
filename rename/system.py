@@ -32,7 +32,7 @@ def rule(file: WindowsPath):
     # file_path = file.as_posix()
 
     for cfg in config_rename:
-        if isfunction(cfg) or isinstance(cfg, functools.partial):
+        if isfunction(cfg) or isinstance(cfg, partial):
             fun = cfg
             try:
                 result = fun(file)
@@ -60,7 +60,7 @@ def rule(file: WindowsPath):
                 if isinstance(_g_, str):
                     new_name = re.sub(_match_, _g_, file.name)
                     file = file.with_name(new_name)
-                elif isfunction(_g_):
+                elif isfunction(_g_) or isinstance(_g_, partial):
                     file = _g_(file)
             return file
 

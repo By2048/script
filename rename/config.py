@@ -19,20 +19,32 @@ except ImportError:
 # name : 文件正则处理后的名字
 # file : 文件原始完整路径
 
+
 def _capitalize_(file: WindowsPath):
-    new_name = file.name.split("_")
-    new_name[0] = new_name[0].capitalize()
-    new_name = "_".join(new_name)
-    file = file.with_name(new_name)
+    stem = file.stem
+    stem = stem.capitalize()
+    file = file.with_stem(stem)
     return file
 
 
-def _upper_(file: WindowsPath):
-    new_name = file.name.split("_")
-    new_name[0] = new_name[0].upper()
-    new_name = "_".join(new_name)
-    file = file.with_name(new_name)
+def _upper_with_index_(file: WindowsPath, index=-1):
+    stem = file.stem
+    if index == -1:
+        stem = stem.upper()
+    elif index == 0:
+        stem = stem
+    elif index > 0:
+        stem = stem[0:index].upper() + stem[index:]
+    file = file.with_stem(stem)
     return file
+
+
+_upper_ = partial(_upper_with_index_, index=-1)
+_upper_1_ = partial(_upper_with_index_, index=1)
+_upper_2_ = partial(_upper_with_index_, index=2)
+_upper_3_ = partial(_upper_with_index_, index=3)
+_upper_4_ = partial(_upper_with_index_, index=4)
+_upper_5_ = partial(_upper_with_index_, index=5)
 
 
 def _zfill_(file: WindowsPath):
@@ -45,6 +57,20 @@ def _zfill_(file: WindowsPath):
     else:
         new_stem = file.stem.zfill(2)
         file = file.with_stem(new_stem)
+        return file
+
+
+def _timestamp_(file: WindowsPath):
+    _type_ = file.suffix
+    _stem_ = file.stem
+    _types_ = ".png .jpg .jpeg .gif .webm"
+    if _type_ in _types_.split() and _stem_.isdigit() and len(_stem_) in [13, 10]:
+        if len(_stem_) == 13:
+            _stem_ = _stem_[:-3]
+        _stem_ = int(_stem_)
+        _stem_ = datetime.fromtimestamp(_stem_)
+        _stem_ = _stem_.strftime("%Y-%m-%d %H-%M-%S")
+        file = file.with_stem(_stem_)
         return file
 
 
@@ -71,7 +97,16 @@ def lol(file: WindowsPath):
         return file
 
 
-def screen(file: WindowsPath):
+def timestamp_with_xxx(file: WindowsPath, xxx: str):
+    _stem_ = file.stem.lower()
+    if xxx in _stem_:
+        _stem_ = _stem_.replace(xxx, "")
+        file = file.with_stem(_stem_)
+    file = _timestamp_(file)
+    return file
+
+
+def app_screen(file: WindowsPath):
     # Chrome_1618427487075.png
     # 1616779141888 为时间戳
     # 1616779141 -> 2021-03-27 01:19:01
@@ -88,46 +123,14 @@ def screen(file: WindowsPath):
         return file
 
 
-def screenshot(file: WindowsPath):
-    # screenshot_1616779141888.png
-    # 1616779141888 为时间戳
-    # 1616779141 -> 2021-03-27 01:19:01
-    #        888 -> 毫秒
-    if "screenshot_1" in file.name or "Screenshot_1" in file.name:
-        file.stem = file.stem.replace("screenshot_", "")
-        file.stem = file.stem.replace("Screenshot_", "")
-        new_stem = int(file.stem)
-        new_stem = datetime.fromtimestamp(new_stem)
-        new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
-        file = file.with_stem(new_stem)
-        return file
+# screenshot_1616779141888.png
+app_screenshot = partial(timestamp_with_xxx, xxx="screenshot_")
 
+# 1638862702756.jpg
+timestamp = partial(timestamp_with_xxx, xxx="")
 
-def timestamp(file: WindowsPath):
-    # 1616986022655.jpg
-    _type_ = file.suffix
-    _types_ = ".png .jpg .jpeg .gif .webm"
-    if _type_ in _types_.split() and file.stem.isdigit() and len(file.stem) in [13, 10]:
-        if len(file.stem) == 13:
-            file.stem = file.stem[:-3]
-        new_stem = int(file.stem)
-        new_stem = datetime.fromtimestamp(new_stem)
-        new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
-        file = file.with_stem(new_stem)
-        return file
-
-
-def wx_camera(file: WindowsPath):
-    # wx_camera_1616986022655.jpg
-    if "wx_camera_" not in file.name:
-        return
-    file.stem = file.stem.replace("wx_camera_", "")
-    new_stem = file.stem[:-3]
-    new_stem = int(new_stem)
-    new_stem = datetime.fromtimestamp(new_stem)
-    new_stem = new_stem.strftime("%Y-%m-%d %H-%M-%S")
-    file = file.with_stem(new_stem)
-    return file
+# wx_camera_1616986022655.jpg
+wx_camera = partial(timestamp_with_xxx, xxx="wx_camera_")
 
 
 def nicotv(file: WindowsPath):
@@ -182,8 +185,8 @@ def bdfilm(file: WindowsPath):
 config_image_video = [
 
     # 手机屏幕截图
-    screen,
-    screenshot,
+    app_screen,
+    app_screenshot,
 
     # 以时间戳格式保存的图片
     timestamp,
@@ -194,7 +197,10 @@ config_image_video = [
     lol,
 
     # 20210622183532.jpg
-    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\1-\2-\3 \4-\5-\6\7"],
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)", r"\1-\2-\3 \4-\5-\6\7"],
+
+    # 20200102144326376.png
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(.jpg|.png)", r"\1-\2-\3 \4-\5-\6\8"],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
@@ -250,8 +256,9 @@ config_software = [
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", _capitalize_)],
 
-    # ffmpeg-2021-11-18-git-85a6b7f7b7-full_build.7z
-    [r"(ffmpeg)(-)([\d\-]+)(-git)(\-\w+)(-full_build)(.7z)", r"\1_\3\7"],
+    # ffmpeg-2021-12-12-git-996b13fac4-full_build.7z
+    [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", _upper_2_)],
+    # [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", r"\1_\3\7"],
 
     # navicat150_premium_cs_x64.exe
     [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", _capitalize_)],
@@ -374,6 +381,9 @@ config_software = [
     # zeal-portable-0.6.1-windows-x64.zip
     [r"(zeal)(-portable)(-)([\d\.]+)(-windows-x64)(.zip)", (r"\1_\4\6", _capitalize_)],
 
+    # Postman-win64-9.5.0-Setup.exe
+    [r"(Postman)(-win64-)([\d\.]+)(-Setup)(.exe)", r"\1_\3\5"],
+
 ]
 
 config_python = [
@@ -424,8 +434,10 @@ config_other = [
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
 
     # 950618(950618)_20210627205223.mp3
+    # 15669947201(15669947201)_20211015170939.mp3
+    #  1        2   3    4   5  6      7      8      9      10     11     12
     [r"([\s\S]+)(\()(\d+)(\))(_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp3)",
-     r"(\6-\7-\8)(\9\-\10-\11)(\3)(\1)\12"],
+     r"(\6-\7-\8)(\9-\10-\11)(\3)(\1)\12"],
 
 ]
 
