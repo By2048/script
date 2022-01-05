@@ -56,7 +56,7 @@ def init():
         result = shortcut.Targetpath
         return result
 
-    def get_exe_version(file: str):
+    def get_exe_version_info(file: str):
         try:
             info = win32api.GetFileVersionInfo(file, os.sep)
             ms = info['FileVersionMS']
@@ -99,11 +99,7 @@ def init():
             path_file_exe = lnk_to_exe(path_file_lnk.as_posix())
             path_file_exe = WindowsPath(path_file_exe)
             if path_file_exe.exists():
-                result = get_exe_version(path_file_exe.as_posix())
-
-        # #Version#xxx#
-        if version_file := list(folder.glob("#Version#*")):
-            result = version_file[0].name.split("#")[-2]
+                result = get_exe_version_info(path_file_exe.as_posix())
 
         # #Info#xxx#
         if (info_file := list(folder.glob("#Info#*"))):

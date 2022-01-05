@@ -132,6 +132,9 @@ timestamp = partial(timestamp_with_xxx, xxx="")
 # wx_camera_1616986022655.jpg
 wx_camera = partial(timestamp_with_xxx, xxx="wx_camera_")
 
+# mmexport1641361625029.png
+wx_image = partial(timestamp_with_xxx, xxx="mmexport")
+
 
 def nicotv(file: WindowsPath):
     if not re.match(r"第([\d\\.]+)集", file.stem):
@@ -193,6 +196,7 @@ config_image_video = [
 
     # 微信保存的图片
     wx_camera,
+    wx_image,
 
     lol,
 
