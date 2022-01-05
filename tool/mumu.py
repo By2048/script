@@ -44,7 +44,7 @@ rename.init()
 rename.start(silent=True)
 print(f"[red]Folder[/red] : {path_from}")
 
-print(f"[red]Rename[/red] : ", end="")
+print(f"[red]Rename[/red] : ", end="" if len(rename.files) else "\n")
 for index, file in enumerate(rename.files, 1):
     print(f"{'         ' if index != 1 else ''}{index} {file.old.name} -> {file.new.name}")
 

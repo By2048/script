@@ -6,8 +6,7 @@ def get_browser_position(w_scale=1, h_scale=1, screen=1):
     """
 
     if screen == "screen_3_main":
-        # {'x': 2010, 'y': 297} {'width': 900, 'height': 624}
-        return 2010, 297, 900, 624
+        return 1980, 310, 600, 600
 
     screen_x = -5120
     screen_y = 740
