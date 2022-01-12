@@ -168,6 +168,23 @@ def init_folders():
             obj = re.search(_match, result).group(_get)
             return obj
 
+        # 指定文件内容
+        # file | .\ventoy\version | ([\d\.]+) | 1
+        if info and info.startswith("file |"):
+            info = info.split("|")
+            info = [item.strip() for item in info]
+            _file_path = info[1]
+            _match = info[2]
+            _get = info[3]
+
+            _file_path = folder.path / _file_path
+            _get = int(_get) if _get.isdigit() else None
+
+            with open(_file_path, "r", encoding="utf-8") as file:
+                content = file.read().strip()
+                obj = re.search(_match, content).group(_get)
+            return obj
+
         return info
 
     for win_disk in windows_config.keys():
@@ -179,24 +196,34 @@ def init_folders():
         path_disk = WindowsPath(_disk)
 
         for disk_folder in windows_config[win_disk].keys():
-            folder = Folder()
-
             path_folder = path_disk / WindowsPath(disk_folder)
 
             if not path_folder.exists():
                 continue
 
-            desktop = windows_config[win_disk][disk_folder].get('Desktop')
-            desktop = Desktop(desktop)
+            desktop_config = windows_config[win_disk][disk_folder].get('Desktop')
 
-            lnk = windows_config[win_disk][disk_folder].get('Lnk')
-            lnk = Lnk(lnk)
-
-            folder.path = path_folder
-            folder.desktop = desktop
-            folder.lnk = lnk
-
-            folders.append(folder)
+            lnk_config = windows_config[win_disk][disk_folder].get('Lnk')
+            if isinstance(lnk_config, list):
+                index = 0
+                for _lnk_config_ in lnk_config:
+                    folder = Folder()
+                    lnk = Lnk(_lnk_config_)
+                    desktop = Desktop(desktop_config)
+                    desktop._ignore_ = False if index == 0 else True
+                    folder.path = path_folder
+                    folder.desktop = desktop
+                    folder.lnk = lnk
+                    index += 1
+                    folders.append(folder)
+            else:
+                folder = Folder()
+                lnk = Lnk(lnk_config)
+                desktop = Desktop(desktop_config)
+                folder.path = path_folder
+                folder.desktop = desktop
+                folder.lnk = lnk
+                folders.append(folder)
 
         del disk_folder
 
@@ -240,6 +267,9 @@ def init_scripts():
 
 def create_desktop(folder: Folder):
     desktop = folder.desktop
+
+    if desktop._ignore_:
+        return
 
     desktop_ini_data = "[.ShellClassInfo]"
     if desktop.icon:
@@ -423,7 +453,10 @@ def main():
                     folder.desktop.info or "",
                     folder.desktop.name if folder.desktop.name != folder.path.name else ""]
             line = [str(item) for item in line]
+            if folder.desktop._ignore_:
+                continue
             table.add_row(*line)
+            # continue
 
     console.print()
     console.print()
