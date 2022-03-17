@@ -170,12 +170,12 @@ def bilibili(file: WindowsPath):
 
 
 def bdfilm(file: WindowsPath):
-    if "bd-film.cc" not in file.name or "bd2020" not in file.name:
+    if "bd2020" not in file.name:
         return
 
     name = file.name
-    name = name.replace("[BD影视分享bd-film.cc]", "")
     name = name.replace("[BD影视分享bd2020.com]", "")
+    name = name.replace("[BD影视分享bd2020.co]", "")
     name = name.replace("mp41", "mp4")
     name = name.strip()
     name = name.replace(':', ' ')
@@ -376,6 +376,9 @@ config_software = [
     # Snipaste-2.6.6-Beta-x64.zip
     [r"(Snipaste)(-)([\d\.]+)(-Beta-x64)(.zip)", r"\1_\3\5"],
 
+    # Obsidian.0.13.19.exe
+    [r"(Obsidian)(\.)([\d\.]+)(\.exe)", r"\1_\3\4"],
+
     # jetbrains-toolbox-1.22.10685.exe
     [r"(jetbrains)(-)(toolbox)(-)([\d\.]+)(.exe)", (r"\1_\5\6", _capitalize_)],
 
@@ -387,6 +390,15 @@ config_software = [
 
     # Postman-win64-9.5.0-Setup.exe
     [r"(Postman)(-win64-)([\d\.]+)(-Setup)(.exe)", r"\1_\3\5"],
+
+    # qbittorrent_4.4.1_x64_setup.exe
+    [r"(qbittorrent)(_)([\d\.]+)(_x64_setup)(.exe)", r"QBittorrent_\3\5"],
+
+    # chrome-win.zip
+    [r"(chrome)(-)(win)(.zip)", r"Chromium.zip"],
+
+    # PowerShell-7.2.2-win-x64.zip
+    [r"(PowerShell)(-)([\d\.]+)(-win-x64)(.zip)", r"\1_\3\5"],
 
 ]
 
