@@ -4,6 +4,10 @@ import os
 import sys
 import hashlib
 import shutil
+import time
+import copy
+from types import NoneType
+
 import yaml
 import tempfile
 import subprocess
@@ -24,37 +28,29 @@ from rich.align import Align
 from rich.live import Live
 from rich.table import Table
 from loguru import logger
+from PIL import Image
 
 try:
     from tool.file import lnk_to_exe, version
 except ImportError:
-    path = os.path.dirname(os.path.dirname(__file__))
-    sys.path.append(path)
+    sys.path.append(WindowsPath(__file__).parents[1].as_posix())
     from tool.file import lnk_to_exe, exe_version
 
-windows_config_path = WindowsPath('E:\\Config\\Windows.yaml')
-assert windows_config_path
+console = get_console()
 
-windows_config: dict
+windows_config_path = WindowsPath('E:\\Config\\Windows.yaml')
 with open(windows_config_path, encoding="utf-8") as file:
     windows_config = yaml.unsafe_load(file)
-assert windows_config
-
-path_icon = WindowsPath(windows_config.get("#Icon"))
-path_lnk = WindowsPath(windows_config.get("#Lnk"))
-assert path_icon
-assert path_lnk
-
-path_script = WindowsPath(windows_config.get("#Script"))
-path_script_txt = WindowsPath(windows_config.get("#ScriptText"))
 
 path_tmp = WindowsPath(windows_config.get("#"))
+path_icon = WindowsPath(windows_config.get("#Icon"))
+path_lnk = WindowsPath(windows_config.get("#Lnk"))
+path_script = WindowsPath(windows_config.get("#Script"))
+path_script_txt = WindowsPath(windows_config.get("#ScriptText"))
 
 # 文件夹配置
 folders = []
 scripts = []
-
-console = get_console()
 
 
 @dataclass
@@ -72,7 +68,6 @@ class Desktop:
         self.name = data.get("Name") or ""
         self.info = data.get("Info") or ""
         self.icon = data.get("Icon") or ""
-        # self.icon = WindowsPath(self.icon) if self.icon else None
 
 
 @dataclass
@@ -94,21 +89,13 @@ class Lnk:
         self.working_directory = data.get("WorkingDirectory") or ""
         self.description = data.get("Description") or ""
         self.icon_location = data.get("IconLocation") or ""
-        # formatter:off
-        # self.target_path = WindowsPath(self.target_path) if self.target_path else None
-        # self.working_directory = WindowsPath(self.working_directory) if self.working_directory else None
-        # self.icon_location = WindowsPath(self.icon_location) if self.icon_location else None
-        # formatter:on
-
-    def __bool__(self):
-        return bool(self.name) and bool(self.target_path)
 
 
 @dataclass
 class Folder:
     path: WindowsPath = WindowsPath()
-    desktop: Desktop = Desktop()
-    lnk: Lnk = Lnk()
+    desktop: Desktop | None = Desktop()
+    lnk: Lnk | None = Lnk()
 
 
 @dataclass
@@ -118,23 +105,48 @@ class Script:
     args: str = None
 
 
+def check():
+    assert windows_config_path
+    assert windows_config
+    assert path_icon
+    assert path_lnk
+
+
 def init_folders():
-    # 获取软件图标
     def get_icon(folder: Folder):
+        desktop = folder.desktop
 
-        if not folder.desktop.icon:
-            icon = path_icon / f"{path_folder.name}.ico"
+        icon = None
+
+        if desktop.icon:
+            if str(desktop.icon).endswith(".png"):
+                png = path_icon / desktop.icon
+                ico = png.with_suffix(".ico")
+                if not ico.exists() and png.exists():
+                    image = Image.open(png)
+                    image.save(ico)
+                icon = ico
+            elif str(desktop.icon).endswith(".ico"):
+                icon = path_icon / desktop.icon
+            elif str(desktop.icon).endswith(".exe"):
+                icon = folder.path / desktop.icon
         else:
-            icon = path_icon / folder.desktop.icon
+            if desktop.info and desktop.info.endswith(".exe"):
+                icon_exe = folder.path / desktop.info
+                if icon_exe.exists():
+                    icon = icon_exe
 
-        if icon.exists():
-            return icon
+            icon_exe = folder.path / f"{folder.path.name}.exe"
+            if icon_exe.exists():
+                icon = icon_exe
 
-        return
+            icon_file = path_icon / f"{folder.path.name}.ico"
+            if icon_file.exists():
+                icon = icon_file
 
-    # 获取软件信息
+        return icon
+
     def get_info(folder: Folder):
-
         info = folder.desktop.info.strip()
 
         if not info:
@@ -160,8 +172,12 @@ def init_folders():
 
             cmd = f"{folder.path}\\{_cmd}"
 
-            result = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            result = result.stdout.readlines()
+            result = subprocess.Popen(cmd,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                      shell=True)
+            result_out = result.stdout.readlines()
+            result_err = result.stderr.readlines()
+            result = result_out or result_err
             result = [item.decode() for item in result]
             result = "".join(result)
 
@@ -187,67 +203,103 @@ def init_folders():
 
         return info
 
-    for win_disk in windows_config.keys():
-        if not win_disk.startswith("$"):
-            continue
-
-        _disk = win_disk.replace("$", "")
-        _disk = f"{_disk}:\\" if not _disk.endswith(":\\") else _disk
-        path_disk = WindowsPath(_disk)
-
-        for disk_folder in windows_config[win_disk].keys():
-            path_folder = path_disk / WindowsPath(disk_folder)
-
-            if not path_folder.exists():
+    def init():
+        for win_disk in windows_config.keys():
+            if not win_disk.startswith("$"):
                 continue
 
-            desktop_config = windows_config[win_disk][disk_folder].get('Desktop')
+            _disk = win_disk.replace("$", "")
+            _disk = f"{_disk}:\\" if not _disk.endswith(":\\") else _disk
+            path_disk = WindowsPath(_disk)
 
-            lnk_config = windows_config[win_disk][disk_folder].get('Lnk')
-            if isinstance(lnk_config, list):
-                index = 0
-                for _lnk_config_ in lnk_config:
-                    folder = Folder()
-                    lnk = Lnk(_lnk_config_)
-                    desktop = Desktop(desktop_config)
-                    desktop._ignore_ = False if index == 0 else True
-                    folder.path = path_folder
-                    folder.desktop = desktop
-                    folder.lnk = lnk
-                    index += 1
-                    folders.append(folder)
-            else:
+            # if str(path_disk) == "D:\\":
+            #     continue
+
+            global_lnk_ignore: bool = windows_config[win_disk].get("(Lnk)") == "Ignore"
+            global_desktop_ignore: bool = windows_config[win_disk].get("(Desktop)") == "Ignore"
+
+            for disk_folder in windows_config[win_disk].keys():
+
+                # Global Config
+                if str(disk_folder).startswith("(") and str(disk_folder).endswith(")"):
+                    continue
+
+                path_folder = path_disk / disk_folder
+
+                if not path_folder.exists():
+                    continue
+
                 folder = Folder()
-                lnk = Lnk(lnk_config)
-                desktop = Desktop(desktop_config)
                 folder.path = path_folder
+
+                desktop_config = windows_config[win_disk][disk_folder].get('Desktop')
+                lnk_config = windows_config[win_disk][disk_folder].get('Lnk')
+
+                desktop = Desktop(desktop_config)
+
                 folder.desktop = desktop
-                folder.lnk = lnk
-                folders.append(folder)
 
-        del disk_folder
+                if global_lnk_ignore or lnk_config == "Ignore":
+                    folder.lnk = None
+                    folders.append(folder)
+                    continue
 
+                # Default:None \ k-v
+                if isinstance(lnk_config, (dict, NoneType)):
+                    lnk = Lnk(lnk_config)
+                    folder.lnk = lnk
+                    folders.append(folder)
+
+                # [k-v]
+                if isinstance(lnk_config, list):
+                    for index, _lnk_config_ in enumerate(lnk_config):
+                        lnk = Lnk(_lnk_config_)
+                        folder = copy.deepcopy(folder)
+                        folder.lnk = lnk
+                        folder.desktop._ignore_ = index == 0
+                        folders.append(folder)
+
+    def complete():
         # 初始化Desktop|Lnk默认配置
         folder: Folder
         for folder in folders:
-            path_folder = folder.path
             desktop = folder.desktop
             lnk = folder.lnk
 
-            desktop.name = desktop.name or path_folder.name
+            # if not desktop._ignore_:
+            desktop.name = desktop.name or folder.path.name
             desktop.icon = get_icon(folder)
             desktop.info = get_info(folder)
 
-            if lnk._ignore_:
+            if not lnk:
                 continue
 
-            lnk.name = lnk.name or f"{path_folder.name}.lnk"
-            lnk.name = f"{lnk.name}.lnk" if not lnk.name.endswith(".lnk") else lnk.name
-            lnk.target_path = lnk.target_path or f"{path_folder.name}.exe"
-            lnk.target_path = folder.path / lnk.target_path
-            lnk.working_directory = folder.path / lnk.working_directory or path_folder
-            lnk.description = lnk.description or desktop.name or ""
-            lnk.icon_location = desktop.icon or path_icon / lnk.target_path
+            # if not lnk._ignore_:
+            lnk.name = lnk.name or f"{folder.path.name}.lnk"
+            if lnk.target_path:
+                lnk.target_path = folder.path / lnk.target_path
+            else:
+                lnk.target_path = folder.path / f"{folder.path.name}.exe"
+            if lnk.working_directory:
+                lnk.working_directory = folder.path / lnk.working_directory
+            else:
+                lnk.working_directory = folder.path
+
+            lnk.description = lnk.description or desktop.name or folder.path.name
+
+            if lnk.icon_location:
+                if str(lnk.icon_location).endswith(".ico"):
+                    lnk.icon_location = path_icon / lnk.icon_location
+                elif str(lnk.icon_location).endswith(".exe"):
+                    lnk.icon_location = folder.path / lnk.icon_location
+                else:
+                    lnk.icon_location = desktop.icon
+            else:
+                lnk.icon_location = folder.desktop.icon
+
+    init()
+
+    complete()
 
 
 def init_scripts():
@@ -263,6 +315,14 @@ def init_scripts():
                 script.exe = args[0]
                 script.args = args[1:] if len(args) > 1 else []
             scripts.append(script)
+
+
+def center_panel_text(text, title="", width=99):
+    text = Text(text)
+    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    panel = Align.center(panel)
+    console.print(panel)
+    console.print()
 
 
 def create_desktop(folder: Folder):
@@ -281,7 +341,8 @@ def create_desktop(folder: Folder):
     desktop_ini_data = desktop_ini_data.strip()
 
     desktop_ini_path = folder.path / 'desktop.ini'
-    os.system(f" attrib -s -h \"{desktop_ini_path}\" ")
+    if desktop_ini_path.exists():
+        os.system(f" attrib -s -h \"{desktop_ini_path}\" ")
 
     try:
         with open(desktop_ini_path, 'w', encoding="gbk") as file:
@@ -293,7 +354,7 @@ def create_desktop(folder: Folder):
 
 
 def create_script():
-    result = ""
+    text = ""
     script: Script
     for script in scripts:
         exe = script.exe
@@ -302,103 +363,77 @@ def create_script():
         if not exe:
             continue
 
-        content = "@Echo Off\n\n"
-        content += "SetLocal\n\n"
-        content += f"Set Exe=\"{exe}\"\n"
-
+        code = "@Echo Off\n\n"
+        code += "SetLocal\n\n"
+        code += f"Set Exe=\"{exe}\"\n"
         if not args or len(args) == 0:
-            content += f"\n%Exe%  %*\n\n"
+            code += f"\n%Exe%  %*\n\n"
         elif len(args) == 1:
-            content += f"Set Arg=\"{args[0]}\"\n\n"
-            content += f"%Exe%  %Arg%  %*\n\n"
+            code += f"Set Arg=\"{args[0]}\"\n\n"
+            code += f"%Exe%  %Arg%  %*\n\n"
         elif len(args) > 1:
             for index, arg in enumerate(args, start=1):
-                content += f"Set Arg{index}=\"{arg}\"\n"
+                code += f"Set Arg{index}=\"{arg}\"\n"
             cmd = "\n%Exe%"
             for index in range(1, len(args) + 1):
                 cmd += f"  %Arg{index}%"
             cmd += "  %*\n\n"
-            content += cmd
-
-        content += "EndLocal"
+            code += cmd
+        code += "EndLocal"
 
         with open(script.path, "w") as file:
-            file.write(content)
-
-        if not exe:
-            continue
+            file.write(code)
 
         args = ' '.join(args) if args else ""
-        result += f"{script.path.stem:>15}  {exe} {args} \n"
+        text += f"{script.path.stem:>15}  {exe} {args} \n"
 
-    result = result.rstrip()
-
-    txt = Text(result)
-
+    text = text.rstrip()
+    title = f"{path_script}\\"
     width = 120
-
-    panel = Panel(txt, title=f"{path_script}\\", title_align="center",
-                  width=width, border_style="red")
-
-    left = (console.width - width) / 2
-    left = int(left)
-    padding = Padding(panel, (0, 0, 0, left))
-
-    console.print(padding)
+    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    console.print(Align.center(panel))
 
 
 def create_script_txt():
-    txt = " "
-    script: Script
     cnt = 0
+    text = " "
+
+    script: Script
     for script in scripts:
         name = script.path.stem
-
         if len(name) < 11:
             if cnt >= 5:
-                txt += "\n "
+                text += "\n "
                 cnt = 0
-            txt += name.ljust(11)
+            text += name.ljust(11)
             cnt += 1
         elif len(name) < 22:
             if cnt > 4:
-                txt += "\n "
+                text += "\n "
                 cnt = 1
-            txt += name.ljust(22)
+            text += name.ljust(22)
             cnt += 2
         elif len(name) < 33:
             if cnt > 3:
-                txt += "\n "
+                text += "\n "
                 cnt = 1
-            txt += name.ljust(33)
+            text += name.ljust(33)
             cnt += 3
-
-    txt = txt.rstrip()
+    text = text.rstrip()
 
     with open(path_script_txt, "w") as file:
-        file.write(txt)
+        file.write(text)
 
-    txt = Text(txt)
-
-    width = 11 * 5 + 3 + 3
-
-    panel = Panel(txt,
-                  title=str(path_script_txt),
-                  title_align="center",
-                  width=width, border_style="red")
-
-    left = (console.width - width) / 2
-    left = int(left)
-    padding = Padding(panel, (0, 0, 0, left))
-
-    console.print(padding)
-    console.print()
+    width = 11 * 5 + 3 * 2
+    title = str(path_script_txt)
+    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    console.print(Align.center(panel))
 
 
 def create_lnk(folder: Folder):
     lnk = folder.lnk
 
-    if lnk._ignore_:
+    if not lnk or lnk._ignore_:
         return
 
     tmp_vbs_path = path_tmp / "lnk.vbs"
@@ -415,6 +450,7 @@ def create_lnk(folder: Folder):
         file.write(content)
 
     os.system(f"start {tmp_vbs_path}")
+    time.sleep(0.1)
 
 
 def flush(folder: Folder):
@@ -429,53 +465,118 @@ def flush(folder: Folder):
 
 def main():
     #
-    init_folders()
-    init_scripts()
+    check()
 
-    table = Table()
-    table.add_column("Folder", justify="left", width=30)
-    table.add_column("Icon", justify="left", width=35)
-    table.add_column("Info", justify="center", width=20)
-    table.add_column("Name", justify="center", width=20)
-    table_center = Align.center(table)
+    # help \ folder \ lnk \ script \ all
+    args = sys.argv[1:] if len(sys.argv) > 1 else sys.argv
+    args = [item.lower() for item in args]
 
-    console.clear()
-    console.print()
+    arg = args[0] if len(args) >= 1 else "all"
 
-    with Live(table_center, console=console, refresh_per_second=30):
+    if arg == "help":
+        text = ""
+        text += "\n[red]All    [/red] : [green]帮助信息 默认[/green]"
+        text += "\n[red]Help   [/red] : [green]帮助信息[/green]"
+        text += "\n[red]Folder [/red] : [green]文件信息[/green]"
+        text += "\n[red]Lnk    [/red] : [green]文件链接[/green]"
+        text += "\n[red]Script [/red] : [green]脚本文件[/green]"
+        text += "\n"
+        console.print(text)
+        return
+
+    def create_table():
+        table = Table()
+        table.add_column("Folder", justify="left", width=30)
+        table.add_column("Icon", justify="left", width=35)
+        table.add_column("Info", justify="center", width=20)
+        table.add_column("Name", justify="center", width=20)
+        return table
+
+    if arg in ["folder", "all"]:
+        console.clear()
+        console.print()
+
+        init_folders()
+
+        table = create_table()
+        table_center = Align.center(table)
+        with Live(table_center, console=console) as live:
+            folder: Folder
+            for folder in folders:
+                create_desktop(folder)
+                flush(folder)
+                line = [f"{folder.path}\\",
+                        folder.desktop.icon or "",
+                        folder.desktop.info or "",
+                        folder.desktop.name if folder.desktop.name != folder.path.name else ""]
+                line = [str(item) for item in line]
+                if folder.desktop._ignore_:
+                    continue
+                table.add_row(*line)
+                if table.row_count > console.height - 6:
+                    table.columns.clear()
+                    table = create_table()
+                    table_center = Align.center(table)
+                    live.update(table_center)
+
+        if arg == "folder":
+            return
+
+        time.sleep(3)
+        console.clear()
+
+    if arg in ["lnk", "all"]:
+        lnks = []
+        init_folders()
         folder: Folder
         for folder in folders:
-            create_desktop(folder)
-            create_lnk(folder)
-            flush(folder)
-            line = [f"{folder.path}\\",
-                    folder.desktop.icon or "",
-                    folder.desktop.info or "",
-                    folder.desktop.name if folder.desktop.name != folder.path.name else ""]
-            line = [str(item) for item in line]
-            if folder.desktop._ignore_:
-                continue
-            table.add_row(*line)
-            # continue
+            if folder.lnk:
+                create_lnk(folder)
+                if name := folder.lnk.name:
+                    lnks.append(name)
 
-    console.print()
-    console.print()
+        lnks.sort()
+        text = ""
+        for index, item in enumerate(lnks, start=1):
+            text += f"{item:<20}"
+            if index % 5 == 0:
+                text += "\n"
 
-    create_script()
-    console.print()
-    console.print()
+        panel = Panel(text, title=f"{path_lnk}\\", title_align="center", width=120,
+                      border_style="red")
+        console.print()
+        console.print()
+        console.print(Align.center(panel))
 
-    create_script_txt()
-    console.print()
-    console.print()
+        if arg == "lnk":
+            return
+
+        time.sleep(1.5)
+        console.clear()
+
+    if arg in ["all", "script"]:
+        init_scripts()
+        console.print()
+        console.print()
+        create_script()
+        console.print()
+        create_script_txt()
+        if arg == "script":
+            return
+        time.sleep(1.5)
+        console.clear()
 
 
 def test():
-    init_folders()
-    print(folders)
+    pass
+    # init_folders()
+    # print(folders)
 
-    init_scripts()
-    print(scripts)
+    # init_scripts()
+    # print(scripts)
+
+    # create_script()
+    # create_script_txt()
 
 
 if __name__ == '__main__':
