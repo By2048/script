@@ -455,6 +455,10 @@ config_other = [
     [r"([\s\S]+)(\()(\d+)(\))(_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp3)",
      r"(\6-\7-\8)(\9-\10-\11)(\3)(\1)\12"],
 
+    # setting_backup_20220318131853.zip
+    [r"(setting_backup_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.zip)",
+     r"FooViewConfig_\2-\3-\4_\5-\6-\7\8"],
+
 ]
 
 config_rename = config_image_video + config_software + config_python + config_other
