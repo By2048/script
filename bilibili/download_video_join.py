@@ -21,8 +21,8 @@ logging.basicConfig(
 )
 
 base_folder = "T:\\com.bilibili.app.in\\"
-ffmpeg_path = "D:\\Bin\\FFmpeg\\bin\\ffmpeg.exe"
-download_path = "T:\\com.bilibili.app.in\\download\\"
+ffmpeg_path = "D:\\FFmpeg\\#\\bin\\ffmpeg.exe"
+download_path = "T:\\com.bilibili.app.in\\"
 keep_path = "T:\\"
 
 """
