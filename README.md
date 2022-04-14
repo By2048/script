@@ -17,6 +17,6 @@
 
 ![](https://github.com/By2048/script/raw/master/Image/Readme/Folder.png)
 
-![](https://github.com/By2048/Ahk/raw/master/Image/Readme/BiliBili.png)
+![](https://github.com/By2048/script/raw/master/Image/Readme/BiliBili.png)
 
-![](https://github.com/By2048/Ahk/raw/master/Image/Readme/Windows.png)
+![](https://github.com/By2048/script/raw/master/Image/Readme/Windows.png)
