@@ -1,9 +1,15 @@
+#
 import os
 import threading
+from pathlib import WindowsPath
 
-folder = "E:\\GitX\\"
+folder = WindowsPath("E:\\GitX\\")
 
-paths = [os.path.join(folder, item) for item in os.listdir(folder)]
+paths = []
+for item in folder.iterdir():
+    if not item.is_dir():
+        continue
+    paths.append(item)
 
 
 def remote():
@@ -17,7 +23,7 @@ def remote():
 
 def update(path):
     cmd = rf'cd /d {path} & git pull'
-    print('\n\n\n')
+    print('\n')
     print(cmd)
     os.system(cmd)
 
@@ -25,10 +31,19 @@ def update(path):
 def main():
     for path in paths:
         update(path)
-        # t = threading.Thread(target=update, args=(path,))
-        # t.start()
+
+
+def test():
+    for path in paths:
+        cmd = f'[red]cd[/red] /d {path} & git remote -v'
+        print(cmd)
+
+
+# t = threading.Thread(target=update, args=(path,))
+# t.start()
 
 
 if __name__ == '__main__':
-    main()
     # remote()
+    # test()
+    main()
