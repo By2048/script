@@ -11,11 +11,14 @@
 | reptile\bilibili             | 获取免费的番剧                       |
 | reptile\nicotv               | Nicotv自动下载                       |
 | system\windows               | 根据配置来修改文件夹图标 备注 拓展名 |
-| tool\gitx                    | Git项目包批量更新                    |
+| tool\gitx                    | 本地下载的Git项目批量更新            |
 
 ------
 
 ![](https://github.com/By2048/script/raw/master/image/readme/Folder.png)
+
 ![](https://github.com/By2048/script/raw/master/image/readme/Markdown.png)
+
 ![](https://github.com/By2048/script/raw/master/image/readme/BiliBili.png)
+
 ![](https://github.com/By2048/script/raw/master/image/readme/Windows.png)
