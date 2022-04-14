@@ -36,6 +36,14 @@ except ImportError:
     sys.path.append(WindowsPath(__file__).parents[1].as_posix())
     from tool.file import lnk_to_exe, exe_version
 
+
+def join(loader, node):
+    nodes = loader.construct_sequence(node)
+    return ' '.join([item for item in nodes])
+
+
+yaml.add_constructor(r'!Join', join)
+
 console = get_console()
 
 windows_config_path = WindowsPath('E:\\Config\\Windows.yaml')
@@ -102,7 +110,9 @@ class Folder:
 class Script:
     path: WindowsPath = None
     exe: WindowsPath = None
-    args: str = None
+    args: list = None
+    before: list = None
+    after: list = None
 
 
 def check():
@@ -305,15 +315,26 @@ def init_folders():
 def init_scripts():
     for script_sub_folder in windows_config.get("Script").keys():
         for script_name, script_args in windows_config["Script"][script_sub_folder].items():
-            args = script_args
-            args = [] if args is None else args
-            args = [args] if isinstance(args, str) else args
-            args = [arg for arg in args if arg is not None]
+
             script = Script()
             script.path = path_script / script_sub_folder / f"{script_name}.bat"
-            if args:
-                script.exe = args[0]
-                script.args = args[1:] if len(args) > 1 else []
+
+            if not script_args:
+                scripts.append(script)
+                continue
+
+            exe = script_args.get("Exe") or ""
+            args = script_args.get("Args") or []
+            before = script_args.get("Before") or []
+            after = script_args.get("After") or []
+            args = [args] if not isinstance(args, list) else args
+            before = [before] if not isinstance(before, list) else before
+            after = [after] if not isinstance(after, list) else after
+
+            script.exe = exe
+            script.args = args
+            script.before = before
+            script.after = after
             scripts.append(script)
 
 
@@ -357,35 +378,45 @@ def create_script():
     text = ""
     script: Script
     for script in scripts:
-        exe = script.exe
-        args = script.args
 
-        if not exe:
+        if not script.exe:
             continue
 
         code = "@Echo Off\n\n"
         code += "SetLocal\n\n"
-        code += f"Set Exe=\"{exe}\"\n"
-        if not args or len(args) == 0:
+
+        if script.before:
+            for before in script.before:
+                code += f"{before}\n"
+            code += "\n"
+
+        code += f"Set Exe=\"{script.exe}\"\n"
+        if not script.args or len(script.args) == 0:
             code += f"\n%Exe%  %*\n\n"
-        elif len(args) == 1:
-            code += f"Set Arg=\"{args[0]}\"\n\n"
+        elif len(script.args) == 1:
+            code += f"Set Arg=\"{script.args[0]}\"\n\n"
             code += f"%Exe%  %Arg%  %*\n\n"
-        elif len(args) > 1:
-            for index, arg in enumerate(args, start=1):
+        elif len(script.args) > 1:
+            for index, arg in enumerate(script.args, start=1):
                 code += f"Set Arg{index}=\"{arg}\"\n"
             cmd = "\n%Exe%"
-            for index in range(1, len(args) + 1):
+            for index in range(1, len(script.args) + 1):
                 cmd += f"  %Arg{index}%"
             cmd += "  %*\n\n"
             code += cmd
+
+        if script.after:
+            for after in script.after:
+                code += f"{after}\n"
+            code += "\n"
+
         code += "EndLocal"
 
         with open(script.path, "w") as file:
             file.write(code)
 
-        args = ' '.join(args) if args else ""
-        text += f"{script.path.stem:>15}  {exe} {args} \n"
+        args = ' '.join(script.args) if script.args else ""
+        text += f"{script.path.stem:>15}  {script.exe} {args} \n"
 
     text = text.rstrip()
     title = f"{path_script}\\"
@@ -468,7 +499,7 @@ def main():
     check()
 
     # help \ folder \ lnk \ script \ all
-    args = sys.argv[1:] if len(sys.argv) > 1 else sys.argv
+    args = sys.argv[1:] if len(sys.argv) > 1 else ["all"]
     args = [item.lower() for item in args]
 
     arg = args[0] if len(args) >= 1 else "all"
@@ -569,8 +600,8 @@ def main():
 
 def test():
     pass
-    # init_folders()
-    # print(folders)
+    init_folders()
+    print(folders)
 
     # init_scripts()
     # print(scripts)
