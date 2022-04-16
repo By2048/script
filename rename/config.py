@@ -400,6 +400,9 @@ config_software = [
     # PowerShell-7.2.2-win-x64.zip
     [r"(PowerShell)(-)([\d\.]+)(-win-x64)(.zip)", r"\1_\3\5"],
 
+    # gvim_8.2.2825_x86_signed.exe
+    [r"(gvim)(_)([\d\.]+)(_x86_signed)(.exe)", r"GVim_\3\5"],
+
 ]
 
 config_python = [
