@@ -362,16 +362,23 @@ def create_desktop(folder: Folder):
     desktop_ini_data = desktop_ini_data.strip()
 
     desktop_ini_path = folder.path / 'desktop.ini'
+
+    content = ""
     if desktop_ini_path.exists():
-        os.system(f" attrib -s -h \"{desktop_ini_path}\" ")
+        file = open(desktop_ini_path, "r", encoding="gbk")
+        content = "".join(file.readlines())
+        file.close()
+
+    if desktop_ini_data == content:
+        return
 
     try:
+        os.system(f" attrib -s -h \"{desktop_ini_path}\" ")
         with open(desktop_ini_path, 'w', encoding="gbk") as file:
             file.write(desktop_ini_data)
+        os.system(f" attrib +s +h \"{desktop_ini_path}\" ")
     except Exception as e:
         logger.exception(e)
-
-    os.system(f" attrib +s +h \"{desktop_ini_path}\" ")
 
 
 def create_script():

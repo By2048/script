@@ -3,6 +3,7 @@ import os
 import sys
 import typing
 import copy
+import hashlib
 from datetime import datetime
 from pathlib import Path, WindowsPath
 from typing import Union, Any, Callable
@@ -182,6 +183,20 @@ def bdfilm(file: WindowsPath):
     name = name.replace('：', ' ')
 
     file = file.with_name(name)
+    return file
+
+
+def md5(file: WindowsPath):
+    if not file.name.lower().startswith("md5"):
+        return
+    hash_md5 = hashlib.md5()
+    with open(file, "rb") as content:
+        while chunk := content.read(4096):
+            hash_md5.update(chunk)
+        # for chunk in iter(lambda: content.read(4096), b""):
+        #     hash_md5.update(chunk)
+    hash_md5 = hash_md5.hexdigest()
+    file = file.with_stem(hash_md5)
     return file
 
 
@@ -428,6 +443,8 @@ config_other = [
     bilibili,
 
     bdfilm,
+
+    md5,
 
     # MuMu20210129215157.png
     [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
