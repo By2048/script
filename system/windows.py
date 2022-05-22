@@ -286,6 +286,7 @@ def init_folders():
 
             # if not lnk._ignore_:
             lnk.name = lnk.name or f"{folder.path.name}.lnk"
+            lnk.name = f"{lnk.name}.lnk" if not lnk.name.endswith(".lnk") else lnk.name
             if lnk.target_path:
                 lnk.target_path = folder.path / lnk.target_path
             else:
@@ -571,7 +572,7 @@ def main():
             if folder.lnk:
                 create_lnk(folder)
                 if name := folder.lnk.name:
-                    lnks.append(name)
+                    lnks.append(name.rstrip(".lnk"))
 
         lnks.sort()
         text = ""
