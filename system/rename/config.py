@@ -275,6 +275,9 @@ config_software = [
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", _capitalize_)],
 
+    # BitComet_1.87_setup.exe
+    [r"(BitComet)(_)([\d\.]+)(_setup)(.exe)", r"\1_\3\5"],
+
     # ffmpeg-2021-12-12-git-996b13fac4-full_build.7z
     [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", _upper_2_)],
     # [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", r"\1_\3\7"],
@@ -482,3 +485,10 @@ config_other = [
 ]
 
 config_rename = config_image_video + config_software + config_python + config_other
+
+try:
+    from config_tmp import config
+except ImportError:
+    from .config_tmp import config
+finally:
+    config_rename += config if config else config_rename
