@@ -84,7 +84,7 @@ def main(command="", folder="", debug=False):
 
 
 def debug():
-    folder = WindowsPath('T:\\Test\\')
+    folder = WindowsPath('T:\\@\\')
     rename.folder = folder
     rename.rule = rule
     rename.init()

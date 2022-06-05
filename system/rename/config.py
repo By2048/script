@@ -79,7 +79,10 @@ def version(file: WindowsPath, key: str):
     if key.lower() not in file.name.lower():
         return
     version_data = get_version(file)
-    new_name = f"{key}_{version_data}.exe"
+    if version_data:
+        new_name = f"{key}_{version_data}.exe"
+    else:
+        new_name = f"{key}.exe"
     file = file.with_name(new_name)
     return file
 
@@ -289,10 +292,14 @@ config_software = [
     [r"(cloudmusic)(setup)([\d\.]+)(.exe)", r"CloudMusic_\3\4"],
 
     # rdm-2021.3.0.0.exe
-    [r"(rdm)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
+    # resp-2022.3.0.0.exe
+    [r"(rdm|resp)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
 
     # QuiteRSS-0.19.4.zip
     [r"(QuiteRSS)(-)([\d\.]+)(.zip)", r"\1_\3\4"],
+
+    # MobaXterm_Portable_v22.0.zip
+    [r"(MobaXterm)(_Portable_)(v)([\d\.]+)(.zip)", r"\1_\4\5"],
 
     # FreeFileSync_11.8_Windows_Setup.exe
     [r"(FreeFileSync_)([\d\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
@@ -322,7 +329,7 @@ config_software = [
     # ScreenToGif.2.27.3.Setup.msi
     [r"(ScreenToGif)(\.)([\d\.]+)(.Setup)(.msi)", r"\1_\3\5"],
     # ScreenToGif.2.27.3.Portable.zip
-    [r"(ScreenToGif)(\.)([\d\.]+)(.Portable)(.zip)", r"\1_\3\5"],
+    [r"(ScreenToGif)(\.)([\d\.]+)(.Portable|.Portable.x64)(.zip)", r"\1_\3\5"],
 
     # Git-2.31.0-64-bit.exe
     [r"(Git)(-)([\d\.]+)(-64-bit)(.exe)", r"\1_\3\5"],
@@ -344,6 +351,8 @@ config_software = [
 
     # AutoHotkey_1.1.33.10_setup.exe
     [r"(AutoHotkey)(_)([\d\.]+)(_setup)(.exe)", r"\1_\3\5"],
+    # AutoHotkey_2.0-beta.3.zip
+    [r"(AutoHotkey)(_)([\d\.]+)(-beta)([\d\.]+)(.zip)", r"\1_\3\5\6"],
 
     # Maye.1.2.6-20211001.zip
     [r"(Maye)(.)(\d.\d.\d)(-)(\d+)(.zip)", r"\1_\3\6"],
@@ -381,6 +390,9 @@ config_software = [
 
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
+
+    # MouseInc2.12.1.7z
+    [r"(MouseInc)([\d\.]+)(.7z)", r"\1_\2\3"],
 
     # npp.8.1.9.portable.x64.zip
     [r"(npp.)([\d\.]+)(.portable)(.x64)(.zip)", r"Notepad++_\2\5"],
