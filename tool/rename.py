@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from collections.abc import Callable
@@ -161,7 +162,7 @@ class Rename(object):
             return
         print()
         table = Table(box=box.ROUNDED)
-        table.add_column("old_name", justify="right")
+        table.add_column("old_name", justify="left")
         table.add_column("I", justify="center")
         table.add_column("new_name", justify="left")
         for index, file in enumerate(self.files, 1):
@@ -172,7 +173,9 @@ class Rename(object):
         print()
 
 
-def get_version(file: WindowsPath):
+def get_version(file: WindowsPath | str):
+    if isinstance(file, WindowsPath):
+        file = file.as_posix()
     try:
         info = win32api.GetFileVersionInfo(file, os.sep)
         ms = info['FileVersionMS']
@@ -182,7 +185,7 @@ def get_version(file: WindowsPath):
         result = f"{high(ms)}.{low(ms)}.{high(ls)}.{low(ls)}"
         return result
     except Exception as e:
-        print(e)
+        logging.exception(e)
         return None
 
 
