@@ -1,45 +1,28 @@
-import json
+import re
 import os
 import sys
+import json
 import time
 import math
 import subprocess
-import builtins
-import re
-
-import rich.padding
-from rich import *
-from rich.text import Text
-from rich.live import Live
-from rich.align import Align
-from rich.panel import Panel
-from rich.progress import SpinnerColumn, Progress, BarColumn, TextColumn
-from rich.table import Table
-from rich.layout import Layout
-from rich.console import Console
-from rich.console import Group
-from rich.live import Live
-from rich import box
-from rich import print as rprint
-from rich import get_console
 
 from pathlib import WindowsPath
 
-console = rich.console.Console()
+from rich import box
+from rich.text import Text
+from rich.align import Align
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.layout import Layout
+from rich.live import Live
+
+console = Console()
 
 w = 140
 h = 28
-# if console.width < w or console.height < h:
-#     rprint(f"Console {console.width}x{console.height}")
-#     exit()
 x = int((console.width - w) / 2)
 y = int((console.height - h) / 2)
-
-layout = Layout()
-
-# cmd = r"D:\Git\bin\git.exe clone --progress git@github.com:By2048/script.git"
-# cmd = r"D:\Git\bin\git.exe clone --progress https://github.com/fatedier/frp.git"
-
 
 folder = WindowsPath(r"E:\\GitX\\")
 folder_paths = list(folder.iterdir())
@@ -50,6 +33,13 @@ folder_pages = []
 for i in range(0, len(folder_paths), page_size):
     folder_pages.append(folder_paths[i:i + page_size])
 page_total = len(folder_pages)
+
+layout = Layout(name="Content")
+
+
+def git_clone():
+    # cmd = r"D:\Git\bin\git.exe clone --progress https://github.com/fatedier/frp.git"
+    pass
 
 
 def update_table_tree(path: WindowsPath):
@@ -76,17 +66,18 @@ def update_table_tree(path: WindowsPath):
             break
 
     for index, value in enumerate(folder_page, start=1):
+        index = str(index).zfill(2)
         if path == value:
-            table.add_row(str(index).zfill(2), "", value.name, style="Black On White")
+            table.add_row(index, "", value.name, style="Black On White")
         else:
-            table.add_row(str(index).zfill(2), "", value.name)
+            table.add_row(index, "", value.name)
 
-    if offset := page_size - len(table.rows):
-        for _ in range(0, offset + 1):
+    # 第一行是空行
+    if offset := page_size - (len(table.rows) - 1):
+        for _ in range(0, offset):
             table.add_row("", "", "")
 
     table.caption = f"{page_index} / {page_total}"
-
     table.add_row("", "", "")
     layout["Folder"].update(Panel(table))
 
@@ -160,16 +151,21 @@ def update_git_log(live: Live, path: WindowsPath):
 
 
 def init_gui():
-    layout.name = "Content"
-    layout["Content"].split_row(Layout(name="Folder", size=35), Layout(name="Git"))
-    layout["Git"].split_column(Layout(name="Git.Url", size=3), Layout(name="Git.Log"))
+    layout["Content"].split_row(
+        Layout(name="Folder", size=35),
+        Layout(name="Git")
+    )
+    layout["Git"].split_column(
+        Layout(name="Git.Url", size=3),
+        Layout(name="Git.Log")
+    )
     layout["Folder"].update(Panel(Text(""), box=box.ROUNDED))
     layout["Git.Url"].update(Panel(Text(""), box=box.ROUNDED))
     layout["Git.Log"].update(Panel(Text(""), box=box.ROUNDED))
 
 
 def main():
-    gui = Align.center(rich.panel.Panel(layout, width=w, height=h, box=rich.box.MINIMAL))
+    gui = Align.center(Panel(layout, width=w, height=h, box=box.MINIMAL))
     init_gui()
     with Live(gui, auto_refresh=False, screen=False) as live:
         for folder_path in folder_paths:
@@ -181,13 +177,16 @@ def main():
 
 
 def test():
-    gui = Align.center(rich.panel.Panel(layout, width=w, height=h, box=rich.box.MINIMAL))
+    gui = Align.center(Panel(layout, width=w, height=h, box=box.MINIMAL))
     init_gui()
-    update_table_tree(folder_paths[1])
+    update_table_tree(folder_paths[11])
+    console.print(gui)
+    update_table_tree(folder_paths[21])
     console.print(gui)
 
 
 if __name__ == '__main__':
+    # test()
     try:
         main()
     except KeyboardInterrupt:
