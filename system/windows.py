@@ -157,7 +157,9 @@ def init_folders():
         return icon
 
     def get_info(folder: Folder):
-        info = folder.desktop.info.strip()
+        info = folder.desktop.info
+        if info:
+            info = info.strip()
 
         if not info:
             _exe_ = folder.path / f"{folder.path.name}.exe"
@@ -217,7 +219,7 @@ def init_folders():
             rule = info[1]
             files = list(folder.path.rglob(rule))
             files = [file for file in files if "desktop.ini" not in file.as_posix()]
-            count = len(files)
+            count = str(len(files))
             return count
 
         return info
