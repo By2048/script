@@ -291,6 +291,9 @@ config_software = [
     # cloudmusicsetup2.9.5.199424.exe
     [r"(cloudmusic)(setup)([\d\.]+)(.exe)", r"CloudMusic_\3\4"],
 
+    # scrcpy-win64-v1.24.zip
+    [r"(scrcpy)(-win64)(-v)([\d\.]+)(.zip)", r"Scrcpy_\4\5"],
+
     # rdm-2021.3.0.0.exe
     # resp-2022.3.0.0.exe
     [r"(rdm|resp)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
