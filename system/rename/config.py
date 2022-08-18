@@ -366,7 +366,7 @@ config_software = [
     [r"(VeraCrypt)( Setup )([\d\.]+)(-Update)(\d)(.exe)", r"\1_\3.\5\6"],
 
     # go1.17.3.windows-arm64.zip
-    [r"(go)([\d\.]+)(.windows-)(amd64)(.zip)", (r"\1_\2\5", _capitalize_)],
+    [r"(go)([\d\.]+)(.windows)(-amd64|-arm64)(.zip)", (r"\1_\2\5", _capitalize_)],
 
     # jdk-17_windows-x64_bin.zip
     [r"(jdk)(-)([\d\.]+)(_windows)(-x64_bin)(.zip)", r"\1_\3\6"],
