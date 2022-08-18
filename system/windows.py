@@ -37,12 +37,12 @@ except ImportError:
     from tool.file import lnk_to_exe, exe_version
 
 
-def join(loader, node):
+def yaml_join(loader, node):
     nodes = loader.construct_sequence(node)
     return ' '.join([item for item in nodes])
 
 
-yaml.add_constructor(r'!Join', join)
+yaml.add_constructor(r'!Join', yaml_join)
 
 console = get_console()
 
@@ -619,8 +619,8 @@ def main():
 
 def test():
     pass
-    init_folders()
-    print(folders)
+    # init_folders()
+    # print(folders)
 
     # init_scripts()
     # print(scripts)
