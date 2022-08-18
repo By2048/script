@@ -103,9 +103,11 @@ def update_git_remote(path: WindowsPath):
 def update_git_log(live: Live, path: WindowsPath):
     # cmd = r"D:\Git\bin\git.exe clone --progress git@github.com:By2048/_django_.git"
     layout["Git.Log"].update(Panel(Text("")))
+    live.refresh()
 
     cmd = r"D:\Git\bin\git.exe pull"
-    proc = subprocess.Popen(cmd, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(cmd, cwd=path,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     datas = []
     lines = []
@@ -123,6 +125,7 @@ def update_git_log(live: Live, path: WindowsPath):
                 )
             )
             live.refresh()
+            time.sleep(1)
             return
 
         if not line:
@@ -174,6 +177,7 @@ def main():
             update_git_remote(folder_path)
             live.refresh()
             update_git_log(live, folder_path)
+            live.refresh()
 
 
 def test():
