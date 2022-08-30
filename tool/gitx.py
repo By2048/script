@@ -8,7 +8,7 @@ import subprocess
 
 from pathlib import WindowsPath
 
-from rich import box
+from rich import box, print
 from rich.text import Text
 from rich.align import Align
 from rich.console import Console
@@ -25,7 +25,18 @@ x = int((console.width - w) / 2)
 y = int((console.height - h) / 2)
 
 folder = WindowsPath(r"E:\\GitX\\")
+if len(sys.argv) > 1:
+    folder = sys.argv[1]
+    folder = WindowsPath(folder)
+
+if not folder:
+    print()
+    print(f"[red]Git Folder Not Exist[/red]")
+    print()
+    sys.exit()
+
 folder_paths = list(folder.iterdir())
+folder_paths = [item for item in folder_paths if not item.name.startswith("#")]
 folder_names = [item.name for item in folder_paths]
 
 page_size = 20
@@ -102,7 +113,8 @@ def update_git_remote(path: WindowsPath):
 
 def update_git_log(live: Live, path: WindowsPath):
     # cmd = r"D:\Git\bin\git.exe clone --progress git@github.com:By2048/_django_.git"
-    layout["Git.Log"].update(Panel(Text("")))
+    content = Panel(Align.center(Text("Start Update ..."), vertical="middle"))
+    layout["Git.Log"].update(content)
     live.refresh()
 
     cmd = r"D:\Git\bin\git.exe pull"
@@ -114,7 +126,6 @@ def update_git_log(live: Live, path: WindowsPath):
     while line := proc.stdout.readline():
         datas.append(line)
         line = line.decode('gbk')
-
         if line == "Already up to date.\n":
             layout["Git.Log"].update(
                 Panel(
@@ -151,6 +162,7 @@ def update_git_log(live: Live, path: WindowsPath):
         data = "".join(lines)
         layout["Git.Log"].update(Panel(data))
         live.refresh()
+    time.sleep(3)
 
 
 def init_gui():
@@ -194,4 +206,4 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        sys.exit(0)
+        sys.exit()
