@@ -21,7 +21,6 @@ try:
 except ImportError:
     from .config import config_rename
 
-
 import fire
 
 rename = Rename()
