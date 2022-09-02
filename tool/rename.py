@@ -26,7 +26,7 @@ class File(object):
         self.new: WindowsPath = WindowsPath()
 
     def __str__(self):
-        return f"{self.old.name} -> {self.new.name}"
+        return f"{self.old.name}\t-> {self.new.name}"
 
 
 class Rename(object):
@@ -73,9 +73,9 @@ class Rename(object):
 
     def debug(self):
         _print_()
-        _print_(self.folder)
+        _print_(self.folder.as_posix())
         for item in self.files:
-            _print_(f"    {item}")
+            _print_(f"\t{item}")
         _print_()
 
     def config(self):

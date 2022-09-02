@@ -90,6 +90,7 @@ def version(file: WindowsPath, key: str):
 github = partial(version, key="GitHubDesktop")
 potplayer = partial(version, key="PotPlayer")
 fdm = partial(version, key="FDM")
+nt_lite = partial(version, key="NTLite")
 
 
 def lol(file: WindowsPath):
@@ -256,9 +257,8 @@ config_image_video = [
 config_software = [
 
     github,
-
     potplayer,
-
+    nt_lite,
     fdm,
 
     # Xftp-7.0.0063p.exe
