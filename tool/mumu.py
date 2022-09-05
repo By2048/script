@@ -13,7 +13,7 @@ except ImportError:
     from tool.rename import Rename
 
 path_from = WindowsPath("C:\\Users\\Administrator\\Documents\\MuMu共享文件夹\\")
-path_to = WindowsPath("P:\\Image\\Android\\")
+path_to = WindowsPath("F:\\Image\\Android\\")
 
 files_from = []
 
