@@ -237,7 +237,6 @@ def init_folders():
             #     continue
 
             global_lnk_ignore: bool = windows_config[win_disk].get("(Lnk)") == "Ignore"
-            global_desktop_ignore: bool = windows_config[win_disk].get("(Desktop)") == "Ignore"
 
             for disk_folder in windows_config[win_disk].keys():
 
@@ -326,7 +325,8 @@ def init_folders():
 
 def init_scripts():
     for script_sub_folder in windows_config.get("Script").keys():
-        for script_name, script_args in windows_config["Script"][script_sub_folder].items():
+        config_items = windows_config["Script"][script_sub_folder].items()
+        for script_name, script_args in config_items:
 
             script = Script()
             script.path = path_script / script_sub_folder / f"{script_name}.bat"
@@ -352,7 +352,8 @@ def init_scripts():
 
 def center_panel_text(text, title="", width=99):
     text = Text(text)
-    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    panel = Panel(text, title=title, title_align="center",
+                  width=width, border_style="red")
     panel = Align.center(panel)
     console.print(panel)
     console.print()
@@ -370,7 +371,10 @@ def create_desktop(folder: Folder):
     if desktop.info:
         desktop_ini_data += f"\nInfoTip = {desktop.info}"
     if desktop.name and desktop.name != folder.path.name:
-        desktop_ini_data += f"\nLocalizedResourceName = {folder.path.name} | {desktop.name}"
+        if desktop.name.startswith("~"):
+            desktop_ini_data += f"\nLocalizedResourceName = {desktop.name.strip('~')}"
+        else:
+            desktop_ini_data += f"\nLocalizedResourceName = {folder.path.name} | {desktop.name}"
     desktop_ini_data = desktop_ini_data.strip()
 
     desktop_ini_path = folder.path / 'desktop.ini'
@@ -440,7 +444,8 @@ def create_script():
     text = text.rstrip()
     title = f"{path_script}\\"
     width = 120
-    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    panel = Panel(text, title=title, title_align="center",
+                  width=width, border_style="red")
     console.print(Align.center(panel))
 
 
@@ -476,7 +481,8 @@ def create_script_txt():
 
     width = 11 * 5 + 3 * 2
     title = str(path_script_txt)
-    panel = Panel(text, title=title, title_align="center", width=width, border_style="red")
+    panel = Panel(text, title=title, title_align="center",
+                  width=width, border_style="red")
     console.print(Align.center(panel))
 
 
