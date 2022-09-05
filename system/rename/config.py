@@ -90,7 +90,8 @@ def version(file: WindowsPath, key: str):
 github = partial(version, key="GitHubDesktop")
 potplayer = partial(version, key="PotPlayer")
 fdm = partial(version, key="FDM")
-nt_lite = partial(version, key="NTLite")
+ntlite = partial(version, key="NTLite")
+postman = partial(version, key="Postman")
 
 
 def lol(file: WindowsPath):
@@ -256,10 +257,11 @@ config_image_video = [
 
 config_software = [
 
+    fdm,
     github,
     potplayer,
-    nt_lite,
-    fdm,
+    ntlite,
+    postman,
 
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
@@ -402,6 +404,9 @@ config_software = [
 
     # QuickLook-3.7.0.zip
     [r"(QuickLook)(-)([\d\.]+)(.zip)", r"\1_\3\4"],
+
+    # Apifox-2.1.34.exe
+    [r"(Apifox)(-)([\d\.]+)(.exe)", r"\1_\3\4"],
 
     # Firefox Setup 94.0.1.exe
     [r"(Firefox)(\s)(Setup)(\s)([\d\.]+)(.exe)", r"\1_\5\6"],
