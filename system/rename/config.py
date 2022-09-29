@@ -205,11 +205,63 @@ def md5(file: WindowsPath):
     return file
 
 
-config_image_video = [
+def record(file: WindowsPath):
+    # 9月29日 23点58分.mp3
+    name = file.name.lower()
+    data = "月,日,点,分".split(",")
+    check = True
+    for item in data:
+        if item not in name:
+            check = False
+    if not check:
+        return
 
-    # 手机屏幕截图
-    app_screen,
-    app_screenshot,
+    stem = file.stem.replace(" ", "")
+    for item in data:
+        stem = stem.replace(item, " ")
+
+    stem = stem.split(" ")
+    year = datetime.now().year
+    month = stem[0].zfill(2)
+    day = stem[1].zfill(2)
+    hour = stem[2].zfill(2)
+    minute = stem[3].zfill(2)
+
+    stem = f"{year}-{month}-{day} {hour}-{minute}"
+    file = file.with_stem(stem)
+    return file
+
+
+config_phone = [
+
+    # 通话录音
+    record,
+
+    # 950618(950618)_20210627205223.mp3
+    # 15669947201(15669947201)_20211015170939.mp3
+    #  1        2   3    4   5  6      7      8      9      10     11     12
+    [r"([\s\S]+)(\()(\d+)(\))(_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp3)",
+     r"(\6-\7-\8)(\9-\10-\11)(\3)(\1)\12"],
+
+    # 9月29日 23点58分.mp3
+    #  1    2   3    4   5    6   7   8   9    10
+    # [r"(\d+)(月)(\d+)(日)(\s+)(\d+)(点)(\d+)(分)(.mp3)", r"\1-\3-\6-\8\10"],
+
+    # setting_backup_20220318131853.zip
+    [r"(setting_backup_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.zip)",
+     r"FooViewConfig_\2-\3-\4_\5-\6-\7\8"],
+
+    # VID_20210731_144747.mp4
+    [r"(VID_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.mp4|.3gp)",
+     r"\2-\3-\4 \6-\7-\8\9"],
+
+    # Recorder_20210903135016.mp4
+    [r"(Recorder_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp4)",
+     r"\2-\3-\4 \5-\6-\7\8"],
+
+]
+
+config_image_video = [
 
     # 以时间戳格式保存的图片
     timestamp,
@@ -220,38 +272,42 @@ config_image_video = [
 
     lol,
 
+    # 手机屏幕截图
+    app_screen,
+    app_screenshot,
+
+    # PANO_20140629_080915.jpg
+    [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
+     r"\2-\3-\4 \6-\7-\8\9"],
+
     # 20210622183532.jpg
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)", r"\1-\2-\3 \4-\5-\6\7"],
 
     # 20200102144326376.png
-    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(.jpg|.png)", r"\1-\2-\3 \4-\5-\6\8"],
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(.jpg|.png)",
+     r"\1-\2-\3 \4-\5-\6\8"],
 
     # Screenshot_20210318215042.png
-    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
+    [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
+     r"\2-\3-\4 \5-\6-\7\8"],
 
     # Screenshot_2014-08-31-13-59-51.png
     [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(.png)", r"\2 \4\5"],
 
     # Screenshot_2013-11-29-13-01-53-1.png
-    [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(\-1)(.png)", r"\2 \4\6"],
+    [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(\-1)(.png)",
+     r"\2 \4\6"],
 
     # IMG20200712095720.jpg
     [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # IMG_20200926_214521.jpg
-    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
+    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
+     r"\2-\3-\4 \6-\7-\8\9"],
 
     # IMG_20040622_141354_HDR.jpg
-    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)", r"\2-\3-\4 \6-\7-\8\10"],
-
-    # PANO_20140629_080915.jpg
-    [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \6-\7-\8\9"],
-
-    # VID_20210731_144747.mp4
-    [r"(VID_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.mp4|.3gp)", r"\2-\3-\4 \6-\7-\8\9"],
-
-    # Recorder_20210903135016.mp4
-    [r"(Recorder_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp4)", r"\2-\3-\4 \5-\6-\7\8"],
+    [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)",
+     r"\2-\3-\4 \6-\7-\8\10"],
 
 ]
 
@@ -479,7 +535,8 @@ config_other = [
     [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
 
     # stylish-2021_12_3.json,.bin,.dms
-    [r"(stylish)(-)(\d+)(_)(\d+)(_)(\d+)(.json)(,.bin,.dms)", (r"\1_\3-\5-\7\8", _capitalize_)],
+    [r"(stylish)(-)(\d+)(_)(\d+)(_)(\d+)(.json)(,.bin,.dms)",
+     (r"\1_\3-\5-\7\8", _capitalize_)],
 
     # 第1集
     # 第xxx集
@@ -492,19 +549,14 @@ config_other = [
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
 
-    # 950618(950618)_20210627205223.mp3
-    # 15669947201(15669947201)_20211015170939.mp3
-    #  1        2   3    4   5  6      7      8      9      10     11     12
-    [r"([\s\S]+)(\()(\d+)(\))(_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp3)",
-     r"(\6-\7-\8)(\9-\10-\11)(\3)(\1)\12"],
-
-    # setting_backup_20220318131853.zip
-    [r"(setting_backup_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.zip)",
-     r"FooViewConfig_\2-\3-\4_\5-\6-\7\8"],
-
 ]
 
-config_rename = config_image_video + config_software + config_python + config_other
+config_rename = [] \
+                + config_phone \
+                + config_image_video \
+                + config_software \
+                + config_python \
+                + config_other
 
 try:
     from config_tmp import config
