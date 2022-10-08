@@ -374,7 +374,7 @@ config_software = [
     [r"(sysdiag)(\-all\-)([\d\.]+)(\-)([\d\.]+)(.exe)", r"HuoRong_\3\6"],
 
     # WiresharkPortable_3.4.9.paf.exe
-    [r"(Wireshark)(Portable)(_)([\d\.]+)(.paf)(.exe)", r"\1_\4\6"],
+    [r"(Wireshark)(Portable|Portable64)(_)([\d\.]+)(.paf)(.exe)", r"\1_\4\6"],
 
     # node-v14.17.0-win-x64.zip
     [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", _capitalize_)],
@@ -396,6 +396,9 @@ config_software = [
     [r"(Git)(-)([\d\.]+)(-64-bit)(.exe)", r"\1_\3\5"],
     # PortableGit-2.31.0-64-bit.7z.exe
     [r"(Portable)(Git)(-)([\d\.]+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
+
+    # platform-tools_r33.0.3-windows.zip
+    [r"(platform-tools)(_r)([\d\.]+)(-windows)(.zip)", r"Adb_\3\5"],
 
     # Q-Dir_Portable_x64.zip
     [r"(Q-Dir)(_)(Portable_x64)(.zip)", r"\1\4"],
