@@ -113,6 +113,7 @@ class Script:
     args: list = None
     before: list = None
     after: list = None
+    commands: list = None
 
 
 def check():
@@ -339,14 +340,17 @@ def init_scripts():
             args = script_args.get("Args") or []
             before = script_args.get("Before") or []
             after = script_args.get("After") or []
+            commands = script_args.get("Commands") or []
             args = [args] if not isinstance(args, list) else args
             before = [before] if not isinstance(before, list) else before
             after = [after] if not isinstance(after, list) else after
+            commands = [commands] if not isinstance(commands, list) else commands
 
             script.exe = exe
             script.args = args
             script.before = before
             script.after = after
+            script.commands = commands
             scripts.append(script)
 
 
@@ -371,8 +375,8 @@ def create_desktop(folder: Folder):
     if desktop.info:
         desktop_ini_data += f"\nInfoTip = {desktop.info}"
     if desktop.name and desktop.name != folder.path.name:
-        if desktop.name.startswith("~"):
-            desktop_ini_data += f"\nLocalizedResourceName = {desktop.name.strip('~')}"
+        if desktop.name.startswith("$"):
+            desktop_ini_data += f"\nLocalizedResourceName = {desktop.name.strip('$')}"
         else:
             desktop_ini_data += f"\nLocalizedResourceName = {folder.path.name} | {desktop.name}"
     desktop_ini_data = desktop_ini_data.strip()
@@ -401,32 +405,38 @@ def create_script():
     text = ""
     script: Script
     for script in scripts:
-
-        if not script.exe:
+        if not script.exe and not script.commands:
             continue
 
         code = "@Echo Off\n\n"
         code += "SetLocal\n\n"
+
+        if script.commands:
+            code += "\n"
+            for command in script.commands:
+                code = code + command + "\n\n"
+            code += "\n"
 
         if script.before:
             for before in script.before:
                 code += f"{before}\n"
             code += "\n"
 
-        code += f"Set Exe=\"{script.exe}\"\n"
-        if not script.args or len(script.args) == 0:
-            code += f"\n%Exe%  %*\n\n"
-        elif len(script.args) == 1:
-            code += f"Set Arg=\"{script.args[0]}\"\n\n"
-            code += f"%Exe%  %Arg%  %*\n\n"
-        elif len(script.args) > 1:
-            for index, arg in enumerate(script.args, start=1):
-                code += f"Set Arg{index}=\"{arg}\"\n"
-            cmd = "\n%Exe%"
-            for index in range(1, len(script.args) + 1):
-                cmd += f"  %Arg{index}%"
-            cmd += "  %*\n\n"
-            code += cmd
+        if script.exe:
+            code += f"Set Exe=\"{script.exe}\"\n"
+            if not script.args or len(script.args) == 0:
+                code += f"\n%Exe%  %*\n\n"
+            elif len(script.args) == 1:
+                code += f"Set Arg=\"{script.args[0]}\"\n\n"
+                code += f"%Exe%  %Arg%  %*\n\n"
+            elif len(script.args) > 1:
+                for index, arg in enumerate(script.args, start=1):
+                    code += f"Set Arg{index}=\"{arg}\"\n"
+                cmd = "\n%Exe%"
+                for index in range(1, len(script.args) + 1):
+                    cmd += f"  %Arg{index}%"
+                cmd += "  %*\n\n"
+                code += cmd
 
         if script.after:
             for after in script.after:
