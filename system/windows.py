@@ -283,7 +283,8 @@ def init_folders():
             desktop.icon = get_icon(folder)
             desktop.info = get_info(folder)
 
-            if not lnk:
+            lnk_default_exe = folder.path / f"{folder.path.name}.exe"
+            if not lnk and not lnk_default_exe.exists():
                 continue
 
             lnk.name = lnk.name or f"{folder.path.name}.lnk"
