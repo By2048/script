@@ -1,4 +1,4 @@
-# [2022-01-12]
+﻿# [2022-01-12]
 import re
 import os
 import sys
@@ -47,6 +47,7 @@ yaml.add_constructor(r'!Join', yaml_join)
 console = get_console()
 
 windows_config_path = WindowsPath('E:\\Config\\Windows.yaml')
+
 with open(windows_config_path, encoding="utf-8") as file:
     windows_config = yaml.unsafe_load(file)
 
@@ -66,12 +67,11 @@ class Desktop:
     name: str = ""
     info: str = ""
     icon: WindowsPath = None
-    _ignore_ = False
+
+    def __bool__(self):
+        return bool(self.name) or bool(self.info) or bool(self.icon)
 
     def __init__(self, data=None):
-        if data == "Ignore":
-            self._ignore_ = True
-            return
         data = {} if data is None else data
         self.name = data.get("Name") or ""
         self.info = data.get("Info") or ""
@@ -85,12 +85,11 @@ class Lnk:
     working_directory: WindowsPath = WindowsPath()
     description: str = ""
     icon_location: WindowsPath = WindowsPath()
-    _ignore_ = False
+
+    def __bool__(self):
+        return bool(self.name) and bool(self.target_path)
 
     def __init__(self, data: dict = None):
-        if data == "Ignore":
-            self._ignore_ = True
-            return
         data = {} if data is None else data
         self.name = data.get("Name") or ""
         self.target_path = data.get("TargetPath") or ""
@@ -104,6 +103,16 @@ class Folder:
     path: WindowsPath = WindowsPath()
     desktop: Desktop | None = Desktop()
     lnk: Lnk | None = Lnk()
+
+    def __repr__(self):
+        data = f">folder  {self.path}"
+        if self.desktop:
+            data = data + "\n desktop "
+            data = data + f"{self.desktop.name} {self.desktop.icon} {self.desktop.info}"
+        if self.lnk:
+            data = data + "\n lnk     "
+            data = data + f"{self.lnk.name} {self.lnk.target_path} {self.lnk.working_directory}"
+        return data
 
 
 @dataclass
@@ -184,7 +193,6 @@ def init_folders():
             _get = int(_get) if _get.isdigit() else None
 
             cmd = f"{folder.path}\\{_cmd}"
-
             result = subprocess.Popen(cmd,
                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                       shell=True)
@@ -230,54 +238,38 @@ def init_folders():
             if not win_disk.startswith("$"):
                 continue
 
-            _disk = win_disk.replace("$", "")
-            _disk = f"{_disk}:\\" if not _disk.endswith(":\\") else _disk
-            path_disk = WindowsPath(_disk)
-
-            # if str(path_disk) == "D:\\":
-            #     continue
-
-            global_lnk_ignore: bool = windows_config[win_disk].get("(Lnk)") == "Ignore"
+            disk = win_disk.replace("$", "")
+            disk = f"{disk}:\\" if not disk.endswith(":\\") else disk
+            disk_path = WindowsPath(disk)
 
             for disk_folder in windows_config[win_disk].keys():
-
-                # Global Config
-                if str(disk_folder).startswith("(") and str(disk_folder).endswith(")"):
-                    continue
-
-                path_folder = path_disk / disk_folder
-
+                path_folder = disk_path / disk_folder
                 if not path_folder.exists():
                     continue
-
-                folder = Folder()
-                folder.path = path_folder
 
                 desktop_config = windows_config[win_disk][disk_folder].get('Desktop')
                 lnk_config = windows_config[win_disk][disk_folder].get('Lnk')
 
+                folder = Folder()
+                folder.path = path_folder
                 desktop = Desktop(desktop_config)
-
                 folder.desktop = desktop
 
-                if global_lnk_ignore or lnk_config == "Ignore":
-                    folder.lnk = None
-                    folders.append(folder)
-                    continue
+                if not lnk_config or lnk_config == "Ignore":
+                    lnk_config = {}
 
-                # Default:None \ k-v
-                if isinstance(lnk_config, (dict, NoneType)):
+                # Default:None \ k-v 一个快捷方式
+                if isinstance(lnk_config, dict):
                     lnk = Lnk(lnk_config)
                     folder.lnk = lnk
                     folders.append(folder)
 
-                # [k-v]
+                # [k-v] 多个快捷方式
                 if isinstance(lnk_config, list):
-                    for index, _lnk_config_ in enumerate(lnk_config):
-                        lnk = Lnk(_lnk_config_)
+                    for index, item in enumerate(lnk_config):
+                        lnk = Lnk(item)
                         folder = copy.deepcopy(folder)
                         folder.lnk = lnk
-                        folder.desktop._ignore_ = index == 0
                         folders.append(folder)
 
     def complete():
@@ -287,7 +279,6 @@ def init_folders():
             desktop = folder.desktop
             lnk = folder.lnk
 
-            # if not desktop._ignore_:
             desktop.name = desktop.name or folder.path.name
             desktop.icon = get_icon(folder)
             desktop.info = get_info(folder)
@@ -295,7 +286,6 @@ def init_folders():
             if not lnk:
                 continue
 
-            # if not lnk._ignore_:
             lnk.name = lnk.name or f"{folder.path.name}.lnk"
             lnk.name = f"{lnk.name}.lnk" if not lnk.name.endswith(".lnk") else lnk.name
             if lnk.target_path:
@@ -365,9 +355,6 @@ def center_panel_text(text, title="", width=99):
 
 def create_desktop(folder: Folder):
     desktop = folder.desktop
-
-    if desktop._ignore_:
-        return
 
     desktop_ini_data = "[.ShellClassInfo]"
     if desktop.icon:
@@ -499,7 +486,7 @@ def create_script_txt():
 def create_lnk(folder: Folder):
     lnk = folder.lnk
 
-    if not lnk or lnk._ignore_:
+    if not lnk:
         return
 
     tmp_vbs_path = path_tmp / "lnk.vbs"
@@ -576,7 +563,7 @@ def main():
                         folder.desktop.info or "",
                         folder.desktop.name if folder.desktop.name != folder.path.name else ""]
                 line = [str(item) for item in line]
-                if folder.desktop._ignore_:
+                if not folder.desktop:
                     continue
                 table.add_row(*line)
                 if table.row_count > console.height - 6:
