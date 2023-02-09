@@ -89,7 +89,6 @@ def version(file: WindowsPath, key: str):
 
 github = partial(version, key="GitHubDesktop")
 potplayer = partial(version, key="PotPlayer")
-fdm = partial(version, key="FDM")
 ntlite = partial(version, key="NTLite")
 postman = partial(version, key="Postman")
 
@@ -313,7 +312,6 @@ config_image_video = [
 
 config_software = [
 
-    fdm,
     github,
     potplayer,
     ntlite,
@@ -341,7 +339,8 @@ config_software = [
 
     # ffmpeg-2021-12-12-git-996b13fac4-full_build.7z
     [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", _upper_2_)],
-    # [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", r"\1_\3\7"],
+    # ffmpeg-5.1.2-essentials_build.7z
+    [r"(ffmpeg)(-)([\d\.]+)(-essentials_build)(.7z)", (r"\1_\3\5", _upper_2_)],
 
     # navicat150_premium_cs_x64.exe
     [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", _capitalize_)],
@@ -499,6 +498,11 @@ config_software = [
 
     # gvim_8.2.2825_x86_signed.exe
     [r"(gvim)(_)([\d\.]+)(_x86_signed)(.exe)", r"GVim_\3\5"],
+
+    # LibreOffice_7.4.5_Win_x64.msi
+    [r"(LibreOffice)(_)([\d\.]+)(_Win_x64)(.msi)", r"\1_\3\5"],
+    # LibreOffice_7.4.5_Win_x64_sdk.msi
+    [r"(LibreOffice)(_)([\d\.]+)(_Win_x64)(_sdk)(.msi)", r"\1SDK_\3\6"],
 
 ]
 
