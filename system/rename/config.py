@@ -260,7 +260,7 @@ config_phone = [
 
 ]
 
-config_image_video = [
+config_media = [
 
     # 以时间戳格式保存的图片
     timestamp,
@@ -274,6 +274,24 @@ config_image_video = [
     # 手机屏幕截图
     app_screen,
     app_screenshot,
+
+    # 下载的动漫
+    # nicotv,
+
+    bilibili,
+
+    bdfilm,
+
+    # 第1集
+    # 第xxx集
+    [r"(第)(\d+)(集|话)(\s)(\S+)", (r"\2 \5", _zfill_)],
+    [r"(第)(\d+)(集|话)([\.\w\d]+)", (r"\2\4", _zfill_)],
+
+    # xxx(无修).mp4
+    [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
+
+    # MuMu20210129215157.png
+    [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
 
     # PANO_20140629_080915.jpg
     [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
@@ -451,6 +469,11 @@ config_software = [
     # XMind-for-Windows-64bit-11.1.1-202110191919.exe
     [r"(XMind)(-for)(-Windows)(-64bit)(-)([\d\.]+)(-\d+)(.exe)", r"\1_\6\8"],
 
+    # VSCode-win32-x64-1.75.1.zip
+    # VSCodeSetup-x64-1.75.1.exe
+    [r"(VSCode)(-win32-x64-)([\d\.]+)(.zip)", r"\1_\3\4"],
+    [r"(VSCode)(Setup)(-x64-)([\d\.]+)(.exe)", r"\1_\4\5"],
+
     # FoxmailSetup_7.2.20.273.exe
     [r"(Foxmail)(Setup)(_)([\d\.]+)(.exe)", r"\1\3\4\5"],
 
@@ -499,10 +522,38 @@ config_software = [
     # gvim_8.2.2825_x86_signed.exe
     [r"(gvim)(_)([\d\.]+)(_x86_signed)(.exe)", r"GVim_\3\5"],
 
+    # PowerToysSetup-0.36.0-x64.exe
+    [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
+
+    # OBS-Studio-29.0.1.zip
+    # OBS-Studio-29.0.1-Full-Installer-x64.exe
+    [r"(OBS)(-Studio-)([\d\.]+)(.zip)", r"\1_\3\4"],
+    [r"(OBS)(-Studio-)([\d\.]+)(-Full-Installer-x64)(.exe)", r"\1_\3\5"],
+
     # LibreOffice_7.4.5_Win_x64.msi
     [r"(LibreOffice)(_)([\d\.]+)(_Win_x64)(.msi)", r"\1_\3\5"],
     # LibreOffice_7.4.5_Win_x64_sdk.msi
     [r"(LibreOffice)(_)([\d\.]+)(_Win_x64)(_sdk)(.msi)", r"\1SDK_\3\6"],
+
+]
+
+config_iso = [
+
+    # manjaro-xfce-21.1.6-211017-linux513.iso
+    [r"(manjaro)(-)(\w+)(-)([\d\.]+)(-)(\d+)(-linux)(\d+)(.iso)",
+     r"Manjaro [version]\5 [linux]\9 [data]\7 [type]\3\10"],
+
+    # debian-11.5.0-amd64-DVD-1.iso
+    [r"(debian)(-)([\d\.]+)(-amd64-DVD-1)(.iso)", r"Debian_\3\5"],
+
+    # debian-11.5.0-amd64-netinst.iso
+    [r"(debian)(-)([\d\.]+)(-amd64-)(netinst)(.iso)", r"Debian_\3_NetInstall\6"],
+
+    # ubuntu-18.04.6-live-server-amd64.iso
+    [r"(ubuntu)(-)([\d\.]+)(-live-server-amd64)(.iso)", r"Ubuntu_\3_LiveServer\5"],
+
+    # deepin-desktop-community-20.8-amd64.iso
+    [r"(deepin)(-desktop-community-)([\d\.]+)(-amd64)(.iso)", r"Deepin_\3\5"],
 
 ]
 
@@ -523,45 +574,22 @@ config_python = [
 # 函数 \ 正则表达式
 config_other = [
 
-    # 下载的动漫
-    # nicotv,
-
-    bilibili,
-
-    bdfilm,
-
     md5,
-
-    # MuMu20210129215157.png
-    [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
-
-    # PowerToysSetup-0.36.0-x64.exe
-    [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
-
-    # xxx(无修).mp4
-    [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
-
-    # stylish-2021_12_3.json,.bin,.dms
-    [r"(stylish)(-)(\d+)(_)(\d+)(_)(\d+)(.json)(,.bin,.dms)",
-     (r"\1_\3-\5-\7\8", _capitalize_)],
-
-    # 第1集
-    # 第xxx集
-    [r"(第)(\d+)(集|话)(\s)(\S+)", (r"\2 \5", _zfill_)],
-    [r"(第)(\d+)(集|话)([\.\w\d]+)", (r"\2\4", _zfill_)],
 
     #  [Keep] XMind.lnk
     [r"(\[)(Keep)(\])(\s)([\d\w]+)(.lnk)", r"\1#\3\5\6"],
 
     # 〔98'〕
-    [r"(〔)([\s\S]+)(〕)(\.\w+)", (r"\2\4", lambda x: x.replace("'", " "))],
+    [r"(〔)([\s\S]+)(〕)(\.\w+)",
+     (r"\2\4", lambda f: f.with_name(f.name.replace("'", " ")))]
 
 ]
 
 config_rename = [] \
                 + config_phone \
-                + config_image_video \
+                + config_media \
                 + config_software \
+                + config_iso \
                 + config_python \
                 + config_other
 
