@@ -7,8 +7,10 @@ import shutil
 import time
 import copy
 from types import NoneType
+from typing import List, Dict
 
 import yaml
+import ctypes
 import tempfile
 import subprocess
 import win32api
@@ -57,10 +59,6 @@ path_lnk = WindowsPath(windows_config.get("#Lnk"))
 path_script = WindowsPath(windows_config.get("#Script"))
 path_script_txt = WindowsPath(windows_config.get("#ScriptText"))
 
-# 文件夹配置
-folders = []
-scripts = []
-
 
 @dataclass
 class Desktop:
@@ -101,17 +99,18 @@ class Lnk:
 @dataclass
 class Folder:
     path: WindowsPath = WindowsPath()
-    desktop: Desktop | None = Desktop()
-    lnk: Lnk | None = Lnk()
+    desktop: Desktop = Desktop()
+    lnks: List[Lnk] = None  # noqa
 
     def __repr__(self):
         data = f">folder  {self.path}"
         if self.desktop:
             data = data + "\n desktop "
             data = data + f"{self.desktop.name} {self.desktop.icon} {self.desktop.info}"
-        if self.lnk:
-            data = data + "\n lnk     "
-            data = data + f"{self.lnk.name} {self.lnk.target_path} {self.lnk.working_directory}"
+        if self.lnks:
+            for lnk in self.lnks:
+                data = data + "\n lnk     "
+                data = data + f"{lnk.name} {lnk.target_path} {lnk.working_directory}"
         return data
 
 
@@ -123,6 +122,14 @@ class Script:
     before: list = None
     after: list = None
     commands: list = None
+
+    def __repr__(self):
+        return self.exe
+
+
+# 文件夹配置
+folders: List[Folder] = []
+scripts: List[Script] = []
 
 
 def check():
@@ -137,6 +144,13 @@ def init_folders():
         desktop = folder.desktop
 
         icon = None
+
+        # 默认可以使用 Xxx.ico Xxx.png
+        ico_file = path_icon / f"{folder.path.name}.ico"
+        png_file = path_icon / f"{folder.path.name}.png"
+        if png_file.exists() and not ico_file.exists():
+            image = Image.open(png_file)
+            image.save(ico_file)
 
         if desktop.icon:
             if str(desktop.icon).endswith(".png"):
@@ -256,70 +270,68 @@ def init_folders():
                 folder.desktop = desktop
 
                 if not lnk_config or lnk_config == "Ignore":
-                    lnk_config = {}
+                    folder.lnks = []
 
                 # Default:None \ k-v 一个快捷方式
-                if isinstance(lnk_config, dict):
-                    lnk = Lnk(lnk_config)
-                    folder.lnk = lnk
-                    folders.append(folder)
+                if lnk_config and isinstance(lnk_config, dict):
+                    folder.lnks = [Lnk(lnk_config)]
 
                 # [k-v] 多个快捷方式
-                if isinstance(lnk_config, list):
-                    for index, item in enumerate(lnk_config):
-                        lnk = Lnk(item)
-                        folder = copy.deepcopy(folder)
-                        folder.lnk = lnk
-                        folders.append(folder)
+                if lnk_config and isinstance(lnk_config, list):
+                    folder.lnks = [Lnk(item) for item in lnk_config]
+
+                folders.append(folder)
 
     def complete():
         # 初始化Desktop|Lnk默认配置
         folder: Folder
         for folder in folders:
             desktop = folder.desktop
-            lnk = folder.lnk
+            lnks = folder.lnks
 
             desktop.name = desktop.name or folder.path.name
             desktop.icon = get_icon(folder)
             desktop.info = get_info(folder)
 
-            lnk_default_exe = folder.path / f"{folder.path.name}.exe"
-            if not lnk and not lnk_default_exe.exists():
-                continue
+            for lnk in lnks:
 
-            lnk.name = lnk.name or f"{folder.path.name}.lnk"
-            lnk.name = f"{lnk.name}.lnk" if not lnk.name.endswith(".lnk") else lnk.name
-            if lnk.target_path:
-                lnk.target_path = folder.path / lnk.target_path
-            else:
-                lnk.target_path = folder.path / f"{folder.path.name}.exe"
-            if lnk.working_directory:
-                lnk.working_directory = folder.path / lnk.working_directory
-            else:
-                lnk.working_directory = folder.path
+                lnk_default_exe = folder.path / f"{folder.path.name}.exe"
+                if not lnk and not lnk_default_exe.exists():
+                    continue
 
-            lnk.description = lnk.description or desktop.name or folder.path.name
-
-            if lnk.icon_location:
-                if str(lnk.icon_location).endswith(".ico"):
-                    lnk.icon_location = path_icon / lnk.icon_location
-                elif str(lnk.icon_location).endswith(".exe"):
-                    lnk.icon_location = folder.path / lnk.icon_location
+                lnk.name = lnk.name or f"{folder.path.name}.lnk"
+                if not lnk.name.endswith(".lnk"):
+                    lnk.name = f"{lnk.name}.lnk"
+                if lnk.target_path:
+                    lnk.target_path = folder.path / lnk.target_path
                 else:
-                    lnk.icon_location = desktop.icon
-            else:
-                lnk.icon_location = folder.desktop.icon
+                    lnk.target_path = folder.path / f"{folder.path.name}.exe"
+                if lnk.working_directory:
+                    lnk.working_directory = folder.path / lnk.working_directory
+                else:
+                    lnk.working_directory = folder.path
 
-    init()
+                lnk.description = lnk.description or desktop.name or folder.path.name
 
-    complete()
+                if lnk.icon_location:
+                    if str(lnk.icon_location).endswith(".ico"):
+                        lnk.icon_location = path_icon / lnk.icon_location
+                    elif str(lnk.icon_location).endswith(".exe"):
+                        lnk.icon_location = folder.path / lnk.icon_location
+                    else:
+                        lnk.icon_location = desktop.icon
+                else:
+                    lnk.icon_location = folder.desktop.icon
+
+    if not folders:
+        init()
+        complete()
 
 
 def init_scripts():
     for script_sub_folder in windows_config.get("Script").keys():
         config_items = windows_config["Script"][script_sub_folder].items()
         for script_name, script_args in config_items:
-
             script = Script()
             script.path = path_script / script_sub_folder / f"{script_name}.bat"
 
@@ -387,6 +399,8 @@ def create_desktop(folder: Folder):
         os.system(f" attrib +s +h \"{desktop_ini_path}\" ")
     except Exception as e:
         logger.exception(e)
+    finally:
+        os.system(f" attrib +r \"{folder.path.as_posix()}\" ")
 
 
 def create_script():
@@ -484,9 +498,7 @@ def create_script_txt():
     console.print(Align.center(panel))
 
 
-def create_lnk(folder: Folder):
-    lnk = folder.lnk
-
+def create_lnk(lnk: Lnk):
     if not lnk:
         return
 
@@ -507,13 +519,13 @@ def create_lnk(folder: Folder):
     time.sleep(0.1)
 
 
-def flush(folder: Folder):
-    # Error 刷新文件夹图片
-    shell.SHChangeNotify(
-        shellcon.SHCNE_UPDATEITEM,
-        shellcon.SHCNF_PATH,
-        bytes(folder.path.as_posix(), 'gbk'),
-        None
+def flush():
+    # 刷新文件夹图片
+    ctypes.windll.shell32.SHChangeNotify(
+        shellcon.SHCNE_ASSOCCHANGED,
+        shellcon.SHCNF_IDLIST,
+        0,
+        0
     )
 
 
@@ -558,7 +570,6 @@ def main():
             folder: Folder
             for folder in folders:
                 create_desktop(folder)
-                flush(folder)
                 line = [f"{folder.path}\\",
                         folder.desktop.icon or "",
                         folder.desktop.info or "",
@@ -573,6 +584,8 @@ def main():
                     table_center = Align.center(table)
                     live.update(table_center)
 
+        flush()
+
         if arg == "folder":
             return
 
@@ -580,24 +593,26 @@ def main():
         console.clear()
 
     if arg in ["lnk", "all"]:
-        lnks = []
+        lnks_name = []
         init_folders()
-        folder: Folder
         for folder in folders:
-            if folder.lnk:
-                create_lnk(folder)
-                if name := folder.lnk.name:
-                    lnks.append(name.rstrip(".lnk"))
+            if not folder.lnks:
+                continue
+            for lnk in folder.lnks:
+                if not lnk:
+                    continue
+                create_lnk(lnk)
+                lnks_name.append(lnk.name.rstrip(".lnk"))
 
-        lnks.sort()
+        lnks_name.sort()
         text = ""
-        for index, item in enumerate(lnks, start=1):
+        for index, item in enumerate(lnks_name, start=1):
             text += f"{item:<20}"
             if index % 5 == 0:
                 text += "\n"
 
-        panel = Panel(text, title=f"{path_lnk}\\", title_align="center", width=120,
-                      border_style="red")
+        panel = Panel(text, title=f"{path_lnk}\\", title_align="center",
+                      width=120, border_style="red")
         console.print()
         console.print()
         console.print(Align.center(panel))
@@ -622,7 +637,6 @@ def main():
 
 
 def test():
-    pass
     # init_folders()
     # print(folders)
 
@@ -631,6 +645,7 @@ def test():
 
     # create_script()
     # create_script_txt()
+    pass
 
 
 if __name__ == '__main__':
