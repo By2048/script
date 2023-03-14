@@ -65,6 +65,7 @@ class Desktop:
     name: str = ""
     info: str = ""
     icon: WindowsPath = None
+    rename: Dict = None
 
     def __bool__(self):
         return bool(self.name) or bool(self.info) or bool(self.icon)
@@ -74,6 +75,7 @@ class Desktop:
         self.name = data.get("Name") or ""
         self.info = data.get("Info") or ""
         self.icon = data.get("Icon") or ""
+        self.rename = data.get("Rename") or {}
 
 
 @dataclass
@@ -247,6 +249,53 @@ def init_folders():
 
         return info
 
+    def get_rename(folder: Folder):
+        info = {}
+        rename = folder.desktop.rename
+        if not rename:
+            return info
+        if isinstance(rename, str):
+            rename = [rename]
+        for item in rename:
+            items = item.split("|")
+            key = items[0].rstrip()
+            value = items[1].lstrip()
+            info[key] = value
+        return info
+
+    def get_lnks(folder: Folder):
+        for lnk in folder.lnks:
+
+            lnk_default_exe = folder.path / f"{folder.path.name}.exe"
+            if not lnk and not lnk_default_exe.exists():
+                continue
+
+            lnk.name = lnk.name or f"{folder.path.name}.lnk"
+            if not lnk.name.endswith(".lnk"):
+                lnk.name = f"{lnk.name}.lnk"
+            if lnk.target_path:
+                lnk.target_path = folder.path / lnk.target_path
+            else:
+                lnk.target_path = folder.path / f"{folder.path.name}.exe"
+            if lnk.working_directory:
+                lnk.working_directory = folder.path / lnk.working_directory
+            else:
+                lnk.working_directory = folder.path
+
+            lnk.description = lnk.description or folder.desktop.name or folder.path.name
+
+            if lnk.icon_location:
+                if str(lnk.icon_location).endswith(".ico"):
+                    lnk.icon_location = path_icon / lnk.icon_location
+                elif str(lnk.icon_location).endswith(".exe"):
+                    lnk.icon_location = folder.path / lnk.icon_location
+                else:
+                    lnk.icon_location = folder.desktop.icon
+            else:
+                lnk.icon_location = folder.desktop.icon
+
+        return []
+
     def init():
         for win_disk in windows_config.keys():
             if not win_disk.startswith("$"):
@@ -286,42 +335,11 @@ def init_folders():
         # 初始化Desktop|Lnk默认配置
         folder: Folder
         for folder in folders:
-            desktop = folder.desktop
-            lnks = folder.lnks
-
-            desktop.name = desktop.name or folder.path.name
-            desktop.icon = get_icon(folder)
-            desktop.info = get_info(folder)
-
-            for lnk in lnks:
-
-                lnk_default_exe = folder.path / f"{folder.path.name}.exe"
-                if not lnk and not lnk_default_exe.exists():
-                    continue
-
-                lnk.name = lnk.name or f"{folder.path.name}.lnk"
-                if not lnk.name.endswith(".lnk"):
-                    lnk.name = f"{lnk.name}.lnk"
-                if lnk.target_path:
-                    lnk.target_path = folder.path / lnk.target_path
-                else:
-                    lnk.target_path = folder.path / f"{folder.path.name}.exe"
-                if lnk.working_directory:
-                    lnk.working_directory = folder.path / lnk.working_directory
-                else:
-                    lnk.working_directory = folder.path
-
-                lnk.description = lnk.description or desktop.name or folder.path.name
-
-                if lnk.icon_location:
-                    if str(lnk.icon_location).endswith(".ico"):
-                        lnk.icon_location = path_icon / lnk.icon_location
-                    elif str(lnk.icon_location).endswith(".exe"):
-                        lnk.icon_location = folder.path / lnk.icon_location
-                    else:
-                        lnk.icon_location = desktop.icon
-                else:
-                    lnk.icon_location = folder.desktop.icon
+            folder.desktop.name = folder.desktop.name or folder.path.name
+            folder.desktop.icon = get_icon(folder)
+            folder.desktop.info = get_info(folder)
+            folder.desktop.rename = get_rename(folder)
+            folder.lnks = get_lnks(folder)
 
     if not folders:
         init()
@@ -379,6 +397,11 @@ def create_desktop(folder: Folder):
             desktop_ini_data += f"\nLocalizedResourceName = {desktop.name.strip('$')}"
         else:
             desktop_ini_data += f"\nLocalizedResourceName = {folder.path.name} | {desktop.name}"
+    if desktop.rename:
+        desktop_ini_data += "\n\n[LocalizedFileNames]"
+        for key, value in desktop.rename.items():
+            desktop_ini_data += f"\n{key} = {value}"
+
     desktop_ini_data = desktop_ini_data.strip()
 
     desktop_ini_path = folder.path / 'desktop.ini'
@@ -639,6 +662,9 @@ def main():
 def test():
     # init_folders()
     # print(folders)
+
+    # for folder in folders:
+    #     create_desktop(folder)
 
     # init_scripts()
     # print(scripts)
