@@ -147,38 +147,31 @@ def init_folders():
 
         icon = None
 
-        # 默认可以使用 Xxx.ico Xxx.png
+        if desktop.icon and "." not in desktop.icon:
+            ico_file = path_icon / f"{desktop.icon}.ico"
+            png_file = path_icon / f"{desktop.icon}.png"
+            if ico_file.exists():
+                icon = ico_file
+            elif png_file.exists():
+                image = Image.open(png_file)
+                image.save(ico_file)
+                icon = ico_file
+            return icon
+
+        if desktop.icon and ".exe" in desktop.icon:
+            icon = folder.path / desktop.icon
+            return icon
+
+        # 默认可以使用 Xxx.ico
         ico_file = path_icon / f"{folder.path.name}.ico"
+        if ico_file.exists():
+            icon = ico_file
+
         png_file = path_icon / f"{folder.path.name}.png"
         if png_file.exists() and not ico_file.exists():
             image = Image.open(png_file)
             image.save(ico_file)
-
-        if desktop.icon:
-            if str(desktop.icon).endswith(".png"):
-                png = path_icon / desktop.icon
-                ico = png.with_suffix(".ico")
-                if not ico.exists() and png.exists():
-                    image = Image.open(png)
-                    image.save(ico)
-                icon = ico
-            elif str(desktop.icon).endswith(".ico"):
-                icon = path_icon / desktop.icon
-            elif str(desktop.icon).endswith(".exe"):
-                icon = folder.path / desktop.icon
-        else:
-            if desktop.info and desktop.info.endswith(".exe"):
-                icon_exe = folder.path / desktop.info
-                if icon_exe.exists():
-                    icon = icon_exe
-
-            icon_exe = folder.path / f"{folder.path.name}.exe"
-            if icon_exe.exists():
-                icon = icon_exe
-
-            icon_file = path_icon / f"{folder.path.name}.ico"
-            if icon_file.exists():
-                icon = icon_file
+            icon = ico_file
 
         return icon
 
