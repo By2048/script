@@ -231,11 +231,12 @@ def init_folders():
                 obj = re.search(_match, content).group(_get)
             return obj
 
+        # 文件数量
         if info and info.startswith("count | *"):
             info = info.split("|")
             info = [item.strip() for item in info]
             rule = info[1]
-            files = list(folder.path.rglob(rule))
+            files = list(folder.path.glob(rule))
             files = [file for file in files if "desktop.ini" not in file.as_posix()]
             count = str(len(files))
             return count
