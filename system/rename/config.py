@@ -322,6 +322,10 @@ config_media = [
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
      r"\2-\3-\4 \6-\7-\8\9"],
 
+    # IMG_2013-10-05_22.23.51.jpg
+    [r"(IMG_)(\d{4}-\d{2}-\d{2})(_)(\d{2})(\.)(\d{2})(\.)(\d{2})(.jpg)",
+     r"\2 \4-\6-\8\9"],
+
     # IMG_20040622_141354_HDR.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)",
      r"\2-\3-\4 \6-\7-\8\10"],
@@ -525,6 +529,9 @@ config_software = [
     # PowerToysSetup-0.36.0-x64.exe
     [r"(PowerToys)(Setup-)([\d\.]+)(-x64)(.exe)", r"\1_\3\5"],
 
+    # WindTerm_2.5.0_Windows_Portable_x86_64.zip
+    [r"(WindTerm_)([\d\.]+)(_Windows_Portable_x86_64)(.zip)", r"\1\2\4"],
+
     # OBS-Studio-29.0.1.zip
     # OBS-Studio-29.0.1-Full-Installer-x64.exe
     [r"(OBS)(-Studio-)([\d\.]+)(.zip)", r"\1_\3\4"],
@@ -550,10 +557,19 @@ config_iso = [
     [r"(debian)(-)([\d\.]+)(-amd64-)(netinst)(.iso)", r"Debian_\3_NetInstall\6"],
 
     # ubuntu-18.04.6-live-server-amd64.iso
-    [r"(ubuntu)(-)([\d\.]+)(-live-server-amd64)(.iso)", r"Ubuntu_\3_LiveServer\5"],
+    [r"(ubuntu)(-)([\d\.]+)(-live-server-amd64)(.iso)", r"Ubuntu_Server_\3\5"],
+    # ubuntu-22.04.2-desktop-amd64.iso
+    [r"(ubuntu)(-)([\d\.]+)(-desktop-amd64)(.iso)", r"Ubuntu_Desktop_\3\5"],
 
     # deepin-desktop-community-20.8-amd64.iso
+    # deepin-desktop-community-23-Alpha2-amd64.iso
     [r"(deepin)(-desktop-community-)([\d\.]+)(-amd64)(.iso)", r"Deepin_\3\5"],
+    [r"(deepin)(-desktop-community-)(\d+)(-Alpha)(\d)(-amd64)(.iso)", r"Deepin_Alpha_\3.\5\7"],
+
+    # kali-linux-2023.1-installer-amd64.iso
+    # kali-linux-2023.1-vmware-amd64.7z
+    [r"(kali)(-linux-)([\d\.]+)(-installer-amd64)(.iso)", r"Kali_\3\5"],
+    [r"(kali)(-linux-)([\d\.]+)(-vmware-amd64)(.7z)", r"Kali_\3\5"],
 
 ]
 
