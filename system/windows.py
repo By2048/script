@@ -87,7 +87,7 @@ class Lnk:
     icon_location: WindowsPath = WindowsPath()
 
     def __bool__(self):
-        return bool(self.name) and bool(self.target_path)
+        return bool(self.name) or bool(self.target_path)
 
     def __init__(self, data: dict = None):
         data = {} if data is None else data
@@ -257,39 +257,6 @@ def init_folders():
             info[key] = value
         return info
 
-    def get_lnks(folder: Folder):
-        for lnk in folder.lnks:
-
-            lnk_default_exe = folder.path / f"{folder.path.name}.exe"
-            if not lnk and not lnk_default_exe.exists():
-                continue
-
-            lnk.name = lnk.name or f"{folder.path.name}.lnk"
-            if not lnk.name.endswith(".lnk"):
-                lnk.name = f"{lnk.name}.lnk"
-            if lnk.target_path:
-                lnk.target_path = folder.path / lnk.target_path
-            else:
-                lnk.target_path = folder.path / f"{folder.path.name}.exe"
-            if lnk.working_directory:
-                lnk.working_directory = folder.path / lnk.working_directory
-            else:
-                lnk.working_directory = folder.path
-
-            lnk.description = lnk.description or folder.desktop.name or folder.path.name
-
-            if lnk.icon_location:
-                if str(lnk.icon_location).endswith(".ico"):
-                    lnk.icon_location = path_icon / lnk.icon_location
-                elif str(lnk.icon_location).endswith(".exe"):
-                    lnk.icon_location = folder.path / lnk.icon_location
-                else:
-                    lnk.icon_location = folder.desktop.icon
-            else:
-                lnk.icon_location = folder.desktop.icon
-
-        return []
-
     def init():
         for win_disk in windows_config.keys():
             if not win_disk.startswith("$"):
@@ -325,7 +292,7 @@ def init_folders():
 
                 folders.append(folder)
 
-    def complete():
+    def complete_desktop():
         # 初始化Desktop|Lnk默认配置
         folder: Folder
         for folder in folders:
@@ -333,11 +300,43 @@ def init_folders():
             folder.desktop.icon = get_icon(folder)
             folder.desktop.info = get_info(folder)
             folder.desktop.rename = get_rename(folder)
-            folder.lnks = get_lnks(folder)
+
+    def complete_lnks():
+        folder: Folder
+        for folder in folders:
+            for lnk in folder.lnks:
+                lnk_default_exe = folder.path / f"{folder.path.name}.exe"
+                if not lnk and not lnk_default_exe.exists():
+                    continue
+
+                lnk.name = lnk.name or f"{folder.path.name}.lnk"
+                if not lnk.name.endswith(".lnk"):
+                    lnk.name = f"{lnk.name}.lnk"
+                if lnk.target_path:
+                    lnk.target_path = folder.path / lnk.target_path
+                else:
+                    lnk.target_path = folder.path / f"{folder.path.name}.exe"
+                if lnk.working_directory:
+                    lnk.working_directory = folder.path / lnk.working_directory
+                else:
+                    lnk.working_directory = folder.path
+
+                lnk.description = lnk.description or folder.desktop.name or folder.path.name
+
+                if lnk.icon_location:
+                    if str(lnk.icon_location).endswith(".ico"):
+                        lnk.icon_location = path_icon / lnk.icon_location
+                    elif str(lnk.icon_location).endswith(".exe"):
+                        lnk.icon_location = folder.path / lnk.icon_location
+                    else:
+                        lnk.icon_location = folder.desktop.icon
+                else:
+                    lnk.icon_location = folder.desktop.icon
 
     if not folders:
         init()
-        complete()
+        complete_desktop()
+        complete_lnks()
 
 
 def init_scripts():
