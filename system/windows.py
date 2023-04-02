@@ -63,7 +63,7 @@ path_script_txt = WindowsPath(windows_config.get("#ScriptText"))
 @dataclass
 class Desktop:
     name: str = ""
-    info: str = ""
+    info: str | list = ""
     icon: WindowsPath = None
     rename: Dict = None
 
@@ -75,7 +75,7 @@ class Desktop:
         self.name = data.get("Name") or ""
         self.info = data.get("Info") or ""
         self.icon = data.get("Icon") or ""
-        self.rename = data.get("Rename") or {}
+        self.rename = data.get("Rename") or ""
 
 
 @dataclass
@@ -177,71 +177,93 @@ def init_folders():
 
     def get_info(folder: Folder):
         info = folder.desktop.info
-        if info:
-            info = info.strip()
 
+        # 尝试使用默认配置进行解析
         if not info:
             _exe_ = folder.path / f"{folder.path.name}.exe"
             if _exe_.exists():
-                info = exe_version(_exe_)
-                return info
+                version = exe_version(_exe_)
+                return version
 
-        if info and info.endswith(".exe"):
-            _exe_ = folder.path / info
-            info = exe_version(_exe_.as_posix())
-            return info
+        all_info = []
+        if isinstance(info, str):
+            all_info = [info.strip()]
+        if isinstance(info, list):
+            all_info = [item.strip() for item in info]
 
-        # 执行指定命名获取的版本
-        # cmd | frpc.exe -v | (\d+) | \1
-        if info and info.startswith("cmd |"):
-            info = info.split("|")
-            info = [item.strip() for item in info]
-            _cmd = info[1]
-            _match = info[2]
-            _get = info[3]
-            _get = int(_get) if _get.isdigit() else None
+        info_content = []
 
-            cmd = f"{folder.path}\\{_cmd}"
-            result = subprocess.Popen(cmd,
-                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                      shell=True)
-            result_out = result.stdout.readlines()
-            result_err = result.stderr.readlines()
-            result = result_out or result_err
-            result = [item.decode() for item in result]
-            result = "".join(result)
+        for info in all_info:
 
-            obj = re.search(_match, result).group(_get)
-            return obj
+            # 软件版本信息
+            if info.lower().endswith(".exe"):
+                _exe_ = folder.path / info
+                version = exe_version(_exe_.as_posix())
+                info_content.append(version)
+                continue
 
-        # 指定文件内容
-        # file | .\ventoy\version | ([\d\.]+) | 1
-        if info and info.startswith("file |"):
-            info = info.split("|")
-            info = [item.strip() for item in info]
-            _file_path = info[1]
-            _match = info[2]
-            _get = info[3]
+            # 执行指定命名获取的版本
+            # cmd | frpc.exe -v | (\d+) | \1
+            if info.lower().startswith("cmd |"):
+                _info = info.split("|")
+                _info = [item.strip() for item in _info]
+                _cmd = _info[1]
+                _match = _info[2]
+                _get = _info[3]
+                _get = int(_get) if _get.isdigit() else None
 
-            _file_path = folder.path / _file_path
-            _get = int(_get) if _get.isdigit() else None
+                cmd = f"{folder.path}\\{_cmd}"
+                result = subprocess.Popen(cmd,
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                          shell=True)
+                result_out = result.stdout.readlines()
+                result_err = result.stderr.readlines()
+                result = result_out or result_err
+                result = [item.decode() for item in result]
+                result = "".join(result)
 
-            with open(_file_path, "r", encoding="utf-8") as file:
-                content = file.read().strip()
-                obj = re.search(_match, content).group(_get)
-            return obj
+                obj = re.search(_match, result).group(_get)
+                info_content.append(obj)
+                continue
 
-        # 文件数量
-        if info and info.startswith("count | *"):
-            info = info.split("|")
-            info = [item.strip() for item in info]
-            rule = info[1]
-            files = list(folder.path.glob(rule))
-            files = [file for file in files if "desktop.ini" not in file.as_posix()]
-            count = str(len(files))
-            return count
+            # 指定文件内容
+            # file | .\ventoy\version | ([\d\.]+) | 1
+            if info.lower().startswith("file |"):
+                _info = info.split("|")
+                _info = [item.strip() for item in _info]
+                _file_path = _info[1]
+                _match = _info[2]
+                _get = _info[3]
 
-        return info
+                _file_path = folder.path / _file_path
+                _get = int(_get) if _get.isdigit() else None
+
+                with open(_file_path, "r", encoding="utf-8") as file:
+                    content = file.read().strip()
+                    obj = re.search(_match, content).group(_get)
+                info_content.append(obj)
+                continue
+
+            # 文件数量
+            if info.lower().startswith("count | *"):
+                _info = info.split("|")
+                _info = [item.strip() for item in _info]
+                rule = _info[1]
+                total = 0
+                if " " in rule:
+                    all_rule = rule.split()
+                else:
+                    all_rule = [rule]
+                for _rule in all_rule:
+                    files = list(folder.path.glob(_rule))
+                    total += len(files)
+                total = f"{total} {rule}"
+                info_content.append(total)
+                continue
+
+            info_content.append(info)
+
+        return " | ".join(info_content)
 
     def get_rename(folder: Folder):
         info = {}
