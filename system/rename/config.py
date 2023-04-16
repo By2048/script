@@ -21,14 +21,7 @@ except ImportError:
 # file : 文件原始完整路径
 
 
-def _capitalize_(file: WindowsPath):
-    stem = file.stem
-    stem = stem.capitalize()
-    file = file.with_stem(stem)
-    return file
-
-
-def _upper_with_index_(file: WindowsPath, index=-1):
+def upper_x(file: WindowsPath, index=-1):
     stem = file.stem
     if index == -1:
         stem = stem.upper()
@@ -40,15 +33,89 @@ def _upper_with_index_(file: WindowsPath, index=-1):
     return file
 
 
-_upper_ = partial(_upper_with_index_, index=-1)
-_upper_1_ = partial(_upper_with_index_, index=1)
-_upper_2_ = partial(_upper_with_index_, index=2)
-_upper_3_ = partial(_upper_with_index_, index=3)
-_upper_4_ = partial(_upper_with_index_, index=4)
-_upper_5_ = partial(_upper_with_index_, index=5)
+def version_x(file: WindowsPath, key: str):
+    if key.lower() not in file.name.lower():
+        return
+    version_data = get_version(file)
+    if version_data:
+        new_name = f"{key}_{version_data}.exe"
+    else:
+        new_name = f"{key}.exe"
+    file = file.with_name(new_name)
+    return file
 
 
-def _zfill_(file: WindowsPath):
+#
+# 以时间戳格式保存的文件
+def timestamp(file: WindowsPath):
+    stem = file.stem
+    if not stem.isdigit():
+        return
+    if len(stem) not in [13, 10]:
+        return
+    if len(stem) == 13:
+        stem = stem[:-3]
+    stem = int(stem)
+    stem = datetime.fromtimestamp(stem)
+    stem = stem.strftime("%Y-%m-%d %H-%M-%S")
+    file = file.with_stem(stem)
+    return file
+
+
+def timestamp_with_x(file: WindowsPath, xxx: str):
+    stem = file.stem.lower()
+    if xxx not in stem:
+        return
+    stem = stem.replace(xxx, "")
+    if not stem.isdigit():
+        return
+    if len(stem) not in [13, 10]:
+        return
+    if len(stem) == 13:  # 去除毫秒数据
+        stem = stem[:-3]
+    stem = int(stem)
+    try:
+        stem = datetime.fromtimestamp(stem)
+        stem = stem.strftime("%Y-%m-%d %H-%M-%S")
+    except:  # noqa
+        return
+    file = file.with_stem(stem)
+    return file
+
+
+upper_1 = partial(upper_x, index=1)
+upper_2 = partial(upper_x, index=2)
+upper_3 = partial(upper_x, index=3)
+upper_4 = partial(upper_x, index=4)
+upper_5 = partial(upper_x, index=5)
+upper_all = partial(upper_x, index=-1)
+
+github = partial(version_x, key="GitHubDesktop")
+potplayer = partial(version_x, key="PotPlayer")
+ntlite = partial(version_x, key="NTLite")  # noqa
+postman = partial(version_x, key="Postman")
+
+# 1638862702756.jpg
+timestamp_image = partial(timestamp_with_x, xxx="")
+
+# screenshot_1616779141888.png
+app_screenshot = partial(timestamp_with_x, xxx="screenshot_")
+
+# wx_camera_1616986022655.jpg
+wx_camera = partial(timestamp_with_x, xxx="wx_camera_")
+
+# mmexport1641361625029.png
+wx_image = partial(timestamp_with_x, xxx="mmexport")
+
+
+def capitalize(file: WindowsPath):
+    stem = file.stem
+    stem = stem.capitalize()
+    file = file.with_stem(stem)
+    return file
+
+
+def zfill(file: WindowsPath):
     if " " in file.stem:
         index, name = file.stem.split(" ", 1)
         index = index.zfill(2)
@@ -61,38 +128,6 @@ def _zfill_(file: WindowsPath):
         return file
 
 
-def _timestamp_(file: WindowsPath):
-    _type_ = file.suffix
-    _stem_ = file.stem
-    _types_ = ".png .jpg .jpeg .gif .webm"
-    if _type_ in _types_.split() and _stem_.isdigit() and len(_stem_) in [13, 10]:
-        if len(_stem_) == 13:
-            _stem_ = _stem_[:-3]
-        _stem_ = int(_stem_)
-        _stem_ = datetime.fromtimestamp(_stem_)
-        _stem_ = _stem_.strftime("%Y-%m-%d %H-%M-%S")
-        file = file.with_stem(_stem_)
-        return file
-
-
-def version(file: WindowsPath, key: str):
-    if key.lower() not in file.name.lower():
-        return
-    version_data = get_version(file)
-    if version_data:
-        new_name = f"{key}_{version_data}.exe"
-    else:
-        new_name = f"{key}.exe"
-    file = file.with_name(new_name)
-    return file
-
-
-github = partial(version, key="GitHubDesktop")
-potplayer = partial(version, key="PotPlayer")
-ntlite = partial(version, key="NTLite")
-postman = partial(version, key="Postman")
-
-
 def lol(file: WindowsPath):
     # 11-18_HN16_NEW-1449121099_05.webm
     if '_HN' in file.name and '_NEW' in file.name and file.name.endswith('.webm'):
@@ -100,15 +135,6 @@ def lol(file: WindowsPath):
         date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
         file = file.with_stem(f"LOL {date}")
         return file
-
-
-def timestamp_with_xxx(file: WindowsPath, xxx: str):
-    _stem_ = file.stem.lower()
-    if xxx in _stem_:
-        _stem_ = _stem_.replace(xxx, "")
-        file = file.with_stem(_stem_)
-    file = _timestamp_(file)
-    return file
 
 
 def app_screen(file: WindowsPath):
@@ -126,19 +152,6 @@ def app_screen(file: WindowsPath):
         _date_ = _date_.strftime("[%Y-%m-%d][%H-%M-%S]")
         file = file.with_stem(f"{_date_}[{_app_}]")
         return file
-
-
-# screenshot_1616779141888.png
-app_screenshot = partial(timestamp_with_xxx, xxx="screenshot_")
-
-# 1638862702756.jpg
-timestamp = partial(timestamp_with_xxx, xxx="")
-
-# wx_camera_1616986022655.jpg
-wx_camera = partial(timestamp_with_xxx, xxx="wx_camera_")
-
-# mmexport1641361625029.png
-wx_image = partial(timestamp_with_xxx, xxx="mmexport")
 
 
 def nicotv(file: WindowsPath):
@@ -191,14 +204,10 @@ def bdfilm(file: WindowsPath):
 
 
 def md5(file: WindowsPath):
-    if not file.name.lower().startswith("md5"):
-        return
     hash_md5 = hashlib.md5()
     with open(file, "rb") as content:
         while chunk := content.read(4096):
             hash_md5.update(chunk)
-        # for chunk in iter(lambda: content.read(4096), b""):
-        #     hash_md5.update(chunk)
     hash_md5 = hash_md5.hexdigest()
     file = file.with_stem(hash_md5)
     return file
@@ -262,9 +271,6 @@ config_phone = [
 
 config_media = [
 
-    # 以时间戳格式保存的图片
-    timestamp,
-
     # 微信保存的图片
     wx_camera,
     wx_image,
@@ -284,8 +290,8 @@ config_media = [
 
     # 第1集
     # 第xxx集
-    [r"(第)(\d+)(集|话)(\s)(\S+)", (r"\2 \5", _zfill_)],
-    [r"(第)(\d+)(集|话)([\.\w\d]+)", (r"\2\4", _zfill_)],
+    [r"(第)(\d+)(集|话)(\s)(\S+)", (r"\2 \5", zfill)],
+    [r"(第)(\d+)(集|话)([\.\w\d]+)", (r"\2\4", zfill)],
 
     # xxx(无修).mp4
     [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
@@ -303,6 +309,14 @@ config_media = [
     # 20200102144326376.png
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(.jpg|.png)",
      r"\1-\2-\3 \4-\5-\6\8"],
+
+    # 1638862702.jpg
+    # 1638862702756.jpg
+    # ".png .jpg .jpeg .gif .webm"
+    # len(_stem_) in [13, 10]:
+
+    # v2-48fa5b6760cfe078212498c6667a77a0.jpeg
+    [r"(v2-)([\d\w]{32})(.jpeg|.jpg|.png)", md5],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
@@ -346,26 +360,26 @@ config_software = [
     [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
     # aria2-1.36.0-win-64bit-build1.zip
-    [r"(aria2)(-)([\d\.]+)(-win-64bit-build1)(.zip)", (r"\1_\3\5", _capitalize_)],
+    [r"(aria2)(-)([\d\.]+)(-win-64bit-build1)(.zip)", (r"\1_\3\5", capitalize)],
 
     # dexpot_1614_portable_r2439.zip
-    [r"(dexpot)(_)([\d\.]+)(_portable)(\_\w+)(.zip)", (r"\1_\3\6", _capitalize_)],
+    [r"(dexpot)(_)([\d\.]+)(_portable)(\_\w+)(.zip)", (r"\1_\3\6", capitalize)],
     # dexpot_1614_r2439.exe
-    [r"(dexpot)(_)([\d\.]+)(\_\w+)(.exe)", (r"\1_\3\5", _capitalize_)],
+    [r"(dexpot)(_)([\d\.]+)(\_\w+)(.exe)", (r"\1_\3\5", capitalize)],
 
     # ventoy-1.0.38-windows.zip
-    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", _capitalize_)],
+    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", capitalize)],
 
     # BitComet_1.87_setup.exe
     [r"(BitComet)(_)([\d\.]+)(_setup)(.exe)", r"\1_\3\5"],
 
     # ffmpeg-2021-12-12-git-996b13fac4-full_build.7z
-    [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", _upper_2_)],
+    [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", upper_2)],
     # ffmpeg-5.1.2-essentials_build.7z
-    [r"(ffmpeg)(-)([\d\.]+)(-essentials_build)(.7z)", (r"\1_\3\5", _upper_2_)],
+    [r"(ffmpeg)(-)([\d\.]+)(-essentials_build)(.7z)", (r"\1_\3\5", upper_2)],
 
     # navicat150_premium_cs_x64.exe
-    [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", _capitalize_)],
+    [r"(navicat)([\d]+)(_premium_cs_x64)(.exe)", (r"\1_\2\4", capitalize)],
 
     # cloudmusicsetup2.9.5.199424.exe
     [r"(cloudmusic)(setup)([\d\.]+)(.exe)", r"CloudMusic_\3\4"],
@@ -375,7 +389,7 @@ config_software = [
 
     # rdm-2021.3.0.0.exe
     # resp-2022.3.0.0.exe
-    [r"(rdm|resp)(-)([\d\.]+)(.exe)", (r"\1_\3\4", _upper_)],
+    [r"(rdm|resp)(-)([\d\.]+)(.exe)", (r"\1_\3\4", upper_all)],
 
     # QuiteRSS-0.19.4.zip
     [r"(QuiteRSS)(-)([\d\.]+)(.zip)", r"\1_\3\4"],
@@ -398,7 +412,7 @@ config_software = [
     [r"(Wireshark)(Portable|Portable64)(_)([\d\.]+)(.paf)(.exe)", r"\1_\4\6"],
 
     # node-v14.17.0-win-x64.zip
-    [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", _capitalize_)],
+    [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", capitalize)],
 
     # DG5411178_x64.zip
     [r"(DG)(\d+)(_x64)(.zip)", r"DiskGenius_\2\4"],
@@ -429,7 +443,7 @@ config_software = [
     [r"(Q-Dir)(_)(x64)(.exe)", r"\1\4"],
 
     # calibre-portable-installer-5.32.0.exe
-    [r"(calibre)(-portable-installer-)([\d\.]+)(.exe)", (r"\1_\3\4", _capitalize_)],
+    [r"(calibre)(-portable-installer-)([\d\.]+)(.exe)", (r"\1_\3\4", capitalize)],
 
     # VSCodeSetup-x64-1.61.2.exe
     [r"(VSCode)(Setup)(-x64-)([\d\.]+)(.exe)", r"\1_\4\5"],
@@ -448,13 +462,13 @@ config_software = [
     [r"(VeraCrypt)( Setup )([\d\.]+)(-Update)(\d)(.exe)", r"\1_\3.\5\6"],
 
     # go1.17.3.windows-arm64.zip
-    [r"(go)([\d\.]+)(.windows)(-amd64|-arm64)(.zip)", (r"\1_\2\5", _capitalize_)],
+    [r"(go)([\d\.]+)(.windows)(-amd64|-arm64)(.zip)", (r"\1_\2\5", capitalize)],
 
     # jdk-17_windows-x64_bin.zip
     [r"(jdk)(-)([\d\.]+)(_windows)(-x64_bin)(.zip)", r"\1_\3\6"],
 
     # frp_0.38.0_windows_amd64.zip
-    [r"(frp)(_)([\d\.]+)(_windows_amd64)(.zip)", (r"\1_\3\5", _capitalize_)],
+    [r"(frp)(_)([\d\.]+)(_windows_amd64)(.zip)", (r"\1_\3\5", capitalize)],
 
     # Shadowsocks-4.4.0.185.zip
     [r"(Shadowsocks)(-)([\d\.]+)(.zip)", r"\1_\3\4"],
@@ -471,7 +485,8 @@ config_software = [
     [r"(Sandboxie)(-Plus)(-x64)(-v)([\d\.]+)(.exe)", r"\1_\5\6"],
 
     # XMind-for-Windows-64bit-11.1.1-202110191919.exe
-    [r"(XMind)(-for)(-Windows)(-64bit)(-)([\d\.]+)(-\d+)(.exe)", r"\1_\6\8"],
+    # Xmind-for-Windows-x64bit-22.11.3656.exe
+    [r"(XMind|Xmind)(-for)(-Windows-)(64bit|x64bit)(-)([\d\.]+)(.exe)", r"\1_\6\7"],
 
     # VSCode-win32-x64-1.75.1.zip
     # VSCodeSetup-x64-1.75.1.exe
@@ -503,13 +518,13 @@ config_software = [
     [r"(Obsidian)(\.)([\d\.]+)(\.exe)", r"\1_\3\4"],
 
     # jetbrains-toolbox-1.22.10685.exe
-    [r"(jetbrains)(-)(toolbox)(-)([\d\.]+)(.exe)", (r"\1_\5\6", _capitalize_)],
+    [r"(jetbrains)(-)(toolbox)(-)([\d\.]+)(.exe)", (r"\1_\5\6", capitalize)],
 
     # Samsung_Magician_Installer_Official_7.0.0.510.zip
     [r"(Samsung_)(Magician)(_Installer)(_Official)(_)([\d\.]+)(.zip)", r"\2\5\6\7"],
 
     # zeal-portable-0.6.1-windows-x64.zip
-    [r"(zeal)(-portable)(-)([\d\.]+)(-windows-x64)(.zip)", (r"\1_\4\6", _capitalize_)],
+    [r"(zeal)(-portable)(-)([\d\.]+)(-windows-x64)(.zip)", (r"\1_\4\6", capitalize)],
 
     # Postman-win64-9.5.0-Setup.exe
     [r"(Postman)(-win64-)([\d\.]+)(-Setup)(.exe)", r"\1_\3\5"],
@@ -564,7 +579,8 @@ config_iso = [
     # deepin-desktop-community-20.8-amd64.iso
     # deepin-desktop-community-23-Alpha2-amd64.iso
     [r"(deepin)(-desktop-community-)([\d\.]+)(-amd64)(.iso)", r"Deepin_\3\5"],
-    [r"(deepin)(-desktop-community-)(\d+)(-Alpha)(\d)(-amd64)(.iso)", r"Deepin_Alpha_\3.\5\7"],
+    [r"(deepin)(-desktop-community-)(\d+)(-Alpha)(\d)(-amd64)(.iso)",
+     r"Deepin_Alpha_\3.\5\7"],
 
     # kali-linux-2023.1-installer-amd64.iso
     # kali-linux-2023.1-vmware-amd64.7z
@@ -577,20 +593,18 @@ config_python = [
     # pattern.cpython-37.pyc
     [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
     # python-x.x.x.exe
-    [r"(python)(-)([\d\.]+)(.exe)", (r"\1\2\3-win32\4", _capitalize_)],
+    [r"(python)(-)([\d\.]+)(.exe)", (r"\1\2\3-win32\4", capitalize)],
     # python-x.x.x-amd64.exe
-    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1\2\3\4\5", _capitalize_)],
+    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1\2\3\5", capitalize)],
     # python-x.x.x-embed-amd64.zip
-    [r"(python)(-)([\d\.]+)(-embed)(-amd64)(.zip)", (r"\1\2\3\5\4\6", _capitalize_)],
+    [r"(python)(-)([\d\.]+)(-embed)(-amd64)(.zip)", (r"\1\2\3\5\4\6", capitalize)],
     # python-3.9.9-embed-win32.zip
-    [r"(python)(-)([\d\.]+)(-embed)(-win32)(.zip)", (r"\1\2\3\5\4\6", _capitalize_)],
+    [r"(python)(-)([\d\.]+)(-embed)(-win32)(.zip)", (r"\1\2\3\5\4\6", capitalize)],
 ]
 
 # 替换规则
 # 函数 \ 正则表达式
 config_other = [
-
-    md5,
 
     #  [Keep] XMind.lnk
     [r"(\[)(Keep)(\])(\s)([\d\w]+)(.lnk)", r"\1#\3\5\6"],

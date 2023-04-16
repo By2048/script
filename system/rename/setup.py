@@ -59,8 +59,12 @@ def rule(file: WindowsPath):
             file = file.with_name(new_name)
             return file
 
+        if isfunction(_get_) or isinstance(_get_, partial):
+            file = _get_(file)
+            return file
+
         if isinstance(_get_, (list, tuple)):
-            for _g_ in list(_get_):
+            for _g_ in _get_:
                 if isinstance(_g_, str):
                     new_name = re.sub(_match_, _g_, file.name)
                     file = file.with_name(new_name)
