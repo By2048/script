@@ -301,7 +301,7 @@ def init_folders():
                 desktop = Desktop(desktop_config)
                 folder.desktop = desktop
 
-                if not lnk_config or lnk_config == "Ignore":
+                if not lnk_config:
                     folder.lnks = []
 
                 # Default:None \ k-v 一个快捷方式
@@ -326,8 +326,18 @@ def init_folders():
     def complete_lnks():
         folder: Folder
         for folder in folders:
+            lnk_default_exe = folder.path / f"{folder.path.name}.exe"
+            if not folder.lnks and lnk_default_exe.exists():
+                lnk = Lnk()
+                lnk.name = f"{folder.path.name}.lnk"
+                lnk.target_path = folder.path / f"{folder.path.name}.exe"
+                lnk.working_directory = folder.path
+                lnk.description = folder.path.name
+                lnk.icon_location = folder.desktop.icon
+                folder.lnks = [lnk]
+                continue
+
             for lnk in folder.lnks:
-                lnk_default_exe = folder.path / f"{folder.path.name}.exe"
                 if not lnk and not lnk_default_exe.exists():
                     continue
 
