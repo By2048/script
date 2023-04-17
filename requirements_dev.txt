@@ -1,6 +1,6 @@
-VeryPrettyTable
-Requests
+
 Fire
+HanZiConv
 
 PyMySQL
 PyMongo
@@ -8,4 +8,8 @@ Redis
 
 Rich
 
-hanziconv
+Requests
+Flask
+BeautifulSoup
+
+EasyOCR
