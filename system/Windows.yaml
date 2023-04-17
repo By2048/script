@@ -1,18 +1,21 @@
 #
 "#": D:\#\
 "#Icon": D:\#Icon\
-"#Lnk": D:\#Lnk\
+"#Lnk": D:\#Lnk\#\
 "#Script": E:\Script\
-"#ScriptText": E:\Project\Ahk\Config\Init.txt
+"#ScriptText": E:\Project\Ahk\Config\Script.txt
 
 # Folder:
 #     Desktop:
 #         Icon: 图标 | 默认目录下{#Icon}查找同名文件 \ xxx.ico \ xxx.exe
-#         Name: 别名 | 默认文件夹名
+#         Name: 别名 | 默认文件夹名|自定义名 / 以$开头完整替换
 #         Info: 备注 | 默认软件版本 文件夹下 {文件夹}.exe
 #                     7zFM.exe | 指定软件 通过这个软件获取本本
 #                          cmd | frpc.exe -v | (\d+)  | \1
 #                              |  命令        | RE匹配 | RE结果
+#         Rename: 文件\文件夹 名称替换
+#                  Xxx   -> XXX
+#                  Xxx.x -> Xxx.X
 #     Lnk:
 #         Name: 快捷方式名 | 默认文件夹名
 #         TargetPath: 应用程序位置 | 默认{文件夹}.exe
@@ -20,10 +23,21 @@
 #         Description: 备注信息 | 默认空
 #         IconLocation: 快捷键图标 | 默认{文件夹}.exe
 
-#
 Default: &Default
     Desktop:
     Lnk:
+
+$C:
+    Program Files:
+        Desktop:
+            Name: $ProgramFiles | x64
+    Program Files (x86):
+        Desktop:
+            Name: $ProgramFiles | x32
+    ProgramData\Microsoft\Windows\Start Menu\Programs:
+        Desktop:
+            Name: $开始\程序 | 系统
+            Rename: Immersive Control Panel.lnk | 设置
 
 #
 $D:
@@ -74,20 +88,9 @@ $D:
     Python\3.10: *PythonBase
 
 #
-$P:
-    (Lnk): Ignore
-    Anime:
-        Desktop:
-            Name: 动漫
-            Icon: Anime.png
-
 
 #
 Script:
-    ".":
-        Ahk-Reload: Null
-        Ahk-Start: Null
-        Ahk-Stop: Null
     Bin:
         CMD:
             Exe: C:\Windows\System32\cmd.exe
@@ -95,7 +98,6 @@ Script:
             Exe: D:\PowerShell\pwsh.exe
         Python:
             Exe: &Python D:\Python\#\Scripts\python.exe
-
     Python:
         Script:
             Exe: *Python
