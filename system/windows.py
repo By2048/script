@@ -147,6 +147,7 @@ def init_folders():
 
         icon = None
 
+        # 默认位置寻找图标并支持png转ico
         if desktop.icon and "." not in desktop.icon:
             ico_file = path_icon / f"{desktop.icon}.ico"
             png_file = path_icon / f"{desktop.icon}.png"
@@ -158,20 +159,26 @@ def init_folders():
                 icon = ico_file
             return icon
 
+        # 使用软件中默认的图标
         if desktop.icon and ".exe" in desktop.icon:
             icon = folder.path / desktop.icon
             return icon
 
-        # 默认可以使用 Xxx.ico
+        # 在相对位置和默认位置寻找图标
+        if desktop.icon and ".ico" in desktop.icon:
+            icon = folder.path / desktop.icon
+            if icon.exists():
+                return icon
+
+        # 使用文件夹对应的默认图标
         ico_file = path_icon / f"{folder.path.name}.ico"
         if ico_file.exists():
-            icon = ico_file
-
+            return ico_file
         png_file = path_icon / f"{folder.path.name}.png"
         if png_file.exists() and not ico_file.exists():
             image = Image.open(png_file)
             image.save(ico_file)
-            icon = ico_file
+            return ico_file
 
         return icon
 
