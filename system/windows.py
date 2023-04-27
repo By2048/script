@@ -215,6 +215,7 @@ def init_folders():
                 _info = info.split("|")
                 _info = [item.strip() for item in _info]
                 _cmd = _info[1]
+                _cmd = _cmd.lstrip(".\\")
                 _match = _info[2]
                 _get = _info[3]
                 _get = int(_get) if _get.isdigit() else None
@@ -226,7 +227,10 @@ def init_folders():
                 result_out = result.stdout.readlines()
                 result_err = result.stderr.readlines()
                 result = result_out or result_err
-                result = [item.decode() for item in result]
+                try:
+                    result = [item.decode() for item in result]
+                except Exception as e:
+                    result = []
                 result = "".join(result)
 
                 obj = re.search(_match, result).group(_get)
