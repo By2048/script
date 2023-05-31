@@ -118,6 +118,7 @@ class Folder:
 
 @dataclass
 class Script:
+    type: str = "Bat"  # Bat Or PowerShell
     path: WindowsPath = None
     exe: WindowsPath = None
     args: list = None
@@ -127,6 +128,9 @@ class Script:
 
     def __repr__(self):
         return self.exe
+
+    def __bool__(self):
+        return bool(self.exe)
 
 
 # 文件夹配置
@@ -387,7 +391,6 @@ def init_scripts():
         config_items = windows_config["Script"][script_sub_folder].items()
         for script_name, script_args in config_items:
             script = Script()
-            script.path = path_script / script_sub_folder / f"{script_name}.bat"
 
             if not script_args:
                 scripts.append(script)
@@ -408,7 +411,13 @@ def init_scripts():
             script.before = before
             script.after = after
             script.commands = commands
-            scripts.append(script)
+            script.type = script_args.get("Type") or "Bat"
+            if script.type == "Bat":
+                script.path = path_script / script_sub_folder / f"{script_name}.bat"
+            if script.type == "PowerShell":
+                script.path = path_script / script_sub_folder / f"{script_name}.ps1"
+            if script:
+                scripts.append(script)
 
 
 def center_panel_text(text, title="", width=99):
@@ -463,20 +472,9 @@ def create_desktop(folder: Folder):
 
 
 def create_script():
-    text = ""
-    script: Script
-    for script in scripts:
-        if not script.exe and not script.commands:
-            continue
-
+    def create_script_bat():
         code = "@Echo Off\n\n"
         code += "SetLocal\n\n"
-
-        if script.commands:
-            code += "\n"
-            for command in script.commands:
-                code = code + command + "\n\n"
-            code += "\n"
 
         if script.before:
             for before in script.before:
@@ -504,10 +502,64 @@ def create_script():
                 code += f"{after}\n"
             code += "\n"
 
+        if script.commands:
+            code += "\n"
+            for command in script.commands:
+                code = code + command + "\n\n"
+            code += "\n"
+
         code += "EndLocal"
 
         with open(script.path, "w") as file:
             file.write(code)
+
+    def create_script_psl():
+        code = ""
+
+        if script.before:
+            for before in script.before:
+                code += f"{before}\n"
+            code += "\n"
+
+        if script.exe:
+            code += f"$Exe = \"{script.exe}\"\n\n"
+            if not script.args or len(script.args) == 0:
+                code += f"& $Exe"
+            elif len(script.args) == 1:
+                code += f"$Arg=\"{script.args[0]}\"\n\n"
+                code += f"&  $Exe  $Arg"
+            elif len(script.args) > 1:
+                for index, arg in enumerate(script.args, start=1):
+                    code += f"$Arg{index}=\"{arg}\"\n"
+                cmd = "\n$Exe"
+                for index in range(1, len(script.args) + 1):
+                    cmd += f"  $Arg{index}"
+                code += cmd
+
+        if script.after:
+            for after in script.after:
+                code += f"{after}\n"
+            code += "\n"
+
+        if script.commands:
+            code += "\n"
+            for command in script.commands:
+                code = code + command + "\n\n"
+            code += "\n"
+
+        with open(script.path, "w") as file:
+            file.write(code)
+
+    text = ""
+    script: Script
+    for script in scripts:
+        if not script.exe and not script.commands:
+            continue
+
+        if script.type == "Bat":
+            create_script_bat()
+        if script.type == "PowerShell":
+            create_script_psl()
 
         args = ' '.join(script.args) if script.args else ""
         text += f"{script.path.stem:>15}  {script.exe} {args} \n"
@@ -526,6 +578,8 @@ def create_script_txt():
 
     script: Script
     for script in scripts:
+        if not script:
+            continue
         name = script.path.stem
         if len(name) < 11:
             if cnt >= 5:
