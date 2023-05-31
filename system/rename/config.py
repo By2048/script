@@ -281,6 +281,9 @@ config_media = [
     app_screen,
     app_screenshot,
 
+    timestamp,
+    timestamp_image,
+
     # 下载的动漫
     # nicotv,
 
@@ -297,17 +300,20 @@ config_media = [
     [r"(.*)(\(无修\))([\.\w\d]+)", (r"\1\3")],
 
     # MuMu20210129215157.png
-    [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)", r"\2-\3-\4 \5-\6-\7\8"],
+    [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
+        r"\2-\3-\4 \5-\6-\7\8"],
 
     # PANO_20140629_080915.jpg
     [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
      r"\2-\3-\4 \6-\7-\8\9"],
 
     # 20210622183532.jpg
-    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)", r"\1-\2-\3 \4-\5-\6\7"],
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)",
+        r"\1-\2-\3 \4-\5-\6\7"],
 
+    # 2020010214432637.png
     # 20200102144326376.png
-    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})(.jpg|.png)",
+    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2}|\d{3})(.jpg|.png)",
      r"\1-\2-\3 \4-\5-\6\8"],
 
     # 1638862702.jpg
@@ -316,7 +322,11 @@ config_media = [
     # len(_stem_) in [13, 10]:
 
     # v2-48fa5b6760cfe078212498c6667a77a0.jpeg
-    [r"(v2-)([\d\w]{32})(.jpeg|.jpg|.png)", md5],
+    [r"(v2-)([\d\w]{32})(.jpeg|.jpg|.png|.webp)", md5],
+
+    # 93e7a7c89561987d20b7e322f5c5882644714970.jpg
+    # f54d20b9feb722f55ed779b51f59f67a155779227.png
+    [r"([\d\w]{40,})(.jpeg|.jpg|.png|.webp)", md5],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
@@ -330,7 +340,8 @@ config_media = [
      r"\2 \4\6"],
 
     # IMG20200712095720.jpg
-    [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)", r"\2-\3-\4 \5-\6-\7\8"],
+    [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)",
+        r"\2-\3-\4 \5-\6-\7\8"],
 
     # IMG_20200926_214521.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
@@ -343,6 +354,9 @@ config_media = [
     # IMG_20040622_141354_HDR.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)",
      r"\2-\3-\4 \6-\7-\8\10"],
+
+    # infinity-2445168.jpg
+    [r"(infinity)(-)(\d+)(.jpg|.png)", md5]
 
 ]
 
@@ -465,7 +479,7 @@ config_software = [
     [r"(go)([\d\.]+)(.windows)(-amd64|-arm64)(.zip)", (r"\1_\2\5", capitalize)],
 
     # jdk-17_windows-x64_bin.zip
-    [r"(jdk)(-)([\d\.]+)(_windows)(-x64_bin)(.zip)", r"\1_\3\6"],
+    [r"(jdk)(-)([\d\.]+)(_windows)(-x64_bin)(.zip)", (r"\1_\3\6", upper_all)],
 
     # frp_0.38.0_windows_amd64.zip
     [r"(frp)(_)([\d\.]+)(_windows_amd64)(.zip)", (r"\1_\3\5", capitalize)],
@@ -534,6 +548,8 @@ config_software = [
 
     # chrome-win.zip
     [r"(chrome)(-)(win)(.zip)", r"Chromium.zip"],
+    # chromedriver_win32.zip
+    [r"(chromedriver)(_)(win32)(.zip)", r"ChromeDriver.zip"],
 
     # PowerShell-7.2.2-win-x64.zip
     [r"(PowerShell)(-)([\d\.]+)(-win-x64)(.zip)", r"\1_\3\5"],
@@ -593,13 +609,13 @@ config_python = [
     # pattern.cpython-37.pyc
     [r"(\w+)(\.cpython-37)(\.pyc)", r"\1\3"],
     # python-x.x.x.exe
-    [r"(python)(-)([\d\.]+)(.exe)", (r"\1\2\3-win32\4", capitalize)],
+    [r"(python)(-)([\d\.]+)(.exe)", (r"\1_\3\4", capitalize)],
     # python-x.x.x-amd64.exe
-    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1\2\3\5", capitalize)],
+    [r"(python)(-)([\d\.]+)(-amd64)(.exe)", (r"\1_\3\5", capitalize)],
     # python-x.x.x-embed-amd64.zip
-    [r"(python)(-)([\d\.]+)(-embed)(-amd64)(.zip)", (r"\1\2\3\5\4\6", capitalize)],
+    [r"(python)(-)([\d\.]+)(-embed)(-amd64)(.zip)", (r"\1_\3\5\4\6", capitalize)],
     # python-3.9.9-embed-win32.zip
-    [r"(python)(-)([\d\.]+)(-embed)(-win32)(.zip)", (r"\1\2\3\5\4\6", capitalize)],
+    [r"(python)(-)([\d\.]+)(-embed)(-win32)(.zip)", (r"\1_\3\5\4\6", capitalize)],
 ]
 
 # 替换规则
@@ -616,12 +632,12 @@ config_other = [
 ]
 
 config_rename = [] \
-                + config_phone \
-                + config_media \
-                + config_software \
-                + config_iso \
-                + config_python \
-                + config_other
+    + config_phone \
+    + config_media \
+    + config_software \
+    + config_iso \
+    + config_python \
+    + config_other
 
 try:
     from config_tmp import config
