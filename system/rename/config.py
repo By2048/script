@@ -301,7 +301,7 @@ config_media = [
 
     # MuMu20210129215157.png
     [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
-        r"\2-\3-\4 \5-\6-\7\8"],
+     r"\2-\3-\4 \5-\6-\7\8"],
 
     # PANO_20140629_080915.jpg
     [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
@@ -309,12 +309,15 @@ config_media = [
 
     # 20210622183532.jpg
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)",
-        r"\1-\2-\3 \4-\5-\6\7"],
+     r"\1-\2-\3 \4-\5-\6\7"],
 
     # 2020010214432637.png
     # 20200102144326376.png
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2}|\d{3})(.jpg|.png)",
      r"\1-\2-\3 \4-\5-\6\8"],
+
+    # tumblr_ondeipvf8D1ttxriho1_1280
+    [r"(tumblr_)([\d\w]+)(.\w+)", md5],
 
     # 1638862702.jpg
     # 1638862702756.jpg
@@ -322,7 +325,7 @@ config_media = [
     # len(_stem_) in [13, 10]:
 
     # v2-48fa5b6760cfe078212498c6667a77a0.jpeg
-    [r"(v2-)([\d\w]{32})(.jpeg|.jpg|.png|.webp)", md5],
+    [r"(v2-)([\d\w]{32})(_[\d\w]+?)(.jpeg|.jpg|.png|.webp)", md5],
 
     # 93e7a7c89561987d20b7e322f5c5882644714970.jpg
     # f54d20b9feb722f55ed779b51f59f67a155779227.png
@@ -341,7 +344,10 @@ config_media = [
 
     # IMG20200712095720.jpg
     [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)",
-        r"\2-\3-\4 \5-\6-\7\8"],
+     r"\2-\3-\4 \5-\6-\7\8"],
+
+    # QQ图片xxx.jpg
+    [r"(QQ图片)([\d\w]+)(.jpeg|.jpg|.png|.webp)", md5],
 
     # IMG_20200926_214521.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
@@ -632,12 +638,12 @@ config_other = [
 ]
 
 config_rename = [] \
-    + config_phone \
-    + config_media \
-    + config_software \
-    + config_iso \
-    + config_python \
-    + config_other
+                + config_phone \
+                + config_media \
+                + config_software \
+                + config_iso \
+                + config_python \
+                + config_other
 
 try:
     from config_tmp import config
