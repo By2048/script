@@ -524,7 +524,7 @@ def create_script():
         if script.exe:
             code += f"$Exe = \"{script.exe}\"\n\n"
             if not script.args or len(script.args) == 0:
-                code += f"& $Exe"
+                code += f"& $Exe $Args"
             elif len(script.args) == 1:
                 code += f"$Arg=\"{script.args[0]}\"\n\n"
                 code += f"&  $Exe  $Arg"
@@ -533,7 +533,7 @@ def create_script():
                     code += f"$Arg{index}=\"{arg}\"\n"
                 cmd = "\n$Exe"
                 for index in range(1, len(script.args) + 1):
-                    cmd += f"  $Arg{index}"
+                    cmd += f"  $Arg{index}   $Args"
                 code += cmd
 
         if script.after:
