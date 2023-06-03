@@ -84,6 +84,8 @@ def main(command="", folder="", debug=False):
     rename.command(command)
     rename.print()
     rename.start()
+    if rename.duplicate:
+        rename.remove_duplicate()
 
 
 def debug():

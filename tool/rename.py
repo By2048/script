@@ -34,6 +34,7 @@ class Rename(object):
         self.folder: WindowsPath = WindowsPath()  # 重命名文件夹目录
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
         self.rule: Callable([WindowsPath], WindowsPath) = lambda x: x  # 匹配 重命名 规则
+        self.duplicate: List[File] = []  # 重复的文件
 
     def __bool__(self):
         return bool(len(self.files))
@@ -139,29 +140,44 @@ class Rename(object):
             print("\n[red]开始重命名[/red]", end="///")
 
         for index, file in enumerate(self.files, 1):
-
-            # old = os.path.join(self.folder, file.old)
-            # new = os.path.join(self.folder, file.new)
-
             if not rename_index:
-                file.old.rename(file.new)
-                # os.rename(old, new)
-                continue
-            if index in rename_index:
-                file.old.rename(file.new)
-                # os.rename(old, new)
-                continue
+                try:
+                    file.old.rename(file.new)
+                except FileExistsError:
+                    self.duplicate.append(file)
+                    continue
+            elif index in rename_index:
+                try:
+                    file.old.rename(file.new)
+                except FileExistsError:
+                    self.duplicate.append(file)
+                    continue
         if not silent:
             print("[red]结束重命名[/red]\n")
 
-    def print(self):
+    def remove_duplicate(self):
+        self.files = self.duplicate
+        self.print(title="Duplicate Files")
+
+        check = Prompt.ask('[red]是否删除重复文件[/red]')
+        if not check:
+            print("\n[red]取消删除[/red]\n")
+            return
+        elif check == "\\":
+            print("\n[red]开始删除[/red]", end="///")
+            for file in self.files:
+                file.old.unlink()
+            print("[red]结束删除[/red]\n")
+
+    def print(self, title=""):
         if not self:
             print()
-            print("[red][No Rename][/red]")
+            print("[red][ No Rename ][/red]")
             print()
             return
         print()
         table = Table(box=box.ROUNDED)
+        table.title = title
         table.add_column("old_name", justify="left")
         table.add_column("I", justify="center")
         table.add_column("new_name", justify="left")
