@@ -237,7 +237,10 @@ def init_folders():
                     result = []
                 result = "".join(result)
 
-                obj = re.search(_match, result).group(_get)
+                try:
+                    obj = re.search(_match, result).group(_get)
+                except AttributeError:
+                    obj = ""
                 info_content.append(obj)
                 continue
 
@@ -524,14 +527,14 @@ def create_script():
         if script.exe:
             code += f"$Exe = \"{script.exe}\"\n\n"
             if not script.args or len(script.args) == 0:
-                code += f"& $Exe $Args"
+                code += f"&  $Exe  $Args"
             elif len(script.args) == 1:
                 code += f"$Arg=\"{script.args[0]}\"\n\n"
                 code += f"&  $Exe  $Arg"
             elif len(script.args) > 1:
                 for index, arg in enumerate(script.args, start=1):
                     code += f"$Arg{index}=\"{arg}\"\n"
-                cmd = "\n$Exe"
+                cmd = "\n&  $Exe"
                 for index in range(1, len(script.args) + 1):
                     cmd += f"  $Arg{index}   $Args"
                 code += cmd
