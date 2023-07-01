@@ -319,17 +319,31 @@ config_media = [
     # tumblr_ondeipvf8D1ttxriho1_1280
     [r"(tumblr_)([\d\w]+)(.\w+)", md5],
 
+    # 1686050553516.jpeg.png
+    [r"([\d\w]+)(.(jpg|png|jpeg|webp))(.(jpg|png|jpeg|webp))", r"\1\3"],
+
+    # 109094951_p0.jpg
+    [r"([\d\w]+)(_p0)(.\w+)", r"\1\3"],
+    # 34452206_107644944_0.png
+    [r"([\d\w]+)(_)([\d\w]+)(_0)(.\w+)", r"\1\2\3\5"],
+
+    # image-1686654513477.png
+    [r"(image-)([\d\w]+)(.\w+)", r"\2\3"],
+
     # 1638862702.jpg
     # 1638862702756.jpg
     # ".png .jpg .jpeg .gif .webm"
     # len(_stem_) in [13, 10]:
 
     # v2-48fa5b6760cfe078212498c6667a77a0.jpeg
-    [r"(v2-)([\d\w]{32})(_[\d\w]+?)(.jpeg|.jpg|.png|.webp)", md5],
+    [r"(v2-)([\d\w]{30,})(.jpeg|.jpg|.png|.webp)", md5],
 
     # 93e7a7c89561987d20b7e322f5c5882644714970.jpg
-    # f54d20b9feb722f55ed779b51f59f67a155779227.png
-    [r"([\d\w]{40,})(.jpeg|.jpg|.png|.webp)", md5],
+    [r"([\d\w]{35,})(.jpeg|.jpg|.png|.webp)", md5],
+
+    # Pixiv下载
+    # illust_105178146_20230616_172808.jpg
+    [r"([\d\w]+)(_\d+)(_\d{4}\d{2}\d{2}_\d{6})(.\w+)", r"\1\2\4"],
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
