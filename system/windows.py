@@ -303,7 +303,6 @@ def init_folders():
                 continue
 
             disk = win_disk.replace("$", "")
-            disk = f"{disk}:\\" if not disk.endswith(":\\") else disk
             disk_path = WindowsPath(disk)
 
             for disk_folder in windows_config[win_disk].keys():
