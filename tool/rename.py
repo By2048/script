@@ -160,7 +160,7 @@ class Rename(object):
         self.print(title="Duplicate Files")
 
         check = Prompt.ask('[red]是否删除重复文件[/red]')
-        if not check:
+        if not check or check != "\\":
             print("\n[red]取消删除[/red]\n")
             return
         elif check == "\\":
@@ -172,7 +172,7 @@ class Rename(object):
     def print(self, title=""):
         if not self:
             print()
-            print("[red][ No Rename ][/red]")
+            print("[red]  [ No Rename ]  [/red]")
             print()
             return
         print()
