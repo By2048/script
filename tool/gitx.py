@@ -19,10 +19,20 @@ from rich.live import Live
 
 console = Console()
 
-w = 140
-h = 28
-x = int((console.width - w) / 2)
-y = int((console.height - h) / 2)
+# padding 1  border 1
+# folder 1  space 1  tree 20  space 1  page 1
+# border 1  padding 1
+
+page_size = 30
+
+gui_h = 8 + page_size
+gui_w = 140
+
+gui_x = int((console.width - gui_w) / 2)
+gui_y = int((console.height - gui_h) / 2)
+
+total_left = 35
+tree_width = total_left - 7
 
 folder = WindowsPath(r"E:\\GitX\\")
 if len(sys.argv) > 1:
@@ -39,7 +49,6 @@ folder_paths = list(folder.iterdir())
 folder_paths = [item for item in folder_paths if not item.name.startswith("#")]
 folder_names = [item.name for item in folder_paths]
 
-page_size = 20
 folder_pages = []
 for i in range(0, len(folder_paths), page_size):
     folder_pages.append(folder_paths[i:i + page_size])
@@ -59,7 +68,7 @@ def update_table_tree(path: WindowsPath):
                   caption=f"1 / {page_size}", caption_style="white")
     table.add_column(justify="left", width=2)
     table.add_column(width=1)
-    table.add_column(justify="left", width=28)
+    table.add_column(justify="left", width=tree_width)
 
     table.add_row("", "", "")
 
@@ -167,7 +176,7 @@ def update_git_log(live: Live, path: WindowsPath):
 
 def init_gui():
     layout["Content"].split_row(
-        Layout(name="Folder", size=35),
+        Layout(name="Folder", size=total_left),
         Layout(name="Git")
     )
     layout["Git"].split_column(
@@ -180,7 +189,7 @@ def init_gui():
 
 
 def main():
-    gui = Align.center(Panel(layout, width=w, height=h, box=box.MINIMAL))
+    gui = Align.center(Panel(layout, width=gui_w, height=gui_h, box=box.MINIMAL))
     init_gui()
     with Live(gui, auto_refresh=False, screen=False) as live:
         for folder_path in folder_paths:
@@ -193,12 +202,8 @@ def main():
 
 
 def test():
-    gui = Align.center(Panel(layout, width=w, height=h, box=box.MINIMAL))
+    gui = Align.center(Panel(layout, width=gui_w, height=gui_h, box=box.MINIMAL))
     init_gui()
-    update_table_tree(folder_paths[11])
-    console.print(gui)
-    update_table_tree(folder_paths[21])
-    console.print(gui)
 
 
 if __name__ == '__main__':
