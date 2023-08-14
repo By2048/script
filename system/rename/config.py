@@ -57,7 +57,7 @@ def timestamp(file: WindowsPath):
         stem = stem[:-3]
     stem = int(stem)
     stem = datetime.fromtimestamp(stem)
-    stem = stem.strftime("%Y-%m-%d %H-%M-%S")
+    stem = stem.strftime("%Y-%m-%d_%H-%M-%S")
     file = file.with_stem(stem)
     return file
 
@@ -76,7 +76,7 @@ def timestamp_with_x(file: WindowsPath, xxx: str):
     stem = int(stem)
     try:
         stem = datetime.fromtimestamp(stem)
-        stem = stem.strftime("%Y-%m-%d %H-%M-%S")
+        stem = stem.strftime("%Y-%m-%d_%H-%M-%S")
     except:  # noqa
         return
     file = file.with_stem(stem)
@@ -132,7 +132,7 @@ def lol(file: WindowsPath):
     # 11-18_HN16_NEW-1449121099_05.webm
     if '_HN' in file.name and '_NEW' in file.name and file.name.endswith('.webm'):
         date = file.stat().st_ctime
-        date = datetime.fromtimestamp(date).strftime("%Y-%m-%d %H-%M-%S")
+        date = datetime.fromtimestamp(date).strftime("%Y-%m-%d_%H-%M-%S")
         file = file.with_stem(f"LOL {date}")
         return file
 
@@ -261,11 +261,11 @@ config_phone = [
 
     # VID_20210731_144747.mp4
     [r"(VID_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.mp4|.3gp)",
-     r"\2-\3-\4 \6-\7-\8\9"],
+     r"\2-\3-\4_\6-\7-\8\9"],
 
     # Recorder_20210903135016.mp4
     [r"(Recorder_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.mp4)",
-     r"\2-\3-\4 \5-\6-\7\8"],
+     r"\2-\3-\4_\5-\6-\7\8"],
 
 ]
 
@@ -301,20 +301,23 @@ config_media = [
 
     # MuMu20210129215157.png
     [r"(MuMu)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
-     r"\2-\3-\4 \5-\6-\7\8"],
+     r"\2-\3-\4_\5-\6-\7\8"],
 
     # PANO_20140629_080915.jpg
     [r"(PANO_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
-     r"\2-\3-\4 \6-\7-\8\9"],
+     r"\2-\3-\4_\6-\7-\8\9"],
 
     # 20210622183532.jpg
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)",
-     r"\1-\2-\3 \4-\5-\6\7"],
+     r"\1-\2-\3_\4-\5-\6\7"],
 
     # 2020010214432637.png
     # 20200102144326376.png
     [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2}|\d{3})(.jpg|.png)",
-     r"\1-\2-\3 \4-\5-\6\8"],
+     r"\1-\2-\3_\4-\5-\6\8"],
+
+    # 2019-04-01 23-15-24.jpg
+    [r"(\d{4}\-\d{2}\-\d{2})( )(\d{2}\-\d{2}\-\d{2})(.\w+)", r"\1_\3\4"],
 
     # tumblr_ondeipvf8D1ttxriho1_1280
     [r"(tumblr_)([\d\w]+)(.\w+)", md5],
@@ -323,9 +326,9 @@ config_media = [
     [r"([\d\w]+)(.(jpg|png|jpeg|webp))(.(jpg|png|jpeg|webp))", r"\1\3"],
 
     # 109094951_p0.jpg
-    [r"([\d\w]+)(_p0)(.\w+)", r"\1\3"],
+    [r"(\d+)(_p0)(.\w+)", r"\1\3"],
     # 34452206_107644944_0.png
-    [r"([\d\w]+)(_)([\d\w]+)(_0)(.\w+)", r"\1\2\3\5"],
+    [r"(\d+)(_)([\d\w]+)(_0)(.\w+)", r"\1\2\3\5"],
 
     # image-1686654513477.png
     [r"(image-)([\d\w]+)(.\w+)", r"\2\3"],
@@ -347,33 +350,35 @@ config_media = [
 
     # Screenshot_20210318215042.png
     [r"(Screenshot_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.png)",
-     r"\2-\3-\4 \5-\6-\7\8"],
+     r"\2-\3-\4_\5-\6-\7\8"],
 
     # Screenshot_2014-08-31-13-59-51.png
     [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(.png)", r"\2 \4\5"],
 
     # Screenshot_2013-11-29-13-01-53-1.png
     [r"(Screenshot_)(\d{4}\-\d{2}\-\d{2})(\-)(\d{2}\-\d{2}\-\d{2})(\-1)(.png)",
-     r"\2 \4\6"],
+     r"\2_\4\6"],
 
     # IMG20200712095720.jpg
-    [r"(IMG)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)",
-     r"\2-\3-\4 \5-\6-\7\8"],
+    # IMG_20200712095720.jpg
+    # IMG_2022111281528.jpg
+    [r"(IMG|IMG_)(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg)",
+     r"\2-\3-\4_\5-\6-\7\8"],
 
     # QQ图片xxx.jpg
     [r"(QQ图片)([\d\w]+)(.jpeg|.jpg|.png|.webp)", md5],
 
     # IMG_20200926_214521.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(.jpg)",
-     r"\2-\3-\4 \6-\7-\8\9"],
+     r"\2-\3-\4_\6-\7-\8\9"],
 
     # IMG_2013-10-05_22.23.51.jpg
     [r"(IMG_)(\d{4}-\d{2}-\d{2})(_)(\d{2})(\.)(\d{2})(\.)(\d{2})(.jpg)",
-     r"\2 \4-\6-\8\9"],
+     r"\2_\4-\6-\8\9"],
 
     # IMG_20040622_141354_HDR.jpg
     [r"(IMG_)(\d{4})(\d{2})(\d{2})(_)(\d{2})(\d{2})(\d{2})(_HDR)(.jpg)",
-     r"\2-\3-\4 \6-\7-\8\10"],
+     r"\2-\3-\4_\6-\7-\8\10"],
 
     # infinity-2445168.jpg
     [r"(infinity)(-)(\d+)(.jpg|.png)", md5]
@@ -393,6 +398,11 @@ config_software = [
     # Xshell-7.0.0063p.exe
     [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
+    # ideaIU-2023.2.exe
+    # pycharm-professional-2023.2.exe
+    [r"(ideaIU)(-)([\d\.]+)(.exe)", r"IDEA_\3\4"],
+    [r"(pycharm-professional)(-)([\d\.]+)(.exe)", r"PyCharm_\3\4"],
+
     # aria2-1.36.0-win-64bit-build1.zip
     [r"(aria2)(-)([\d\.]+)(-win-64bit-build1)(.zip)", (r"\1_\3\5", capitalize)],
 
@@ -402,7 +412,9 @@ config_software = [
     [r"(dexpot)(_)([\d\.]+)(\_\w+)(.exe)", (r"\1_\3\5", capitalize)],
 
     # ventoy-1.0.38-windows.zip
-    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", (r"\1_\3\5", capitalize)],
+    [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", r"Ventoy_\3\5"],
+    # iventoy-1.0.08-win64.zip
+    [r"(iventoy)(-)([\d\.]+)(-win64)(.zip)", r"VentoyI_\3\5"],
 
     # BitComet_1.87_setup.exe
     [r"(BitComet)(_)([\d\.]+)(_setup)(.exe)", r"\1_\3\5"],
