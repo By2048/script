@@ -330,6 +330,15 @@ def init_folders():
                 desktop = Desktop(desktop_config)
                 folder.desktop = desktop
 
+                # 忽略Desktop前缀 直接设置参数
+                # name_quick = windows_config[win_disk][disk_folder].get('DesktopName')
+                # icon_quick = windows_config[win_disk][disk_folder].get('DesktopIcon')
+
+                # if not folder.desktop.name and name_quick:
+                #     folder.desktop.name = name_quick
+                # if not folder.desktop.icon and icon_quick:
+                #     folder.desktop.icon = icon_quick
+
                 if not lnk_config:
                     folder.lnks = []
 
