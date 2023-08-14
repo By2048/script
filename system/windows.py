@@ -48,10 +48,18 @@ yaml.add_constructor(r'!Join', yaml_join)
 
 console = get_console()
 
-windows_config_path = WindowsPath('E:\\Config\\Windows.yaml')
+windows_config_folder = WindowsPath('E:\\Config\\Windows\\')
 
-with open(windows_config_path, encoding="utf-8") as file:
-    windows_config = yaml.unsafe_load(file)
+windows_config: dict = {}
+
+for config_file in windows_config_folder.iterdir():
+    with open(config_file, encoding="utf-8") as file:
+        config_item: dict = yaml.unsafe_load(file)
+        for key, value in config_item.items():
+            if key not in windows_config.keys():
+                windows_config[key] = value
+            else:
+                windows_config[key] |= value
 
 path_tmp = WindowsPath(windows_config.get("#"))
 path_icon = WindowsPath(windows_config.get("#Icon"))
@@ -139,7 +147,7 @@ scripts: List[Script] = []
 
 
 def check():
-    assert windows_config_path
+    assert windows_config_folder
     assert windows_config
     assert path_icon
     assert path_lnk
