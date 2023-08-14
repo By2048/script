@@ -218,7 +218,8 @@ def init_folders():
             if info.lower().endswith(".exe"):
                 _exe_ = folder.path / info
                 version = exe_version(_exe_.as_posix())
-                info_content.append(version)
+                if version:
+                    info_content.append(version)
                 continue
 
             # 执行指定命名获取的版本
@@ -249,7 +250,8 @@ def init_folders():
                     obj = re.search(_match, result).group(_get)
                 except AttributeError:
                     obj = ""
-                info_content.append(obj)
+                if obj:
+                    info_content.append(obj)
                 continue
 
             # 指定文件内容
@@ -267,7 +269,8 @@ def init_folders():
                 with open(_file_path, "r", encoding="utf-8") as file:
                     content = file.read().strip()
                     obj = re.search(_match, content).group(_get)
-                info_content.append(obj)
+                if obj:
+                    info_content.append(obj)
                 continue
 
             # 文件数量
@@ -287,9 +290,10 @@ def init_folders():
                 info_content.append(total)
                 continue
 
-            info_content.append(info)
+            if info:
+                info_content.append(info)
 
-        return " | ".join(info_content)
+        return " | ".join(info_content) if info_content else ""
 
     def get_rename(folder: Folder):
         info = {}
