@@ -13,13 +13,12 @@ from rich.live import Live
 from rich.table import Table
 
 if sys.platform == 'win32':
-    path = Path("D:\\#\\")
+    path = os.environ.get("#") or "D:\\#\\"
+    path = Path(path)
 else:
     path = Path("/tmp/")
 
 path = path / "bilibili.json"
-
-chrome_driver_path = r"C:\Program Files\Google\Chrome\Application\chromedriver.exe"
 
 # order
 # 0 更新时间
