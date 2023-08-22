@@ -328,7 +328,7 @@ config_media = [
     # 109094951_p0.jpg
     [r"(\d+)(_p0)(.\w+)", r"\1\3"],
     # 34452206_107644944_0.png
-    [r"(\d+)(_)([\d\w]+)(_0)(.\w+)", r"\1\2\3\5"],
+    [r"(\d+_\d+)(_p?)(0)(\.\w+)", r"\1\3\4"],
 
     # image-1686654513477.png
     [r"(image-)([\d\w]+)(.\w+)", r"\2\3"],
@@ -418,6 +418,9 @@ config_software = [
 
     # BitComet_1.87_setup.exe
     [r"(BitComet)(_)([\d\.]+)(_setup)(.exe)", r"\1_\3\5"],
+
+    # BCompare-zh-4.4.6.27483.exe
+    [r"(BCompare)(-zh-)([\d\.]+)(.exe)", r"\1_\3\4"],
 
     # ffmpeg-2021-12-12-git-996b13fac4-full_build.7z
     [r"(ffmpeg)(-)([\d\-]+)(-)(git\-\w+)(\-full_build)(.7z)", (r"\1_\3\7", upper_2)],
