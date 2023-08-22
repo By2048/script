@@ -43,7 +43,7 @@ def rule(file: WindowsPath):
             except Exception as e:
                 continue
             if result:
-                return result
+                return result, str(fun)
             continue
 
         _match_, _get_ = cfg[0], cfg[1]
@@ -57,11 +57,11 @@ def rule(file: WindowsPath):
         if isinstance(_get_, str):
             new_name = re.sub(_match_, _get_, file.name)
             file = file.with_name(new_name)
-            return file
+            return file, f"{_match_} {_get_}"
 
         if isfunction(_get_) or isinstance(_get_, partial):
             file = _get_(file)
-            return file
+            return file, f"{_match_} {_get_}"
 
         if isinstance(_get_, (list, tuple)):
             for _g_ in _get_:
@@ -70,7 +70,7 @@ def rule(file: WindowsPath):
                     file = file.with_name(new_name)
                 elif isfunction(_g_) or isinstance(_g_, partial):
                     file = _g_(file)
-            return file
+            return file, f"{_match_} {_get_}"
 
 
 def main(command="", folder="", debug=False):

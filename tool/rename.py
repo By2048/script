@@ -1,15 +1,11 @@
-import logging
 import os
 import sys
-from collections.abc import Callable
-
 import win32api
+import logging
 import inspect
-import copy
-from typing import List
+from collections.abc import Callable
+from typing import List, Any
 from pathlib import Path, WindowsPath
-
-_print_ = print
 
 from rich import print
 from rich import box
@@ -19,14 +15,17 @@ from rich.markup import escape
 from rich.table import Table
 from hanziconv import HanziConv
 
+_print_ = print
+
 
 class File(object):
     def __init__(self):
         self.old: WindowsPath = WindowsPath()
         self.new: WindowsPath = WindowsPath()
+        self.rule: Any = ""
 
     def __str__(self):
-        return f"{self.old.name}\t-> {self.new.name}"
+        return f"{self.old.name}\t-> {self.new.name} | {self.rule}"
 
 
 class Rename(object):
@@ -47,12 +46,15 @@ class Rename(object):
             if not result:
                 continue
 
+            new_name, rule = result
+
             path_file_old = path_file
-            path_file_new = result
+            path_file_new = new_name
 
             file = File()
             file.old = path_file_old
             file.new = path_file_new
+            file.rule = rule
             file.new = change_name(file.new)
             if file.old == file.new:
                 continue
@@ -74,9 +76,8 @@ class Rename(object):
 
     def debug(self):
         _print_()
-        _print_(self.folder.as_posix())
         for item in self.files:
-            _print_(f"\t{item}")
+            _print_(f"  {item}")
         _print_()
 
     def config(self):
@@ -178,9 +179,9 @@ class Rename(object):
         print()
         table = Table(box=box.ROUNDED)
         table.title = title
-        table.add_column("old_name", justify="left")
-        table.add_column("I", justify="center")
-        table.add_column("new_name", justify="left")
+        table.add_column("Old", justify="center")
+        table.add_column("I*", justify="center")
+        table.add_column("New", justify="center")
         for index, file in enumerate(self.files, 1):
             _old_ = escape(file.old.name)
             _new_ = escape(file.new.name)
