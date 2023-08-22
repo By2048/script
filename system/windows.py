@@ -228,15 +228,16 @@ def init_folders():
                 _info = info.split("|")
                 _info = [item.strip() for item in _info]
                 _cmd = _info[1]
-                _cmd = _cmd.lstrip(".\\")
+                # 判断绝对路径 相对路径
+                if ":\\" not in _cmd:
+                    _cmd = _cmd.lstrip(".\\")
+                    _cmd = f"{folder.path}\\{_cmd}"
                 _match = _info[2]
                 _get = _info[3]
                 _get = int(_get) if _get.isdigit() else None
 
-                cmd = f"{folder.path}\\{_cmd}"
-                result = subprocess.Popen(cmd,
-                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                          shell=True)
+                result = subprocess.Popen(_cmd, shell=True,
+                                          stderr=subprocess.PIPE, stdout=subprocess.PIPE)
                 result_out = result.stdout.readlines()
                 result_err = result.stderr.readlines()
                 result = result_out or result_err
@@ -293,7 +294,7 @@ def init_folders():
             if info:
                 info_content.append(info)
 
-        return " | ".join(info_content) if info_content else ""
+        return "  |  ".join(info_content) if info_content else ""
 
     def get_rename(folder: Folder):
         info = {}
