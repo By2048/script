@@ -9,6 +9,7 @@ from pathlib import Path, WindowsPath
 
 from rich import print
 from rich import box
+from rich.align import Align
 from rich.prompt import Prompt
 from rich.syntax import Syntax
 from rich.markup import escape
@@ -185,7 +186,7 @@ class Rename(object):
         for index, file in enumerate(self.files, 1):
             _old_ = escape(file.old.name)
             _new_ = escape(file.new.name)
-            table.add_row(_old_, f"<{str(index).zfill(2)}>", _new_)
+            table.add_row(Align(_old_), f"<{str(index).zfill(2)}>", _new_)
         print(table)
         print()
 
