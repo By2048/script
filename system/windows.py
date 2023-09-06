@@ -264,7 +264,9 @@ def init_folders():
                 _match = _info[2]
                 _get = _info[3]
 
-                _file_path = folder.path / _file_path
+                if ":\\" not in _file_path:
+                    _file_path = folder.path / _file_path
+
                 _get = int(_get) if _get.isdigit() else None
 
                 with open(_file_path, "r", encoding="utf-8") as file:
