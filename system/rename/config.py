@@ -679,4 +679,5 @@ try:
 except ImportError:
     from .config_tmp import config
 finally:
-    config_rename += config if config else config_rename
+    config = [] if not config else config
+    config_rename = config + config_rename
