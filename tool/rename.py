@@ -186,7 +186,7 @@ class Rename(object):
         for index, file in enumerate(self.files, 1):
             _old_ = escape(file.old.name)
             _new_ = escape(file.new.name)
-            table.add_row(Align(_old_), f"<{str(index).zfill(2)}>", _new_)
+            table.add_row(Align(_old_), f"<{str(index).zfill(2)}>", Align(_new_))
         print(table)
         print()
 
