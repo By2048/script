@@ -52,7 +52,7 @@ windows_config_folder = WindowsPath('E:\\Config\\Windows\\')
 
 windows_config: dict = {}
 
-for config_file in windows_config_folder.iterdir():
+for config_file in windows_config_folder.glob("*.yaml"):
     with open(config_file, encoding="utf-8") as file:
         config_item: dict = yaml.unsafe_load(file)
         for key, value in config_item.items():
