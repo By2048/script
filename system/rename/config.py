@@ -33,14 +33,14 @@ def upper_x(file: WindowsPath, index=-1):
     return file
 
 
-def version_x(file: WindowsPath, key: str):
-    if key.lower() not in file.name.lower():
+def version_x(file: WindowsPath, match: str, get: str):
+    if match.lower() not in file.name.lower():
         return
     version_data = get_version(file)
     if version_data:
-        new_name = f"{key}_{version_data}.exe"
+        new_name = f"{get}_{version_data}.exe"
     else:
-        new_name = f"{key}.exe"
+        new_name = f"{get}.exe"
     file = file.with_name(new_name)
     return file
 
@@ -90,10 +90,16 @@ upper_4 = partial(upper_x, index=4)
 upper_5 = partial(upper_x, index=5)
 upper_all = partial(upper_x, index=-1)
 
-github = partial(version_x, key="GitHubDesktop")
-potplayer = partial(version_x, key="PotPlayer")
-ntlite = partial(version_x, key="NTLite")  # noqa
-postman = partial(version_x, key="Postman")
+github = partial(version_x, match="GitHubDesktop", get="GitHub")
+potplayer = partial(version_x, match="PotPlayer", get="PotPlayer")
+ntlite = partial(version_x, match="NTLite", get="NTLite")  # noqa
+postman = partial(version_x, match="Postman", get="Postman")
+fdm = partial(version_x, match="FDM", get="FDM")
+geek = partial(version_x, match="Geek", get="Geek")
+firefox = partial(version_x, match="FireFox-Full", get="FireFox")
+fsviewer = partial(version_x, match="FSViewer", get="FSViewer")
+wechat = partial(version_x, match="WeChat", get="WeChat")
+youdao = partial(version_x, match="YoudaoDict", get="YouDao")
 
 # 1638862702756.jpg
 timestamp_image = partial(timestamp_with_x, xxx="")
@@ -391,6 +397,11 @@ config_software = [
     potplayer,
     ntlite,
     postman,
+    fdm,
+    geek,
+    fsviewer,
+    wechat,
+    youdao,
 
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
@@ -559,6 +570,7 @@ config_software = [
 
     # Firefox Setup 94.0.1.exe
     [r"(Firefox)(\s)(Setup)(\s)([\d\.]+)(.exe)", r"\1_\5\6"],
+    firefox,
 
     # Snipaste-2.6.6-Beta-x64.zip
     [r"(Snipaste)(-)([\d\.]+)(-Beta-x64)(.zip)", r"\1_\3\5"],
