@@ -409,6 +409,9 @@ config_software = [
     # Xshell-7.0.0063p.exe
     [r"(Xshell)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
 
+    # THS_hevo_gc9.1.1.1.exe
+    [r"(THS)(_hevo_gc)([\d\.]+)(.exe)", r"\1_\3\4"],
+
     # ideaIU-2023.2.exe
     # pycharm-professional-2023.2.exe
     [r"(ideaIU)(-)([\d\.]+)(.exe)", r"IDEA_\3\4"],
@@ -460,22 +463,33 @@ config_software = [
     # FreeFileSync_11.8_Windows_Setup.exe
     [r"(FreeFileSync_)([\d\.]+)(_Windows_Setup)(.exe)", r"\1\2\4"],
 
+    # TIM3.4.8.22092.exe
+    [r"(TIM)([\d\.]+)(.exe)", r"\1_\2\3"],
+
     # SumatraPDF-3.3.3-64.zip  portable (zip) v
     [r"(SumatraPDF)(\-)([\d\.]+)(-64)(\.zip)", r"\1_\3_Portable\5"],
     # SumatraPDF-3.3.3-64-install.exe
     [r"(SumatraPDF)(\-)([\d\.]+)(-64)(-install)(\.exe)", r"\1_\3_Install\6"],
 
+    # logioptionsplus_installer.exe
+    [r"(logioptionsplus_installer.exe)", r"LogiOptionsPlus.exe"],
+
     # sysdiag-all-5.0.64.2-2021.11.3.1.exe
     [r"(sysdiag)(\-all\-)([\d\.]+)(\-)([\d\.]+)(.exe)", r"HuoRong_\3\6"],
 
-    # WiresharkPortable_3.4.9.paf.exe
-    [r"(Wireshark)(Portable|Portable64)(_)([\d\.]+)(.paf)(.exe)", r"\1_\4\6"],
+    # Wireshark-win64-4.0.8.exe
+    [r"(Wireshark)(-win64-)([\d\.]+)(.exe)", r"\1_\3\4"],
+    # WiresharkPortable64_4.0.8.paf.exe
+    [r"(Wireshark)(Portable)(64?)(_)([\d\.]+)(.paf)(.exe)", r"\1\2_\5\7"],
 
     # node-v14.17.0-win-x64.zip
     [r"(node)(-v)([\d\.]+)(-win-x64)(.zip)", (r"\1_\3\5", capitalize)],
 
     # DG5411178_x64.zip
     [r"(DG)(\d+)(_x64)(.zip)", r"DiskGenius_\2\4"],
+
+    # GeForce_Experience_v3.27.0.112.exe
+    [r"(GeForce)(_Experience_v)([\d\.]+)(.exe)", r"\1_\3\4"],
 
     # Everything-1.4.1.1005.x64.zip
     [r"(Everything)(-)([\d\.]+)(.x64)(.zip)", r"\1_\3\5"],
@@ -493,7 +507,7 @@ config_software = [
     [r"(Portable)(Git)(-)([\d\.]+)(-64-bit)(.7z)(.exe)", r"\2_\4\6\7"],
 
     # platform-tools_r33.0.3-windows.zip
-    [r"(platform-tools)(_r)([\d\.]+)(-windows)(.zip)", r"Adb_\3\5"],
+    [r"(platform-tools)(_r)([\d\.]+)(-windows)(.zip)", r"AndroidTools_\3\5"],
 
     # Q-Dir_Portable_x64.zip
     [r"(Q-Dir)(_)(Portable_x64)(.zip)", r"\1\4"],
