@@ -479,9 +479,13 @@ def create_desktop(folder: Folder):
 
     content = ""
     if desktop_ini_path.exists():
-        file = open(desktop_ini_path, "r", encoding="gbk")
-        content = "".join(file.readlines())
-        file.close()
+        try:
+            file = open(desktop_ini_path, "r", encoding="gbk")
+            content = "".join(file.readlines())
+        except UnicodeDecodeError:
+            pass
+        finally:
+            file.close()
 
     if desktop_ini_data == content:
         return
