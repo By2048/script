@@ -1,7 +1,7 @@
 import hashlib
 import os
 
-from tool.rename import Rename
+from rename import Rename
 
 folder = "T:\\收藏\\"
 

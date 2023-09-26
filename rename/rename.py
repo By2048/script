@@ -191,22 +191,6 @@ class Rename(object):
         print()
 
 
-def get_version(file: WindowsPath | str):
-    if isinstance(file, WindowsPath):
-        file = file.as_posix()
-    try:
-        info = win32api.GetFileVersionInfo(file, os.sep)
-        ms = info['FileVersionMS']
-        ls = info['FileVersionLS']
-        high = win32api.HIWORD
-        low = win32api.LOWORD
-        result = f"{high(ms)}.{low(ms)}.{high(ls)}.{low(ls)}"
-        return result
-    except Exception as e:
-        logging.exception(e)
-        return None
-
-
 def change_name(file: WindowsPath | str) -> WindowsPath | str:
     """ 简繁转换 替换不支持的特殊符号 """
     if not file:

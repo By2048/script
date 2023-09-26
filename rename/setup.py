@@ -10,16 +10,8 @@ from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
 
-try:
-    from tool.rename import Rename
-except ImportError:
-    sys.path.append(WindowsPath(__file__).parents[2].as_posix())
-    from tool.rename import Rename
-
-try:
-    from config import config_rename
-except ImportError:
-    from .config import config_rename
+from rename import Rename
+from config import config_rename
 
 import fire
 

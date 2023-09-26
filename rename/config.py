@@ -10,11 +10,13 @@ from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
 
+from rename import Rename
+
 try:
-    from tool.rename import Rename, get_version
+    sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
+    from tool.file import get_exe_version, lnk_to_exe
 except ImportError:
-    sys.path.append(WindowsPath(__file__).parents[1].as_posix())
-    from tool.rename import Rename, get_version
+    from ..tool.file import get_exe_version, lnk_to_exe
 
 
 # name : 文件正则处理后的名字
@@ -34,9 +36,11 @@ def upper_x(file: WindowsPath, index=-1):
 
 
 def version_x(file: WindowsPath, match: str, get: str):
+    if not file.as_posix().endswith(".exe"):
+        return
     if match.lower() not in file.name.lower():
         return
-    version_data = get_version(file)
+    version_data = get_exe_version(file)
     if version_data:
         new_name = f"{get}_{version_data}.exe"
     else:
