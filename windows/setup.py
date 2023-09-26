@@ -1,6 +1,9 @@
 import os
 import sys
 import time
+from pathlib import WindowsPath
+
+sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
 
 from rich import print
 from rich.pretty import pprint
@@ -18,10 +21,9 @@ from model import Desktop, Lnk, Script, Folder
 from desktop import init_desktop
 from folder import init_folders
 from config import console, folders, scripts
-from desktop import init_desktop, create_desktop
+from desktop import init_desktop, create_desktop, flush_desktop
 from lnk import init_lnk, create_lnk
 from script import init_scripts, create_script, create_script_txt
-from tool import flush
 
 
 def help():
@@ -50,14 +52,14 @@ def main():
         fun = args[0]
         arg = args[1]
 
-    logger.debug(f"Fun:{fun} Arg:{arg}")
-
     if fun == "help":
         help()
         return
 
-    fun = os.environ.get("fun") or fun
-    arg = os.environ.get("arg") or arg
+    fun = os.environ.get("function") or fun
+    arg = os.environ.get("filter") or arg
+
+    logger.info(f"Fun:{fun} Arg:{arg}")
 
     init_folders(filter=arg)
 
@@ -66,7 +68,7 @@ def main():
         console.print()
         init_desktop()
         create_desktop()
-        flush()
+        flush_desktop()
         time.sleep(3)
 
     if fun in ["lnk", "all"]:

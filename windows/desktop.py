@@ -1,7 +1,14 @@
+import re
 import os
 import sys
-import re
+import ctypes
+import time
+
+import win32api
 import subprocess
+from pathlib import WindowsPath
+from win32comext.shell import shell, shellcon
+
 from pathlib import WindowsPath
 
 from PIL import Image
@@ -15,7 +22,6 @@ from config import path_icon
 from model import Folder, Desktop, Lnk
 
 try:
-    sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
     from tool.file import get_exe_version, lnk_to_exe
 except ImportError:
     from ..tool.file import get_exe_version, lnk_to_exe
@@ -280,8 +286,19 @@ def create_desktop():
             if not folder.desktop:
                 continue
             table.add_row(*line)
-            if table.row_count > console.height - 6:
+            if table.row_count > console.height - 11:
+                time.sleep(3)
                 table.columns.clear()
                 table = get_desktop_table()
                 table_center = Align.center(table)
                 live.update(table_center)
+
+
+def flush_desktop():
+    # 刷新文件夹图片
+    ctypes.windll.shell32.SHChangeNotify(
+        shellcon.SHCNE_ASSOCCHANGED,
+        shellcon.SHCNF_IDLIST,
+        0,
+        0
+    )

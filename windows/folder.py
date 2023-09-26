@@ -1,15 +1,21 @@
 import os
 import re
 import subprocess
+import sys
 from pathlib import WindowsPath
+from pprint import pprint
 
 from PIL import Image
 from loguru import logger
 
 from config import folders, windows_config
-from tool import get_exe_version
 from config import path_icon
 from model import Folder, Desktop, Lnk
+
+try:
+    from tool.file import get_exe_version, lnk_to_exe
+except ImportError:
+    from ..tool.file import get_exe_version, lnk_to_exe
 
 
 def init_folders(filter=""):
@@ -25,8 +31,9 @@ def init_folders(filter=""):
             if not path_folder.exists():
                 continue
 
-            if filter and filter not in path_folder.as_posix():
-                continue
+            if filter:
+                if filter not in path_folder.as_posix():
+                    continue
 
             desktop_config = windows_config[win_disk][disk_folder].get('Desktop')
             lnk_config = windows_config[win_disk][disk_folder].get('Lnk')
