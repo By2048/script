@@ -9,7 +9,7 @@ from pathlib import WindowsPath
 from loguru import logger
 
 
-def exe_version(file: str | WindowsPath):
+def get_exe_version(file: str | WindowsPath):
     file = WindowsPath(file) if isinstance(file, str) else file
     if not file.exists():
         return
@@ -37,7 +37,7 @@ def lnk_to_exe(file: str):
 
 if __name__ == '__main__':
     file = "D:\BitComet\BitComet.exe"
-    result = exe_version(file)
+    result = get_exe_version(file)
     print(result)
 
     file = "D:\#Lnk\Dexpot.lnk"
