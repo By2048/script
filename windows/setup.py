@@ -41,7 +41,6 @@ def main():
     #
     # help \ desktop \ lnk \ script \ all
     args = sys.argv[1:] if len(sys.argv) > 1 else ["all"]
-    args = [item.lower() for item in args]
 
     fun = arg = ""
     if len(args) == 0:
@@ -56,14 +55,9 @@ def main():
         help()
         return
 
-    fun = os.environ.get("function") or fun
-    arg = os.environ.get("filter") or arg
-
-    logger.info(f"Fun:{fun} Arg:{arg}")
-
     init_folders(filter=arg)
 
-    if fun in ["desktop", "all"]:
+    if fun.lower() in ["desktop", "all"]:
         console.clear()
         console.print()
         init_desktop()
@@ -71,14 +65,14 @@ def main():
         flush_desktop()
         time.sleep(3)
 
-    if fun in ["lnk", "all"]:
+    if fun.lower() in ["lnk", "all"]:
         console.clear()
         init_lnk()
         create_lnk()
         time.sleep(3)
         console.clear()
 
-    if fun in ["script", "all"]:
+    if fun.lower() in ["script", "all"]:
         init_scripts()
         console.print()
         console.print()
