@@ -421,6 +421,9 @@ config_software = [
     [r"(ideaIU)(-)([\d\.]+)(.exe)", r"IDEA_\3\4"],
     [r"(pycharm-professional)(-)([\d\.]+)(.exe)", r"PyCharm_\3\4"],
 
+    # tportable-x64.4.10.2.zip
+    [r"(tportable)(-x64.)([\d\.]+)(.zip)", r"Telegram_\3\4"],
+
     # aria2-1.36.0-win-64bit-build1.zip
     [r"(aria2)(-)([\d\.]+)(-win-64bit-build1)(.zip)", (r"\1_\3\5", capitalize)],
 
