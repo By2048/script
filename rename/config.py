@@ -104,6 +104,7 @@ firefox = partial(version_x, match="FireFox-Full", get="FireFox")
 fsviewer = partial(version_x, match="FSViewer", get="FSViewer")
 wechat = partial(version_x, match="WeChat", get="WeChat")
 youdao = partial(version_x, match="YoudaoDict", get="YouDao")
+wps = partial(version_x, match="WPS_Setup", get="WPS")
 
 # 1638862702756.jpg
 timestamp_image = partial(timestamp_with_x, xxx="")
@@ -406,6 +407,7 @@ config_software = [
     fsviewer,
     wechat,
     youdao,
+    wps,
 
     # Xftp-7.0.0063p.exe
     [r"(Xftp)(-)([\d\.]+)(\w)(.exe)", r"\1_\3\5"],
@@ -456,6 +458,9 @@ config_software = [
 
     # scrcpy-win64-v1.24.zip
     [r"(scrcpy)(-win64)(-v)([\d\.]+)(.zip)", r"Scrcpy_\4\5"],
+
+    # mkvtoolnix-64-bit-79.0.7z
+    [r"(mkvtoolnix)(-64-bit-)([\d\.]+)(.7z)", r"MKVToolNix_\3\4"],
 
     # rdm-2021.3.0.0.exe
     # resp-2022.3.0.0.exe
