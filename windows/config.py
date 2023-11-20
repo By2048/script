@@ -20,12 +20,13 @@ def yaml_join(loader, node):
 
 yaml.add_constructor(r'!Join', yaml_join)
 
-console = get_console()
-
 windows_config_folder = WindowsPath('E:\\Config\\Windows\\')
+
+console = get_console()
 
 windows_config: dict = {}
 
+console.print()
 for config_file in windows_config_folder.glob("*.yaml"):
     logger.debug(f"Load {config_file}")
     with open(config_file, encoding="utf-8") as file:
@@ -35,6 +36,7 @@ for config_file in windows_config_folder.glob("*.yaml"):
                 windows_config[key] = value
             else:
                 windows_config[key] |= value
+console.print()
 
 path_tmp = WindowsPath(windows_config.get("#"))
 path_icon = WindowsPath(windows_config.get("#Icon"))

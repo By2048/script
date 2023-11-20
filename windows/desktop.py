@@ -32,7 +32,7 @@ def get_desktop_icon(folder: Folder):
 
     icon = None
 
-    # 默认位置寻找图标并支持png转ico
+    # 在默认位置寻找图标并支持png转ico D:\#Icon\Xxx.ico
     if desktop.icon and "." not in desktop.icon:
         ico_file = path_icon / f"{desktop.icon}.ico"
         png_file = path_icon / f"{desktop.icon}.png"
@@ -44,18 +44,19 @@ def get_desktop_icon(folder: Folder):
             icon = ico_file
         return icon
 
-    # 使用软件中默认的图标
-    if desktop.icon and ".exe" in desktop.icon:
-        icon = folder.path / desktop.icon
-        return icon
-
     # 在相对位置和默认位置寻找图标
     if desktop.icon and ".ico" in desktop.icon:
         icon = folder.path / desktop.icon
         if icon.exists():
             return icon
 
-    # 使用文件夹对应的默认图标
+    # 使用软件中默认的图标 Folder\Xxx.exe
+    if desktop.icon and ".exe" in desktop.icon:
+        exe_icon = folder.path / desktop.icon
+        if exe_icon.exists():
+            return exe_icon
+
+    # 使用自定义文件夹对应的默认图标 *Default
     ico_file = path_icon / f"{folder.path.name}.ico"
     if ico_file.exists():
         return ico_file
@@ -64,6 +65,11 @@ def get_desktop_icon(folder: Folder):
         image = Image.open(png_file)
         image.save(ico_file)
         return ico_file
+
+    # 使用软件默认图标
+    exe_file = folder.path / f"{folder.path.name}.exe"
+    if exe_file.exists():
+        return exe_file
 
     return icon
 
@@ -209,8 +215,8 @@ def get_desktop_rename(folder: Folder):
 def get_desktop_table():
     table = Table()
     table.add_column("Folder", justify="left", width=30)
-    table.add_column("Icon", justify="left", width=35)
-    table.add_column("Info", justify="center", width=20)
+    table.add_column("Icon", justify="left", width=30)
+    table.add_column("Info", justify="center", width=25)
     table.add_column("Name", justify="center", width=20)
     return table
 
@@ -286,9 +292,12 @@ def create_desktop():
             if not folder.desktop:
                 continue
             table.add_row(*line)
+            live.refresh()
             if table.row_count > console.height - 11:
                 time.sleep(3)
                 table.columns.clear()
+                console.clear()
+                console.print()
                 table = get_desktop_table()
                 table_center = Align.center(table)
                 live.update(table_center)

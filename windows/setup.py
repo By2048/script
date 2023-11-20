@@ -5,18 +5,6 @@ from pathlib import WindowsPath
 
 sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
 
-from rich import print
-from rich.pretty import pprint
-from rich import box, get_console
-from rich.padding import Padding
-from rich.panel import Panel
-from rich.text import Text
-from rich.align import Align
-from rich.live import Live
-from rich.table import Table
-from loguru import logger
-from PIL import Image
-
 from model import Desktop, Lnk, Script, Folder
 from desktop import init_desktop
 from folder import init_folders
@@ -57,7 +45,7 @@ def main():
 
     init_folders(filter=arg)
 
-    if fun.lower() in ["desktop", "all"]:
+    if fun.lower() in ["folder", "desktop", "all"]:
         console.clear()
         console.print()
         init_desktop()
@@ -65,18 +53,19 @@ def main():
         flush_desktop()
         time.sleep(3)
 
-    if fun.lower() in ["lnk", "all"]:
         console.clear()
+        console.print()
         init_lnk()
         create_lnk()
         time.sleep(3)
         console.clear()
 
     if fun.lower() in ["script", "all"]:
+        console.print()
+        console.print()
         init_scripts()
-        console.print()
-        console.print()
         create_script()
+
         console.print()
         create_script_txt()
         time.sleep(3)
