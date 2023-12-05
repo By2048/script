@@ -443,6 +443,9 @@ config_software = [
     # dexpot_1614_r2439.exe
     [r"(dexpot)(_)([\d\.]+)(\_\w+)(.exe)", (r"\1_\3\5", capitalize)],
 
+    # blender-4.0.1-windows-x64.msi
+    [r"(blender)(-)([\d\.]+)(-windows-x64)(.msi)", (r"\1_\3\5", capitalize)],
+
     # ventoy-1.0.38-windows.zip
     [r"(ventoy)(-)([\d\.]+)(-windows)(.zip)", r"Ventoy_\3\5"],
     # iventoy-1.0.08-win64.zip
