@@ -1,6 +1,6 @@
 from typing import Dict, List
 from pathlib import WindowsPath
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -44,7 +44,8 @@ class Lnk:
 @dataclass
 class Folder:
     path: WindowsPath = WindowsPath()
-    desktop: Desktop = Desktop()
+    # desktop: Desktop = Desktop()
+    desktop: Desktop = field(default_factory=Desktop)
     lnks: List[Lnk] = None  # noqa
 
     def __repr__(self):
