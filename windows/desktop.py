@@ -205,9 +205,9 @@ def get_desktop_rename(folder: Folder):
     if isinstance(rename, str):
         rename = [rename]
     for item in rename:
-        items = item.split("|")
-        key = items[0].rstrip()
-        value = items[1].lstrip()
+        items = item.split("|", 1)
+        key = items[0].strip()
+        value = items[1].strip()
         info[key] = value
     return info
 
