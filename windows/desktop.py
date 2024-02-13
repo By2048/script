@@ -145,7 +145,7 @@ def get_desktop_info(folder: Folder):
 
     def get_info_by_count(folder, info):
         # 文件数量
-        if not info.lower().startswith("count | *"):
+        if not info.lower().startswith("count |"):
             return
         _info = info.split("|")
         _info = [item.strip() for item in _info]
