@@ -582,6 +582,12 @@ config_software = [
     # Sandboxie-Plus-x64-v0.9.6.exe
     [r"(Sandboxie)(-Plus)(-x64)(-v)([\d\.]+)(.exe)", r"\1_\5\6"],
 
+    # blender-4.0.2-windows-x64.zip
+    [r"(blender-)([\d\.]+)(-windows-x64)(.zip)", r"Blender_\2\4"],
+
+    # Anaconda3-2023.09-0-Windows-x86_64.exe
+    [r"(Anaconda3-)([\d\.]+)(-0-Windows-x86_64)(.exe)", r"Anaconda_\2\4"],
+
     # XMind-for-Windows-64bit-11.1.1-202110191919.exe
     # Xmind-for-Windows-x64bit-22.11.3656.exe
     [r"(XMind|Xmind)(-for)(-Windows-)(64bit|x64bit)(-)([\d\.]+)(.exe)", r"\1_\6\7"],
@@ -712,7 +718,11 @@ config_other = [
 
     # 〔98'〕
     [r"(〔)([\s\S]+)(〕)(\.\w+)",
-     (r"\2\4", lambda f: f.with_name(f.name.replace("'", " ")))]
+     (r"\2\4", lambda f: f.with_name(f.name.replace("'", " ")))],
+
+    # Software(D) - 2024-02-10 08-41-42.html
+    #  1        2   3   4   5      6                  7   8            9       10
+    [r"([\d\w]+)(\()(\w)(\))(\s-\s)(\d{4}-\d{2}-\d{2})(\s)(\d{2}-\d{2})(-\d{2})(.html)", r"\6_\8_\3\10"],
 
 ]
 
