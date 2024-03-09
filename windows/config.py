@@ -21,13 +21,19 @@ def yaml_join(loader, node):
 yaml.add_constructor(r'!Join', yaml_join)
 
 windows_config_folder = WindowsPath('E:\\Config\\Windows\\')
+windows_config_files = []
+for item in windows_config_folder.glob("*.yaml"):
+    if "Config.yaml" in item.as_posix():
+        windows_config_files.insert(0, item)
+    else:
+        windows_config_files.append(item)
 
 console = get_console()
 
 windows_config: dict = {}
 
 console.print()
-for config_file in windows_config_folder.glob("*.yaml"):
+for config_file in windows_config_files:
     logger.debug(f"Load {config_file}")
     with open(config_file, encoding="utf-8") as file:
         config_item: dict = yaml.unsafe_load(file)
