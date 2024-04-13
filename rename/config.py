@@ -282,6 +282,8 @@ config_phone = [
 
 config_media = [
 
+    # Xxxx-Xx-Xx_Xx-Xx-Xx.Xxx
+
     # 微信保存的图片
     wx_camera,
     wx_image,
@@ -319,8 +321,11 @@ config_media = [
      r"\2-\3-\4_\6-\7-\8\9"],
 
     # 20210622183532.jpg
-    [r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(.jpg|.png)",
-     r"\1-\2-\3_\4-\5-\6\7"],
+    [r"(\d{4})(\d{2})(\d{2})(_?)(\d{2})(\d{2})(\d{2})(.jpg|.png)",
+     r"\1-\2-\3_\5-\6-\7\8"],
+
+    # 20240414_033129.jpg
+    [r"(\d{4}\d{2}\d{2})(_)(\d{2}\d{2}\d{2})(.\w+)", r"\1_\3\4"],
 
     # 2020010214432637.png
     # 20200102144326376.png
@@ -332,6 +337,9 @@ config_media = [
 
     # tumblr_ondeipvf8D1ttxriho1_1280
     [r"(tumblr_)([\d\w]+)(.\w+)", md5],
+
+    # image_7908280.png
+    [r"(image_)(\d+)(.\w+)", md5],
 
     # 1686050553516.jpeg.png
     [r"([\d\w]+)(.(jpg|png|jpeg|webp))(.(jpg|png|jpeg|webp))", r"\1\3"],
