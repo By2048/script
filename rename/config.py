@@ -435,6 +435,9 @@ config_software = [
     # THS_hevo_gc9.1.1.1.exe
     [r"(THS)(_hevo_gc)([\d\.]+)(.exe)", r"\1_\3\4"],
 
+    # dotnet-sdk-8.0.203-win-x64.exe
+    [r"(dotnet-sdk-)([\d\.]+)(-win-x64)(.exe)", r"DotNet_\2\4"],
+
     # ideaIU-2023.2.exe
     # pycharm-professional-2023.2.exe
     [r"(ideaIU)(-)([\d\.]+)(.exe)", r"IDEA_\3\4"],
