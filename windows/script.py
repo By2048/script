@@ -144,39 +144,48 @@ def create_script():
 
 
 def create_script_txt():
-    cnt = 0
-    text = " "
+    text = "|  "
 
+    each_length = 11  # 每个命令的长度
+    total_cnt = 5  # 一行最多存在的命令数
+
+    cnt = 0
     script: Script
     for script in scripts:
         if not script:
             continue
         name = script.path.stem
-        if len(name) < 11:
-            if cnt >= 5:
-                text += "\n "
+        if len(name) < each_length:
+            if cnt >= total_cnt:
+                text += "\n|  "
                 cnt = 0
-            text += name.ljust(11)
+            text += name.ljust(each_length) + " "
             cnt += 1
-        elif len(name) < 22:
-            if cnt > 4:
-                text += "\n "
+        elif len(name) < each_length * 2:
+            if cnt > total_cnt - 1:
+                text += "\n|  "
                 cnt = 1
-            text += name.ljust(22)
+            text += name.ljust(each_length * 2) + " "
             cnt += 2
-        elif len(name) < 33:
-            if cnt > 3:
-                text += "\n "
+        elif len(name) < each_length * 3:
+            if cnt > total_cnt - 2:
+                text += "\n|  "
                 cnt = 1
-            text += name.ljust(33)
+            text += name.ljust(each_length * 3) + " "
             cnt += 3
-    text = text.rstrip()
+        if cnt >= total_cnt:
+            text += "  |"
+
+    # 结尾空格补全 + |
+    if cnt <= total_cnt:
+        text += " " * (each_length + 1) * (total_cnt - cnt) + "  |"
 
     with open(path_script_txt, "w") as file:
         file.write(text)
 
-    width = 11 * 5 + 3 * 2
+    width = (each_length * total_cnt) + (total_cnt * 3)
     title = str(path_script_txt)
-    panel = Panel(text, title=title, title_align="center",
-                  width=width, border_style="red")
+    panel = Panel(text, title=title, width=width,
+                  title_align="center", border_style="red")
     console.print(Align.center(panel))
+
