@@ -10,8 +10,6 @@ from typing import Union, Any, Callable
 from functools import partial
 from inspect import isfunction
 
-from rename import Rename
-
 try:
     sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
     from tool.file import get_exe_version, lnk_to_exe
@@ -21,7 +19,6 @@ except ImportError:
 
 # name : 文件正则处理后的名字
 # file : 文件原始完整路径
-
 
 def upper_x(file: WindowsPath, index=-1):
     stem = file.stem
@@ -733,22 +730,24 @@ config_other = [
 
     # Software(D) - 2024-02-10 08-41-42.html
     #  1        2   3   4   5      6                  7   8            9       10
-    [r"([\d\w]+)(\()(\w)(\))(\s-\s)(\d{4}-\d{2}-\d{2})(\s)(\d{2}-\d{2})(-\d{2})(.html)", r"\6_\8_\3\10"],
+    [r"([\d\w]+)(\()(\w)(\))(\s-\s)(\d{4}-\d{2}-\d{2})(\s)(\d{2}-\d{2})(-\d{2})(.html)",
+     r"\6_\8_\3\10"],
 
 ]
 
-config_rename = [] \
-                + config_phone \
-                + config_media \
-                + config_software \
-                + config_iso \
-                + config_python \
-                + config_other
-
+config_tmp = []
 try:
-    from config_tmp import config
+    from config_tmp import config as config_tmp
 except ImportError:
-    from .config_tmp import config
+    from .config_tmp import config as config_tmp
 finally:
-    config = [] if not config else config
-    config_rename = config + config_rename
+    config_tmp = [] if not config_tmp else config_tmp
+
+config = [] \
+         + config_phone \
+         + config_media \
+         + config_software \
+         + config_iso \
+         + config_python \
+         + config_other \
+         + config_tmp

@@ -7,73 +7,24 @@ import copy
 from datetime import datetime
 from pathlib import Path, WindowsPath
 from typing import Union, Any, Callable
-from functools import partial
-from inspect import isfunction
 
 from rename import Rename
-from config import config_rename
+from config import config
 
 import fire
 
 rename = Rename()
 
 
-def rule(file: WindowsPath):
-    """ 重命名函数
-    @param file: 需要重命名文件的完整路径
-    @return: 重命名文件名 命名规则
-    """
-
-    # file_name = file.name
-    # file_path = file.as_posix()
-
-    for cfg in config_rename:
-        if isfunction(cfg) or isinstance(cfg, partial):
-            fun = cfg
-            try:
-                result = fun(file)
-            except Exception as e:
-                continue
-            if result:
-                return result, str(fun)
-            continue
-
-        _match_, _get_ = cfg[0], cfg[1]
-
-        if not isinstance(_match_, str):
-            continue
-
-        if not re.match(_match_, file.name):
-            continue
-
-        if isinstance(_get_, str):
-            new_name = re.sub(_match_, _get_, file.name)
-            file = file.with_name(new_name)
-            return file, f"{_match_} {_get_}"
-
-        if isfunction(_get_) or isinstance(_get_, partial):
-            file = _get_(file)
-            return file, f"{_match_} {_get_}"
-
-        if isinstance(_get_, (list, tuple)):
-            for _g_ in _get_:
-                if isinstance(_g_, str):
-                    new_name = re.sub(_match_, _g_, file.name)
-                    file = file.with_name(new_name)
-                elif isfunction(_g_) or isinstance(_g_, partial):
-                    file = _g_(file)
-            return file, f"{_match_} {_get_}"
-
-
-def main(command="", folder="", debug=False):
+def main(command="", folder=".", debug=False):
     if isinstance(folder, str):
         folder = WindowsPath(folder)
     rename.folder = folder or WindowsPath(".")
-    rename.rule = rule
+    rename.config = config
     rename.init()
+    rename.command(command)
     if debug:
         rename.debug()
-    rename.command(command)
     rename.print()
     rename.start()
     if rename.duplicate:
@@ -81,10 +32,11 @@ def main(command="", folder="", debug=False):
 
 
 def debug():
-    folder = WindowsPath('T:\\@\\')
+    folder = WindowsPath('T:\\')
+    rename.config = config
     rename.folder = folder
-    rename.rule = rule
     rename.init()
+    rename.command("debug")
     rename.print()
 
 

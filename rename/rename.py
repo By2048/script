@@ -1,11 +1,18 @@
+import re
 import os
 import sys
+import copy
+import types
+import typing
 import win32api
 import logging
 import inspect
+
 from collections.abc import Callable
 from typing import List, Any
 from pathlib import Path, WindowsPath
+from functools import partial
+from inspect import isfunction
 
 from rich import print
 from rich import box
@@ -26,18 +33,75 @@ class File(object):
         self.rule: Any = ""
 
     def __str__(self):
+        if isinstance(self.rule, types.FunctionType):
+            name = self.rule.__qualname__
         return f"{self.old.name}\t-> {self.new.name} | {self.rule}"
 
 
 class Rename(object):
     def __init__(self):
         self.folder: WindowsPath = WindowsPath()  # 重命名文件夹目录
+        self.config: List[List] = []  # 重命名规则
         self.files: List[File] = []  # 需要重命名的文件 新名字-旧名字
-        self.rule: Callable([WindowsPath], WindowsPath) = lambda x: x  # 匹配 重命名 规则
         self.duplicate: List[File] = []  # 重复的文件
 
     def __bool__(self):
         return bool(len(self.files))
+
+    def rule(self, file: WindowsPath):
+        """ 重命名函数
+        @param file: 需要重命名文件的完整路径
+        @return: 重命名文件名 | 命名规则
+        """
+        for cfg in self.config:
+            if isfunction(cfg) or isinstance(cfg, partial):
+                fun = cfg
+                try:
+                    result = fun(file)
+                except Exception as e:
+                    continue
+                if result and isfunction(cfg):
+                    return result, f"<F> {fun.__name__}"
+                if result and isinstance(cfg, partial):
+                    return result, f"<F> {fun.func.__name__}"
+                continue
+
+            _match_, _get_ = cfg[0], cfg[1]
+
+            if not isinstance(_match_, str):
+                continue
+
+            if not re.match(_match_, file.name):
+                continue
+
+            if isinstance(_get_, str):
+                new_name = re.sub(_match_, _get_, file.name)
+                file = file.with_name(new_name)
+                return file, f"{_match_} / {_get_}"
+
+            if isfunction(_get_) or isinstance(_get_, partial):
+                file = _get_(file)
+                info = ""
+                if isinstance(_get_, partial):
+                    info = f"<F> {_get_.func.__name__}"
+                if isfunction(_get_):
+                    info = f"<F> {_get_.__name__}"
+                return file, f"{_match_} / {info}"
+
+            if isinstance(_get_, (list, tuple)):
+                info = ""
+                for _g_ in _get_:
+                    if isinstance(_g_, str):
+                        new_name = re.sub(_match_, _g_, file.name)
+                        file = file.with_name(new_name)
+                        info = info + _g_ + " & "
+                    elif isfunction(_g_) or isinstance(_g_, partial):
+                        file = _g_(file)
+                        if isinstance(_g_, partial):
+                            info = info + f"<F> {_g_.func.__name__}"
+                        if isfunction(_g_):
+                            info = info + f"<F> {_g_.__name__}"
+                return file, f"{_match_} / {info}"
 
     def init(self):
         for path_file in self.folder.iterdir():
@@ -47,7 +111,7 @@ class Rename(object):
             if not result:
                 continue
 
-            new_name, rule = result
+            new_name, rename_rule = result
 
             path_file_old = path_file
             path_file_new = new_name
@@ -55,7 +119,7 @@ class Rename(object):
             file = File()
             file.old = path_file_old
             file.new = path_file_new
-            file.rule = rule
+            file.rule = rename_rule
             file.new = change_name(file.new)
             if file.old == file.new:
                 continue
@@ -81,12 +145,6 @@ class Rename(object):
             _print_(f"  {item}")
         _print_()
 
-    def config(self):
-        rule = inspect.getsource(self.rule)
-        print()
-        print(Syntax(rule, "python3", line_numbers=True, indent_guides=True))
-        print()
-
     def command(self, arg):
         if arg == "help":
             print()
@@ -97,9 +155,6 @@ class Rename(object):
             exit()
         if arg == "debug":
             self.debug()
-            exit()
-        if arg == "config":
-            self.config()
             exit()
 
     def start(self, silent=False):
@@ -189,6 +244,12 @@ class Rename(object):
             table.add_row(Align(_old_), f"<{str(index).zfill(2)}>", Align(_new_))
         print(table)
         print()
+
+    # def config(self):
+    #     rule = inspect.getsource(self.rule)
+    #     print()
+    #     print(Syntax(rule, "python3", line_numbers=True, indent_guides=True))
+    #     print()
 
 
 def change_name(file: WindowsPath | str) -> WindowsPath | str:
