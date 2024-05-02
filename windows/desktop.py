@@ -27,54 +27,65 @@ except ImportError:
     from ..tool.file import get_exe_version, lnk_to_exe
 
 
+# $Name \ Folder | Name
+def get_desktop_name(folder: Folder):
+    name = ""
+    if folder.desktop.name and folder.desktop.name != folder.path.name:
+        if folder.desktop.name.startswith("$"):
+            name = folder.desktop.name.lstrip('$')
+        else:
+            name = f"{folder.path.name} | {folder.desktop.name}"
+    return name
+
+
 def get_desktop_icon(folder: Folder):
+    #
+
+    icon = WindowsPath()
     desktop = folder.desktop
 
-    icon = None
+    # 图片格式转换
+    def png2ico(png: WindowsPath):
+        ico = png.with_suffix(".ico")
+        image = Image.open(png)
+        image.save(ico)
+        return ico
 
-    # 在默认位置寻找图标并支持png转ico D:\#Icon\Xxx.ico
-    if desktop.icon and "." not in desktop.icon:
+    # 绝对路径 D:\App\Xxx.exe
+    if desktop.icon and ":\\" in str(desktop.icon):
+        icon = WindowsPath(desktop.icon)
+        if icon.exists():
+            return icon
+
+    # 使用当前文件夹中的设置 | Folder\Xxx{exe|ico}
+    if desktop.icon and "$" not in str(desktop.icon):
+        if str(desktop.icon).endswith((".exe", ".ico")):
+            if (icon := folder.path / desktop.icon).exists():
+                return desktop.icon
+
+    # 在默认位置寻找图标并支持png转ico D:\#Icon\Folder{ico|png}
+    if desktop.icon and "$" in str(desktop.icon):
+        desktop.icon = WindowsPath(str(desktop.icon).replace("$", ""))
         ico_file = path_icon / f"{desktop.icon}.ico"
         png_file = path_icon / f"{desktop.icon}.png"
         if ico_file.exists():
             icon = ico_file
         elif png_file.exists():
-            image = Image.open(png_file)
-            image.save(ico_file)
-            icon = ico_file
+            icon = png2ico(png_file)
         return icon
 
-    # 在相对位置和默认位置寻找图标
-    if desktop.icon and ".ico" in desktop.icon:
-        icon = folder.path / desktop.icon
-        if icon.exists():
-            return icon
-
-    # 使用软件中默认的图标 Folder\Xxx.exe
-    if desktop.icon and ".exe" in desktop.icon:
-        exe_icon = folder.path / desktop.icon
-        if exe_icon.exists():
-            return exe_icon
-
-    # 使用自定义文件夹对应的默认图标 *Default
-    ico_file = path_icon / f"{folder.path.name}.ico"
-    if ico_file.exists():
-        return ico_file
-    png_file = path_icon / f"{folder.path.name}.png"
-    if png_file.exists() and not ico_file.exists():
-        image = Image.open(png_file)
-        image.save(ico_file)
-        return ico_file
-
-    # 使用软件默认图标
+    # 默认设置 相对路径 | 使用软件所在文件夹中的信息 | Folder\Folder{exe|ico|png}
     exe_file = folder.path / f"{folder.path.name}.exe"
+    ico_file = folder.path / f"{folder.path.name}.ico"
     if exe_file.exists():
-        return exe_file
-
-    return icon
+        return f"{folder.path.name}.exe"
+    elif ico_file.exists():
+        return f"{folder.path.name}.ico"
 
 
 def get_desktop_info(folder: Folder):
+    #
+
     # 文件夹信息
     def get_info_by_exe(folder, info):
         # 软件版本信息
@@ -88,7 +99,7 @@ def get_desktop_info(folder: Folder):
     def get_info_by_cmd(folder, info):
         # 执行指定命名获取的版本
         # cmd | frpc.exe -v | (\d+) | \1
-        if not info.lower().startswith("cmd |"):
+        if not info.lower().startswith("$cmd |"):
             return
         _info = info.split("|")
         _info = [item.strip() for item in _info]
@@ -123,7 +134,7 @@ def get_desktop_info(folder: Folder):
     def get_info_by_file(folder, info):
         # 指定文件内容
         # file | .\ventoy\version | ([\d\.]+) | 1
-        if not info.lower().startswith("file |"):
+        if not info.lower().startswith("$file |"):
             return
         _info = info.split("|")
         _info = [item.strip() for item in _info]
@@ -145,7 +156,7 @@ def get_desktop_info(folder: Folder):
 
     def get_info_by_count(folder, info):
         # 文件数量
-        if not info.lower().startswith("count |"):
+        if not info.lower().startswith("$count |"):
             return
         _info = info.split("|")
         _info = [item.strip() for item in _info]
@@ -189,6 +200,7 @@ def get_desktop_info(folder: Folder):
         info_content.append(info_file)
         info_content.append(info_count)
 
+        # 原始数据
         if not info_exe and not info_cmd and not info_file and not info_count:
             info_content.append(info)
 
@@ -214,8 +226,8 @@ def get_desktop_rename(folder: Folder):
 
 def get_desktop_table():
     table = Table()
-    table.add_column("Folder", justify="left", width=30)
-    table.add_column("Icon", justify="left", width=30)
+    table.add_column("Folder", justify="center", width=30)
+    table.add_column("Icon", justify="center", width=30)
     table.add_column("Info", justify="center", width=25)
     table.add_column("Name", justify="center", width=20)
     return table
@@ -229,11 +241,8 @@ def create_ini_file(folder: Folder):
         desktop_ini_data += f"\nIconResource = {desktop.icon} , 0"
     if desktop.info:
         desktop_ini_data += f"\nInfoTip = {desktop.info}"
-    if desktop.name and desktop.name != folder.path.name:
-        if desktop.name.startswith("$"):
-            desktop_ini_data += f"\nLocalizedResourceName = {desktop.name.strip('$')}"
-        else:
-            desktop_ini_data += f"\nLocalizedResourceName = {folder.path.name} | {desktop.name}"
+    if desktop.name:
+        desktop_ini_data += f"\nLocalizedResourceName = {desktop.name}"
     if desktop.rename:
         desktop_ini_data += "\n\n[LocalizedFileNames]"
         for key, value in desktop.rename.items():
@@ -271,7 +280,7 @@ def init_desktop():
     # 初始化Desktop|Lnk默认配置
     folder: Folder
     for folder in folders:
-        folder.desktop.name = folder.desktop.name or folder.path.name
+        folder.desktop.name = get_desktop_name(folder)
         folder.desktop.icon = get_desktop_icon(folder)
         folder.desktop.info = get_desktop_info(folder)
         folder.desktop.rename = get_desktop_rename(folder)
