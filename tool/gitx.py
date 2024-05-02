@@ -46,6 +46,7 @@ if not folder:
     sys.exit()
 
 folder_paths = list(folder.iterdir())
+folder_paths = [item for item in folder_paths if item.is_dir()]
 folder_paths = [item for item in folder_paths if not item.name.startswith("#")]
 folder_names = [item.name for item in folder_paths]
 
