@@ -229,7 +229,7 @@ class Rename(object):
     def print(self, title=""):
         if not self:
             print()
-            print("[red]  [ No Rename ]  [/red]")
+            print(f"[red]  [ No Rename ]  [/red] {self.folder}\\")
             print()
             return
         print()
