@@ -16,19 +16,22 @@ import fire
 rename = Rename()
 
 
-def main(command="", folder=".", debug=False):
+def main(folder=".", silent=False, debug=False):
     if isinstance(folder, str):
         folder = WindowsPath(folder)
+    if isinstance(silent, str):
+        silent = True if silent == "True" else silent
+        silent = False if silent == "False" else silent
     rename.folder = folder or WindowsPath(".")
     rename.config = config
     rename.init()
-    rename.command(command)
     if debug:
         rename.debug()
+        exit()
     rename.print()
-    rename.start()
+    rename.start(silent=silent)
     if rename.duplicate:
-        rename.remove_duplicate()
+        rename.remove_duplicate(silent=silent)
 
 
 def debug():
@@ -36,7 +39,6 @@ def debug():
     rename.config = config
     rename.folder = folder
     rename.init()
-    rename.command("debug")
     rename.print()
 
 

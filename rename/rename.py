@@ -145,18 +145,6 @@ class Rename(object):
             _print_(f"  {item}")
         _print_()
 
-    def command(self, arg):
-        if arg == "help":
-            print()
-            print("help")
-            print("debug")
-            print("config")
-            print()
-            exit()
-        if arg == "debug":
-            self.debug()
-            exit()
-
     def start(self, silent=False):
         if not self:
             return
@@ -212,9 +200,14 @@ class Rename(object):
         if not silent:
             print("[red]结束重命名[/red]\n")
 
-    def remove_duplicate(self):
+    def remove_duplicate(self, silent=False):
         self.files = self.duplicate
         self.print(title="Duplicate Files")
+
+        if silent:
+            for file in self.files:
+                file.old.unlink()
+            return
 
         check = Prompt.ask('[red]是否删除重复文件[/red]')
         if not check or check != "\\":
