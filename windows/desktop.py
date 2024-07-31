@@ -61,7 +61,7 @@ def get_desktop_icon(folder: Folder):
     if desktop.icon and "$" not in str(desktop.icon):
         if str(desktop.icon).endswith((".exe", ".ico")):
             if (icon := folder.path / desktop.icon).exists():
-                return desktop.icon
+                return icon
 
     # 在默认位置寻找图标并支持png转ico D:\#Icon\Folder{ico|png}
     if desktop.icon and "$" in str(desktop.icon):
@@ -78,9 +78,9 @@ def get_desktop_icon(folder: Folder):
     exe_file = folder.path / f"{folder.path.name}.exe"
     ico_file = folder.path / f"{folder.path.name}.ico"
     if exe_file.exists():
-        return f"{folder.path.name}.exe"
+        return exe_file
     elif ico_file.exists():
-        return f"{folder.path.name}.ico"
+        return ico_file
 
 
 def get_desktop_info(folder: Folder):

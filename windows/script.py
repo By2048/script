@@ -32,16 +32,16 @@ def init_scripts():
             script.before = before
             script.after = after
             script.commands = commands
-            script.type = script_args.get("Type") or "Bat"
-            if script.type == "Bat":
-                script.path = path_script / script_sub_folder / f"{script_name}.bat"
+            script.type = script_args.get("Type") or "Cmd"
+            if script.type == "Cmd":
+                script.path = path_script / script_sub_folder / f"{script_name}.cmd"
             if script.type == "PowerShell":
                 script.path = path_script / script_sub_folder / f"{script_name}.ps1"
             if script:
                 scripts.append(script)
 
 
-def create_script_bat_file(script):
+def create_script_cmd_file(script):
     code = "@Echo Off\n\n"
     code += "SetLocal\n\n"
 
@@ -127,8 +127,8 @@ def create_script():
     for script in scripts:
         if not script.exe and not script.commands:
             continue
-        if script.type == "Bat":
-            create_script_bat_file(script)
+        if script.type == "Cmd":
+            create_script_cmd_file(script)
         if script.type == "PowerShell":
             create_script_psl_file(script)
 

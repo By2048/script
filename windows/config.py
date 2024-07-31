@@ -22,7 +22,7 @@ yaml.add_constructor(r'!Join', yaml_join)
 
 windows_config_folder = WindowsPath('E:\\Config\\Windows\\')
 windows_config_files = []
-for item in windows_config_folder.glob("*.yaml"):
+for item in windows_config_folder.glob("**\\*.yaml"):
     if "~" in item.as_posix():
         continue
     if "Config.yaml" in item.as_posix():
