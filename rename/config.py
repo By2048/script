@@ -12,9 +12,9 @@ from inspect import isfunction
 
 try:
     sys.path.insert(0, WindowsPath(__file__).parents[1].as_posix())
-    from tool.file import get_exe_version, lnk_to_exe
+    from tool.file import get_exe_file_version, get_exe_product_version, lnk_to_exe
 except ImportError:
-    from ..tool.file import get_exe_version, lnk_to_exe
+    from ..tool.file import get_exe_file_version, get_exe_product_version, lnk_to_exe
 
 
 # name : 文件正则处理后的名字
@@ -37,7 +37,7 @@ def version_x(file: WindowsPath, match: str, get: str):
         return
     if match.lower() not in file.name.lower():
         return
-    version_data = get_exe_version(file)
+    version_data = get_exe_file_version(file)
     if version_data:
         new_name = f"{get}_{version_data}.exe"
     else:
@@ -476,7 +476,7 @@ config_software = [
 
     # cloudmusicsetup2.9.5.199424.exe
     [r"(cloudmusic)(setup)([\d\.]+)(.exe)", r"CloudMusic_\3\4"],
-    
+
     # Clash.Nyanpasu_1.5.1_x64-setup.exe
     [r"(Clash)(.)(Nyanpasu)(_)([\d\.]+)(_x64-setup)(.exe)", r"\1\3\4\5\7"],
 

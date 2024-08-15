@@ -18,14 +18,25 @@ def get_exe_version(file: str | WindowsPath):
     file = file.as_posix()
     try:
         info = win32api.GetFileVersionInfo(file, os.sep)
-        ms = info['FileVersionMS']
-        ls = info['FileVersionLS']
+        file_ms = info['FileVersionMS']
+        file_ls = info['FileVersionLS']
+        product_ms = info['ProductVersionMS']
+        product_ls = info['ProductVersionLS']
         high = win32api.HIWORD
         low = win32api.LOWORD
-        result = f"{high(ms)}.{low(ms)}.{high(ls)}.{low(ls)}"
-        return result
+        file_info = f"{high(file_ms)}.{low(file_ms)}.{high(file_ls)}.{low(file_ls)}"
+        product_info = f"{high(product_ms)}.{low(product_ms)}.{high(product_ls)}.{low(product_ls)}"
+        return file_info, product_info
     except Exception as e:
-        return None
+        return None, None
+
+
+def get_exe_file_version(file: str | WindowsPath):
+    return get_exe_version(file)[0]
+
+
+def get_exe_product_version(file: str | WindowsPath):
+    return get_exe_version(file)[1]
 
 
 def lnk_to_exe(file: str):

@@ -22,9 +22,9 @@ from config import path_icon
 from model import Folder, Desktop, Lnk
 
 try:
-    from tool.file import get_exe_version, lnk_to_exe
+    from tool.file import get_exe_file_version, get_exe_product_version, lnk_to_exe
 except ImportError:
-    from ..tool.file import get_exe_version, lnk_to_exe
+    from ..tool.file import get_exe_file_version, get_exe_product_version, lnk_to_exe
 
 
 # $Name \ Folder | Name
@@ -91,8 +91,20 @@ def get_desktop_info(folder: Folder):
         # 软件版本信息
         if not info.lower().endswith(".exe"):
             return
-        _exe_ = folder.path / info
-        version = get_exe_version(_exe_.as_posix())
+        mode = "$File"
+        exe = ""
+        version = ""
+        if " | " in info:
+            mode = info.split(" | ")[0]
+            exe = info.split(" | ")[-1]
+            exe = folder.path / exe
+        else:
+            exe = folder.path / info
+        if mode in ["$File", "$file"]:
+            version = get_exe_file_version(exe.as_posix())
+        if mode in ["$Product", "$product"]:
+            version = get_exe_product_version(exe.as_posix())
+
         if version:
             return version
 
@@ -178,7 +190,7 @@ def get_desktop_info(folder: Folder):
     if not info:
         _exe_ = folder.path / f"{folder.path.name}.exe"
         if _exe_.exists():
-            version = get_exe_version(_exe_)
+            version = get_exe_file_version(_exe_)
             return version
 
     all_info = []
@@ -231,6 +243,36 @@ def get_desktop_table():
     table.add_column("Info", justify="center", width=25)
     table.add_column("Name", justify="center", width=20)
     return table
+
+
+def get_desktop_table_line(folder: Folder):
+    _folder_ = folder.path
+    _icon_ = folder.desktop.icon or ""
+    _info_ = folder.desktop.info or ""
+    _name_ = folder.desktop.name or ""
+
+    _folder_ = str(_folder_) + "\\"
+    _icon_ = str(_icon_)
+    _info_ = str(_info_)
+    _name_ = str(_name_)
+
+    if _folder_ in _icon_:
+        _icon_ = _icon_.replace(_folder_, "")
+
+    if " > " in _info_:
+        _info_ = _info_.split(" > ")[0].strip()
+    if " | " in _info_:
+        _info_ = _info_.split(" | ")[-1].strip()
+
+    if " | " in _name_:
+        _name_ = _name_.split(" | ")[-1].strip()
+    if " > " in _name_:
+        _name_ = _name_.split(" > ")[-1].strip()
+
+    line = [_folder_, _icon_, _info_, _name_]
+    line = [str(item) for item in line]
+
+    return line
 
 
 def create_ini_file(folder: Folder):
@@ -293,13 +335,9 @@ def create_desktop():
         folder: Folder
         for folder in folders:
             create_ini_file(folder)
-            line = [f"{folder.path}\\",
-                    folder.desktop.icon or "",
-                    folder.desktop.info or "",
-                    folder.desktop.name if folder.desktop.name != folder.path.name else ""]
-            line = [str(item) for item in line]
             if not folder.desktop:
                 continue
+            line = get_desktop_table_line(folder)
             table.add_row(*line)
             live.refresh()
             if table.row_count > console.height - 11:
