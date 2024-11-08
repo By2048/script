@@ -11,6 +11,10 @@ def init_scripts():
     for script_sub_folder in windows_config.get("@Script").keys():
         config_items = windows_config["@Script"][script_sub_folder].items()
         for script_name, script_args in config_items:
+
+            if "(" in script_name or ")" in script_name:
+                continue
+
             script = Script()
 
             if not script_args:

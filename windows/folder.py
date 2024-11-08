@@ -12,11 +12,6 @@ from config import folders, windows_config
 from config import path_icon
 from model import Folder, Desktop, Lnk
 
-try:
-    from tool.file import get_exe_version, lnk_to_exe
-except ImportError:
-    from ..tool.file import get_exe_version, lnk_to_exe
-
 
 def init_folders(filter=""):
     for win_disk in windows_config.keys():

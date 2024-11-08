@@ -46,12 +46,14 @@ for config_file in windows_config_files:
                 windows_config[key] |= value
 console.print()
 
-path_tmp = WindowsPath(windows_config.get("#"))
+path_cache = WindowsPath(windows_config.get("#Cache"))
 path_icon = WindowsPath(windows_config.get("#Icon"))
 path_lnk = WindowsPath(windows_config.get("#Lnk"))
 path_script = WindowsPath(windows_config.get("#Script"))
 path_script_txt = WindowsPath(windows_config.get("#ScriptText"))
 path_psl = WindowsPath(windows_config.get("#PowerShell"))
+
+path_rename = windows_config.get("#PathRename")
 
 # 文件夹配置
 folders: List[Folder] = []

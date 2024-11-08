@@ -9,7 +9,7 @@ from rich.live import Live
 
 from model import Lnk, Folder
 from config import folders, scripts, console
-from config import path_tmp, path_lnk, path_icon
+from config import path_cache, path_lnk, path_icon
 
 
 def create_lnk_file(lnk: Lnk):
@@ -20,7 +20,7 @@ def create_lnk_file(lnk: Lnk):
     if not lnk.icon_location:
         lnk.icon_location = " - None - "
 
-    tmp_vbs_path = path_tmp / "lnk.vbs"
+    tmp_vbs_path = path_cache / "lnk.vbs"
     content = f'Set ws = WScript.CreateObject("WScript.Shell") \n' \
               f'Set lnk = ws.CreateShortcut("{path_lnk / lnk.name}") \n' \
               f'lnk.TargetPath = "{lnk.target_path}" \n' \
