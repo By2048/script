@@ -21,6 +21,7 @@ def init_scripts():
                 scripts.append(script)
                 continue
 
+            run = script_args.get("Run") or ""
             exe = script_args.get("Exe") or ""
             args = script_args.get("Args") or []
             before = script_args.get("Before") or []
@@ -31,15 +32,18 @@ def init_scripts():
             after = [after] if not isinstance(after, list) else after
             commands = [commands] if not isinstance(commands, list) else commands
 
+            script.run = run
             script.exe = exe
             script.args = args
             script.before = before
             script.after = after
             script.commands = commands
             script.type = script_args.get("Type") or "Cmd"
+            if script.type == "Bat":
+                script.path = path_script / script_sub_folder / f"{script_name}.bat"
             if script.type == "Cmd":
                 script.path = path_script / script_sub_folder / f"{script_name}.cmd"
-            if script.type == "PowerShell":
+            if script.type in ("PowerShell", "PSL"):
                 script.path = path_script / script_sub_folder / f"{script_name}.ps1"
             if script:
                 scripts.append(script)
@@ -60,10 +64,12 @@ def create_script_cmd_file(script):
             code += f"\n%Exe%  %*\n\n"
         elif len(script.args) == 1:
             code += f"Set Arg=\"{script.args[0]}\"\n\n"
+            code += script.run if script.run else ""
             code += f"%Exe%  %Arg%  %*\n\n"
         elif len(script.args) > 1:
             for index, arg in enumerate(script.args, start=1):
                 code += f"Set Arg{index}=\"{arg}\"\n"
+            code += script.run if script.run else ""
             cmd = "\n%Exe%"
             for index in range(1, len(script.args) + 1):
                 cmd += f"  %Arg{index}%"
@@ -192,4 +198,3 @@ def create_script_txt():
     panel = Panel(text, title=title, width=width,
                   title_align="center", border_style="red")
     console.print(Align.center(panel))
-

@@ -62,8 +62,9 @@ class Folder:
 
 @dataclass
 class Script:
-    type: str = "Bat"  # Bat Or PowerShell
+    type: str = "Bat"  # Bat Cmd PowerShell
     path: WindowsPath = None
+    run: str = ""  # 命令运行时 前置指令
     exe: WindowsPath = None
     args: list = None
     before: list = None
