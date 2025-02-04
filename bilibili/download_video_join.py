@@ -18,8 +18,8 @@ except ImportError:
     from rename.rename import change_name
 
 path_ffmpeg = WindowsPath("D:\\FFmpeg\\ffmpeg.exe")
-path_download = WindowsPath("T:\\#Sync\\Video\\")
-path_video = path_download
+path_download = WindowsPath("V:\\#\\com.bilibili.app.in\\")
+path_video = WindowsPath("T:\\#Video\\")
 
 if os.environ.get("Debug"):
     path_download = WindowsPath("V:\\Video\\")
