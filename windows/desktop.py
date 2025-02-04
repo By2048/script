@@ -143,6 +143,42 @@ def get_desktop_info(folder: Folder):
         if obj:
             return obj
 
+    def get_info_by_name(folder, info):
+        # 执行指定命名获取的版本
+        # name | envs\spyder-runtime\conda-meta | spyder-*-py*.json | (spyder-)([\d\w\.]+)(.*.json) | 2
+
+        if not info.lower().startswith("$name |"):
+            return
+
+        _folder = info.split("|")[1].strip()
+        _glob = info.split("|")[2].strip()
+        _match = info.split("|")[3].strip()
+        _get = info.split("|")[4].strip()
+        _get = int(_get) if _get.isdigit() else None
+
+        if ":\\" not in _folder:
+            _folder = folder.path / _folder
+
+        folder_path = WindowsPath(_folder)
+        if not folder_path.exists():
+            return ""
+
+        file_info: WindowsPath | None = None
+        for path in folder_path.glob(_glob):
+            if path.is_file():
+                file_info = path
+
+        if not file_info:
+            return ""
+
+        try:
+            obj = re.search(_match, str(file_info.name)).group(_get)
+        except AttributeError:
+            obj = ""
+
+        if obj:
+            return obj
+
     def get_info_by_file(folder, info):
         # 指定文件内容
         # file | .\ventoy\version | ([\d\.]+) | 1
@@ -205,15 +241,17 @@ def get_desktop_info(folder: Folder):
         info_exe = get_info_by_exe(folder, info)
         info_cmd = get_info_by_cmd(folder, info)
         info_file = get_info_by_file(folder, info)
+        info_name = get_info_by_name(folder, info)
         info_count = get_info_by_count(folder, info)
 
         info_content.append(info_exe)
         info_content.append(info_cmd)
+        info_content.append(info_name)
         info_content.append(info_file)
         info_content.append(info_count)
 
         # 原始数据
-        if not info_exe and not info_cmd and not info_file and not info_count:
+        if not any([info_exe, info_cmd, info_name, info_file, info_count]):
             info_content.append(info)
 
         info_content = [item for item in info_content if item]
