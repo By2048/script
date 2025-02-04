@@ -32,11 +32,19 @@ def get_exe_version(file: str | WindowsPath):
 
 
 def get_exe_file_version(file: str | WindowsPath):
-    return get_exe_version(file)[0]
+    try:
+        result = get_exe_version(file)[0]
+    except:
+        result = ""
+    return result
 
 
 def get_exe_product_version(file: str | WindowsPath):
-    return get_exe_version(file)[1]
+    try:
+        result = get_exe_version(file)[1]
+    except:
+        result = ""
+    return result
 
 
 def lnk_to_exe(file: str):

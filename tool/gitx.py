@@ -34,7 +34,7 @@ gui_y = int((console.height - gui_h) / 2)
 total_left = 35
 tree_width = total_left - 7
 
-folder = WindowsPath(r"E:\\GitX\\")
+folder = WindowsPath(r"E:\\Git\\")
 if len(sys.argv) > 1:
     folder = sys.argv[1]
     folder = WindowsPath(folder)
